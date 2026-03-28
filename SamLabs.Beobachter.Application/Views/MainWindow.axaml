@@ -74,11 +74,11 @@
                     <TextBox x:Name="SearchTextBox"
                              Grid.Column="0"
                              Watermark="Search logger/message/exception/thread..."
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                             Text="{Binding Filters.SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="1"
                             Margin="8,0,0,0"
                             Content="Clear"
-                            Command="{Binding ClearSearchCommand}" />
+                            Command="{Binding Filters.ClearSearchCommand}" />
                     <Button Grid.Column="2"
                             Margin="8,0,0,0"
                             Content="Add Sample"
@@ -93,20 +93,20 @@
                             Command="{Binding ToggleAutoScrollCommand}" />
                     <Button Grid.Column="5"
                             Margin="8,0,0,0"
-                            Content="{Binding DensityButtonText}"
-                            Command="{Binding ToggleDensityCommand}" />
+                            Content="{Binding Stream.DensityButtonText}"
+                            Command="{Binding Stream.ToggleDensityCommand}" />
                     <Button Grid.Column="6"
                             Margin="8,0,0,0"
                             Content="Col -"
-                            Command="{Binding DecreaseColumnWidthsCommand}" />
+                            Command="{Binding Stream.DecreaseColumnWidthsCommand}" />
                     <Button Grid.Column="7"
                             Margin="8,0,0,0"
                             Content="Col +"
-                            Command="{Binding IncreaseColumnWidthsCommand}" />
+                            Command="{Binding Stream.IncreaseColumnWidthsCommand}" />
                     <Button Grid.Column="8"
                             Margin="8,0,0,0"
                             Content="Col Reset"
-                            Command="{Binding ResetColumnWidthsCommand}" />
+                            Command="{Binding Stream.ResetColumnWidthsCommand}" />
                 </Grid>
 
                 <WrapPanel Grid.Row="1"
@@ -118,7 +118,7 @@
                         <TextBlock Text="Receiver"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                         <TextBox Watermark="udp-1"
-                                 Text="{Binding ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding Filters.ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="200"
                                 Margin="0,0,8,0"
@@ -126,7 +126,7 @@
                         <TextBlock Text="Logger"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                         <TextBox Watermark="Orders.Api"
-                                 Text="{Binding LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding Filters.LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="140"
                                 Margin="0,0,8,0"
@@ -134,7 +134,7 @@
                         <TextBlock Text="Thread"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                         <TextBox Watermark="worker-7"
-                                 Text="{Binding ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="130"
                                 Margin="0,0,8,0"
@@ -142,7 +142,7 @@
                         <TextBlock Text="Tenant"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                         <TextBox Watermark="alpha"
-                                 Text="{Binding TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="130"
                                 Margin="0,0,8,0"
@@ -150,47 +150,47 @@
                         <TextBlock Text="Trace Id"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                         <TextBox Watermark="abcd1234"
-                                 Text="{Binding TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                 Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                     <StackPanel Width="120"
                                 Margin="0,0,8,0"
                                 Spacing="2">
                         <TextBlock Text="Min Level"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <ComboBox ItemsSource="{Binding MinimumLevelOptions}"
-                                  SelectedItem="{Binding MinimumLevelOption}" />
+                        <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
+                                  SelectedItem="{Binding Filters.MinimumLevelOption}" />
                     </StackPanel>
                     <Button Content="Clear Fields"
                             VerticalAlignment="Bottom"
                             Margin="0,0,8,0"
-                            Command="{Binding ClearStructuredFiltersCommand}" />
+                            Command="{Binding Filters.ClearStructuredFiltersCommand}" />
                 </WrapPanel>
 
                 <WrapPanel Grid.Row="2"
                            Margin="0,8,0,0">
                     <CheckBox Content="Trace"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowTrace}" />
+                              IsChecked="{Binding Filters.ShowTrace}" />
                     <CheckBox Content="Debug"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowDebug}" />
+                              IsChecked="{Binding Filters.ShowDebug}" />
                     <CheckBox Content="Info"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowInfo}" />
+                              IsChecked="{Binding Filters.ShowInfo}" />
                     <CheckBox Content="Warn"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowWarn}" />
+                              IsChecked="{Binding Filters.ShowWarn}" />
                     <CheckBox Content="Error"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowError}" />
+                              IsChecked="{Binding Filters.ShowError}" />
                     <CheckBox Content="Fatal"
                               Margin="0,0,10,0"
-                              IsChecked="{Binding ShowFatal}" />
+                              IsChecked="{Binding Filters.ShowFatal}" />
                     <Button Content="Reset Levels"
                             Margin="0,0,10,0"
-                            Command="{Binding ResetLevelsCommand}" />
+                            Command="{Binding Filters.ResetLevelsCommand}" />
                     <Button Content="Enable All Loggers"
-                            Command="{Binding EnableAllLoggersCommand}" />
+                            Command="{Binding Sources.EnableAllLoggersCommand}" />
                 </WrapPanel>
 
                 <Expander Grid.Row="3"
@@ -202,8 +202,8 @@
                           ColumnSpacing="10">
                         <ListBox Grid.Column="0"
                                  MinHeight="130"
-                                 SelectedItem="{Binding SelectedReceiverDefinition}"
-                                 ItemsSource="{Binding ReceiverDefinitions}">
+                                 SelectedItem="{Binding ReceiverSetup.SelectedReceiverDefinition}"
+                                 ItemsSource="{Binding ReceiverSetup.ReceiverDefinitions}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
                                     <Border Margin="0,0,0,6"
@@ -290,21 +290,21 @@
                         <StackPanel Grid.Column="1"
                                     Spacing="6">
                             <Button Content="Add UDP"
-                                    Command="{Binding AddUdpReceiverCommand}" />
+                                    Command="{Binding ReceiverSetup.AddUdpReceiverCommand}" />
                             <Button Content="Add TCP"
-                                    Command="{Binding AddTcpReceiverCommand}" />
+                                    Command="{Binding ReceiverSetup.AddTcpReceiverCommand}" />
                             <Button Content="Add File"
-                                    Command="{Binding AddFileReceiverCommand}" />
+                                    Command="{Binding ReceiverSetup.AddFileReceiverCommand}" />
                             <Button Content="Remove"
-                                    Command="{Binding RemoveSelectedReceiverCommand}" />
+                                    Command="{Binding ReceiverSetup.RemoveSelectedReceiverCommand}" />
                             <Button Content="Save + Reload"
-                                    Command="{Binding SaveReceiverSetupCommand}" />
+                                    Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}" />
                             <Button Content="Reload From Disk"
-                                    Command="{Binding ReloadReceiverSetupCommand}" />
+                                    Command="{Binding ReceiverSetup.ReloadReceiverSetupCommand}" />
                             <TextBlock Width="170"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource ShellMutedForegroundBrush}"
-                                       Text="{Binding ReceiverSetupStatus}" />
+                                       Text="{Binding ReceiverSetup.ReceiverSetupStatus}" />
                         </StackPanel>
                     </Grid>
                 </Expander>
@@ -329,7 +329,7 @@
                                    FontWeight="SemiBold"
                                    Foreground="{DynamicResource ShellForegroundBrush}" />
                         <TreeView Grid.Row="1"
-                                  ItemsSource="{Binding LoggerTreeItems}">
+                                  ItemsSource="{Binding Sources.LoggerTreeItems}">
                             <TreeView.ItemTemplate>
                                 <TreeDataTemplate x:DataType="viewModels:LoggerTreeItemViewModel"
                                                   ItemsSource="{Binding Children}">
@@ -346,9 +346,9 @@
                     <Grid Grid.Row="0"
                           Margin="4,0,4,6">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
-                            <ColumnDefinition Width="{Binding LevelColumnWidth}" />
-                            <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
+                            <ColumnDefinition Width="{Binding Stream.TimestampColumnWidth}" />
+                            <ColumnDefinition Width="{Binding Stream.LevelColumnWidth}" />
+                            <ColumnDefinition Width="{Binding Stream.LoggerColumnWidth}" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
@@ -372,8 +372,8 @@
                     <ListBox x:Name="LogEntriesList"
                              Grid.Row="1"
                              Background="Transparent"
-                             ItemsSource="{Binding VisibleEntries}"
-                             SelectedItem="{Binding SelectedEntry}">
+                             ItemsSource="{Binding Stream.VisibleEntries}"
+                             SelectedItem="{Binding Stream.SelectedEntry}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel CacheLength="0.5" />
@@ -381,28 +381,28 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:LogEntry">
-                                <Border Margin="{Binding DataContext.LogRowMargin, ElementName=MainWindowRoot}"
+                                <Border Margin="{Binding DataContext.Stream.LogRowMargin, ElementName=MainWindowRoot}"
                                         Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
                                         CornerRadius="4">
                                     <Grid Margin="4,0"
                                           >
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=MainWindowRoot}" />
-                                            <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=MainWindowRoot}" />
-                                            <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="{Binding DataContext.Stream.TimestampColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="{Binding DataContext.Stream.LevelColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="{Binding DataContext.Stream.LoggerColumnWidth, ElementName=MainWindowRoot}" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0"
-                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   FontSize="{Binding DataContext.Stream.LogRowFontSize, ElementName=MainWindowRoot}"
                                                    Text="{Binding Timestamp}" />
                                         <TextBlock Grid.Column="1"
-                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   FontSize="{Binding DataContext.Stream.LogRowFontSize, ElementName=MainWindowRoot}"
                                                    Text="{Binding Level}" />
                                         <TextBlock Grid.Column="2"
-                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   FontSize="{Binding DataContext.Stream.LogRowFontSize, ElementName=MainWindowRoot}"
                                                    Text="{Binding LoggerName}" />
                                         <TextBlock Grid.Column="3"
-                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   FontSize="{Binding DataContext.Stream.LogRowFontSize, ElementName=MainWindowRoot}"
                                                    Text="{Binding Message}" />
                                     </Grid>
                                 </Border>
@@ -423,7 +423,7 @@
                                        Foreground="{DynamicResource ShellForegroundBrush}" />
                             <ScrollViewer Grid.Row="1"
                                           VerticalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding SelectedDetailsText}"
+                                <TextBlock Text="{Binding Details.SelectedDetailsText}"
                                            TextWrapping="Wrap" />
                             </ScrollViewer>
                             <Grid Grid.Row="2"
@@ -431,16 +431,16 @@
                                   ColumnDefinitions="Auto,Auto,*">
                                 <Button Grid.Column="0"
                                         Content="Copy Message"
-                                        Command="{Binding CopySelectedMessageCommand}" />
+                                        Command="{Binding Details.CopySelectedMessageCommand}" />
                                 <Button Grid.Column="1"
                                         Margin="8,0,0,0"
                                         Content="Copy Details"
-                                        Command="{Binding CopySelectedDetailsCommand}" />
+                                        Command="{Binding Details.CopySelectedDetailsCommand}" />
                                 <TextBlock Grid.Column="2"
                                            Margin="12,0,0,0"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellMutedForegroundBrush}"
-                                           Text="{Binding CopyStatus}" />
+                                           Text="{Binding Details.CopyStatus}" />
                             </Grid>
                         </Grid>
                     </Border>

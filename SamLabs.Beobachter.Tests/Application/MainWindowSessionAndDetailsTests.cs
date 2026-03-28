@@ -44,15 +44,13 @@ public sealed class MainWindowSessionAndDetailsTests
     {
         FakeClipboardService clipboard = new();
         FakeIngestionSession session = new([MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Error, "Oops")]);
-        MainWindowViewModel vm = new(new ThemeService(), session, clipboard)
-        {
-            SelectedEntry = session.Snapshot().First()
-        };
+        MainWindowViewModel vm = new(new ThemeService(), session, clipboard);
+        vm.Stream.SelectedEntry = session.Snapshot().First();
 
-        await ((IAsyncRelayCommand)vm.CopySelectedMessageCommand).ExecuteAsync(null);
+        await ((IAsyncRelayCommand)vm.Details.CopySelectedMessageCommand).ExecuteAsync(null);
         Assert.Equal("Oops", clipboard.LastText);
 
-        await ((IAsyncRelayCommand)vm.CopySelectedDetailsCommand).ExecuteAsync(null);
+        await ((IAsyncRelayCommand)vm.Details.CopySelectedDetailsCommand).ExecuteAsync(null);
         Assert.Contains("Logger: Orders.Api", clipboard.LastText);
     }
 
@@ -79,14 +77,12 @@ public sealed class MainWindowSessionAndDetailsTests
             }
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService())
-        {
-            SelectedEntry = session.Snapshot().First()
-        };
+        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        vm.Stream.SelectedEntry = session.Snapshot().First();
 
-        Assert.Contains("MessageTemplate: Payment warning for {OrderId}", vm.SelectedDetailsText);
-        Assert.Contains("StructuredPayload:", vm.SelectedDetailsText);
-        Assert.Contains("\"OrderId\":123", vm.SelectedDetailsText);
+        Assert.Contains("MessageTemplate: Payment warning for {OrderId}", vm.Details.SelectedDetailsText);
+        Assert.Contains("StructuredPayload:", vm.Details.SelectedDetailsText);
+        Assert.Contains("\"OrderId\":123", vm.Details.SelectedDetailsText);
     }
 
     [Fact]
@@ -94,18 +90,18 @@ public sealed class MainWindowSessionAndDetailsTests
     {
         MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService());
 
-        Assert.False(vm.IsCompactDensity);
-        Assert.Equal("Density: Comfortable", vm.DensityButtonText);
-        Assert.Equal(12, vm.LogRowFontSize);
+        Assert.False(vm.Stream.IsCompactDensity);
+        Assert.Equal("Density: Comfortable", vm.Stream.DensityButtonText);
+        Assert.Equal(12, vm.Stream.LogRowFontSize);
 
-        vm.ToggleDensityCommand.Execute(null);
-        Assert.True(vm.IsCompactDensity);
-        Assert.Equal("Density: Compact", vm.DensityButtonText);
-        Assert.Equal(11, vm.LogRowFontSize);
+        vm.Stream.ToggleDensityCommand.Execute(null);
+        Assert.True(vm.Stream.IsCompactDensity);
+        Assert.Equal("Density: Compact", vm.Stream.DensityButtonText);
+        Assert.Equal(11, vm.Stream.LogRowFontSize);
 
-        vm.ToggleDensityCommand.Execute(null);
-        Assert.False(vm.IsCompactDensity);
-        Assert.Equal("Density: Comfortable", vm.DensityButtonText);
-        Assert.Equal(12, vm.LogRowFontSize);
+        vm.Stream.ToggleDensityCommand.Execute(null);
+        Assert.False(vm.Stream.IsCompactDensity);
+        Assert.Equal("Density: Comfortable", vm.Stream.DensityButtonText);
+        Assert.Equal(12, vm.Stream.LogRowFontSize);
     }
 }

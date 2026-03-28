@@ -936,3 +936,34 @@ Impact:
 
 Follow-ups:
 - Move source panel bindings directly to `Sources.*` and remove shell pass-throughs in final shell cleanup.
+
+## 2026-03-28 - MVVM Refactor Phase 4: Shell Pass-Through Removal + Binding Realignment
+What changed:
+- Removed remaining shell pass-through members from:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - deleted wrapper properties/commands for filters, stream, details, receiver setup, and source tree
+  - kept only child VM composition (`Filters`, `Stream`, `Details`, `ReceiverSetup`, `Sources`) and shell orchestration
+  - updated workspace/layout persistence and status summary paths to read/write through child VMs
+- Rebound the main window to child VMs directly:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - switched bindings to `Filters.*`, `Stream.*`, `Details.*`, `ReceiverSetup.*`, and `Sources.*`
+- Updated view code-behind interactions to use child VMs without setting `DataContext` in code:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+- Updated shell-level tests to target child VM surfaces directly:
+  [MainWindowFilteringTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowFilteringTests.cs),
+  [MainWindowReceiverSetupTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowReceiverSetupTests.cs),
+  [MainWindowSessionAndDetailsTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowSessionAndDetailsTests.cs),
+  [MainWindowWorkspaceStateTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowWorkspaceStateTests.cs),
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+
+Why:
+- The shell still contained compatibility wrappers that kept coupling high and made refactor regressions harder to reason about.
+- Direct binding to child VMs matches the intended shell-composition architecture while keeping ViewLocator/DataContext ownership intact.
+
+Impact:
+- `MainWindowViewModel` is now materially smaller and focused on coordination instead of panel state ownership.
+- Main window bindings now reflect real VM boundaries.
+- Full test suite remains green (`82` passing tests).
+
+Follow-ups:
+- If desired, split remaining shell-only concerns (top bar status/theme controls) into dedicated toolbar/status child VMs.

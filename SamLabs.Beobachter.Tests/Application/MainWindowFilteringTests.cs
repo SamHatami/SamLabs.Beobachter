@@ -20,20 +20,20 @@ public sealed class MainWindowFilteringTests
         ]);
 
         MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
-        Assert.Equal(3, vm.VisibleEntries.Count);
+        Assert.Equal(3, vm.Stream.VisibleEntries.Count);
 
-        vm.SearchText = "gateway";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.SearchText = "gateway";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.ShowWarn = false;
-        Assert.Empty(vm.VisibleEntries);
+        vm.Filters.ShowWarn = false;
+        Assert.Empty(vm.Stream.VisibleEntries);
 
-        vm.ShowWarn = true;
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.ShowWarn = true;
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        LoggerTreeItemViewModel paymentsNode = MainWindowTestSupport.Flatten(vm.LoggerTreeItems).First(x => x.FullPath == "Orders.Api.Payments");
+        LoggerTreeItemViewModel paymentsNode = MainWindowTestSupport.Flatten(vm.Sources.LoggerTreeItems).First(x => x.FullPath == "Orders.Api.Payments");
         paymentsNode.IsEnabled = false;
-        Assert.Empty(vm.VisibleEntries);
+        Assert.Empty(vm.Stream.VisibleEntries);
     }
 
     [Fact]
@@ -76,25 +76,25 @@ public sealed class MainWindowFilteringTests
 
         MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
 
-        vm.ReceiverFilter = "udp-1";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.ReceiverFilter = "udp-1";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.LoggerFilter = "Checkout";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.LoggerFilter = "Checkout";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.ThreadFilter = "worker-1";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.ThreadFilter = "worker-1";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.TenantFilter = "alp";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.TenantFilter = "alp";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.TraceIdFilter = "trace-1";
-        Assert.Single(vm.VisibleEntries);
+        vm.Filters.TraceIdFilter = "trace-1";
+        Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.MinimumLevelOption = "Fatal";
-        Assert.Empty(vm.VisibleEntries);
+        vm.Filters.MinimumLevelOption = "Fatal";
+        Assert.Empty(vm.Stream.VisibleEntries);
 
-        vm.ClearStructuredFiltersCommand.Execute(null);
-        Assert.Equal(2, vm.VisibleEntries.Count);
+        vm.Filters.ClearStructuredFiltersCommand.Execute(null);
+        Assert.Equal(2, vm.Stream.VisibleEntries.Count);
     }
 }

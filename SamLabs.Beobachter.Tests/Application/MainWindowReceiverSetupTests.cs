@@ -17,17 +17,17 @@ public sealed class MainWindowReceiverSetupTests
 
         await MainWindowTestSupport.WaitForReceiverLoadAsync(vm);
 
-        vm.AddUdpReceiverCommand.Execute(null);
-        vm.AddTcpReceiverCommand.Execute(null);
-        vm.AddFileReceiverCommand.Execute(null);
+        vm.ReceiverSetup.AddUdpReceiverCommand.Execute(null);
+        vm.ReceiverSetup.AddTcpReceiverCommand.Execute(null);
+        vm.ReceiverSetup.AddFileReceiverCommand.Execute(null);
 
-        ReceiverDefinitionViewModel fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
+        ReceiverDefinitionViewModel fileReceiver = vm.ReceiverSetup.ReceiverDefinitions.Single(x => x.IsFile);
         fileReceiver.FilePath = "C:/logs/app.log";
         fileReceiver.Port = 7071;
-        ReceiverDefinitionViewModel udpReceiver = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        ReceiverDefinitionViewModel udpReceiver = vm.ReceiverSetup.ReceiverDefinitions.Single(x => x.IsUdp);
         udpReceiver.ParserOrderText = "JsonLogParser, PlainTextParser";
 
-        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+        await ((IAsyncRelayCommand)vm.ReceiverSetup.SaveReceiverSetupCommand).ExecuteAsync(null);
 
         ReceiverDefinitions? saved = settings.LastSavedReceiverDefinitions;
         Assert.NotNull(saved);
@@ -48,15 +48,15 @@ public sealed class MainWindowReceiverSetupTests
 
         await MainWindowTestSupport.WaitForReceiverLoadAsync(vm);
 
-        vm.AddUdpReceiverCommand.Execute(null);
-        ReceiverDefinitionViewModel udp = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        vm.ReceiverSetup.AddUdpReceiverCommand.Execute(null);
+        ReceiverDefinitionViewModel udp = vm.ReceiverSetup.ReceiverDefinitions.Single(x => x.IsUdp);
         udp.Port = 70_000;
 
-        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+        await ((IAsyncRelayCommand)vm.ReceiverSetup.SaveReceiverSetupCommand).ExecuteAsync(null);
 
         Assert.Null(settings.LastSavedReceiverDefinitions);
         Assert.Equal(0, session.ReloadReceiversCalls);
-        Assert.Contains("Validation failed", vm.ReceiverSetupStatus);
+        Assert.Contains("Validation failed", vm.ReceiverSetup.ReceiverSetupStatus);
     }
 
     [Fact]
@@ -94,12 +94,12 @@ public sealed class MainWindowReceiverSetupTests
         FakeIngestionSession session = new([]);
         MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService(), settings);
 
-        await ((IAsyncRelayCommand)vm.ReloadReceiverSetupCommand).ExecuteAsync(null);
+        await ((IAsyncRelayCommand)vm.ReceiverSetup.ReloadReceiverSetupCommand).ExecuteAsync(null);
 
-        Assert.Equal(2, vm.ReceiverDefinitions.Count);
-        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "udp-prod" && x.IsUdp && x.Port == 17071);
-        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "file-prod" && x.IsFile && x.PollIntervalMs == 250);
-        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "udp-prod" && x.ParserOrderText.Contains("JsonLogParser"));
+        Assert.Equal(2, vm.ReceiverSetup.ReceiverDefinitions.Count);
+        Assert.Contains(vm.ReceiverSetup.ReceiverDefinitions, x => x.Id == "udp-prod" && x.IsUdp && x.Port == 17071);
+        Assert.Contains(vm.ReceiverSetup.ReceiverDefinitions, x => x.Id == "file-prod" && x.IsFile && x.PollIntervalMs == 250);
+        Assert.Contains(vm.ReceiverSetup.ReceiverDefinitions, x => x.Id == "udp-prod" && x.ParserOrderText.Contains("JsonLogParser"));
         Assert.Equal(1, session.ReloadReceiversCalls);
     }
 }

@@ -41,7 +41,7 @@ internal static class MainWindowTestSupport
     public static async Task WaitForReceiverLoadAsync(MainWindowViewModel vm)
     {
         var attempt = 0;
-        while (attempt < 25 && vm.ReceiverSetupStatus.Length == 0 && vm.ReceiverDefinitions.Count == 0)
+        while (attempt < 25 && vm.ReceiverSetup.ReceiverSetupStatus.Length == 0 && vm.ReceiverSetup.ReceiverDefinitions.Count == 0)
         {
             await Task.Delay(10);
             attempt++;

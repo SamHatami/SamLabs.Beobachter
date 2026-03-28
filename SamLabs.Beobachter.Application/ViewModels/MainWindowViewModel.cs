@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -80,8 +79,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _autoScrollButtonText = "Pin: On";
 
-    public string LogColumnDefinitions => Stream.LogColumnDefinitions;
-
     public MainWindowViewModel() : this(
         new ThemeService(),
         new DesignIngestionSession(),
@@ -110,7 +107,6 @@ public partial class MainWindowViewModel : ViewModelBase
         ReceiverSetup = new ReceiverSetupViewModel(_settingsStore, _ingestionSession);
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
-        Details.PropertyChanged += OnDetailsPropertyChanged;
         Stream = new LogStreamViewModel();
         Stream.PropertyChanged += OnStreamPropertyChanged;
 
@@ -129,350 +125,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public SourceTreeViewModel Sources { get; }
 
-    public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems => Sources.LoggerTreeItems;
-
-    public IRelayCommand EnableAllLoggersCommand => Sources.EnableAllLoggersCommand;
-
     public ReceiverSetupViewModel ReceiverSetup { get; }
-
-    public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions => ReceiverSetup.ReceiverDefinitions;
-
-    public ReceiverDefinitionViewModel? SelectedReceiverDefinition
-    {
-        get => ReceiverSetup.SelectedReceiverDefinition;
-        set
-        {
-            if (ReferenceEquals(ReceiverSetup.SelectedReceiverDefinition, value))
-            {
-                return;
-            }
-
-            ReceiverSetup.SelectedReceiverDefinition = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string ReceiverSetupStatus => ReceiverSetup.ReceiverSetupStatus;
-
-    public IRelayCommand AddUdpReceiverCommand => ReceiverSetup.AddUdpReceiverCommand;
-
-    public IRelayCommand AddTcpReceiverCommand => ReceiverSetup.AddTcpReceiverCommand;
-
-    public IRelayCommand AddFileReceiverCommand => ReceiverSetup.AddFileReceiverCommand;
-
-    public IRelayCommand RemoveSelectedReceiverCommand => ReceiverSetup.RemoveSelectedReceiverCommand;
-
-    public IAsyncRelayCommand SaveReceiverSetupCommand => ReceiverSetup.SaveReceiverSetupCommand;
-
-    public IAsyncRelayCommand ReloadReceiverSetupCommand => ReceiverSetup.ReloadReceiverSetupCommand;
 
     public LogFiltersViewModel Filters { get; }
 
-    public string SearchText
-    {
-        get => Filters.SearchText;
-        set
-        {
-            if (string.Equals(Filters.SearchText, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.SearchText = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string ReceiverFilter
-    {
-        get => Filters.ReceiverFilter;
-        set
-        {
-            if (string.Equals(Filters.ReceiverFilter, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.ReceiverFilter = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string LoggerFilter
-    {
-        get => Filters.LoggerFilter;
-        set
-        {
-            if (string.Equals(Filters.LoggerFilter, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.LoggerFilter = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string ThreadFilter
-    {
-        get => Filters.ThreadFilter;
-        set
-        {
-            if (string.Equals(Filters.ThreadFilter, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.ThreadFilter = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string TenantFilter
-    {
-        get => Filters.TenantFilter;
-        set
-        {
-            if (string.Equals(Filters.TenantFilter, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.TenantFilter = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string TraceIdFilter
-    {
-        get => Filters.TraceIdFilter;
-        set
-        {
-            if (string.Equals(Filters.TraceIdFilter, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.TraceIdFilter = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string MinimumLevelOption
-    {
-        get => Filters.MinimumLevelOption;
-        set
-        {
-            if (string.Equals(Filters.MinimumLevelOption, value, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            Filters.MinimumLevelOption = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowTrace
-    {
-        get => Filters.ShowTrace;
-        set
-        {
-            if (Filters.ShowTrace == value)
-            {
-                return;
-            }
-
-            Filters.ShowTrace = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowDebug
-    {
-        get => Filters.ShowDebug;
-        set
-        {
-            if (Filters.ShowDebug == value)
-            {
-                return;
-            }
-
-            Filters.ShowDebug = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowInfo
-    {
-        get => Filters.ShowInfo;
-        set
-        {
-            if (Filters.ShowInfo == value)
-            {
-                return;
-            }
-
-            Filters.ShowInfo = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowWarn
-    {
-        get => Filters.ShowWarn;
-        set
-        {
-            if (Filters.ShowWarn == value)
-            {
-                return;
-            }
-
-            Filters.ShowWarn = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowError
-    {
-        get => Filters.ShowError;
-        set
-        {
-            if (Filters.ShowError == value)
-            {
-                return;
-            }
-
-            Filters.ShowError = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool ShowFatal
-    {
-        get => Filters.ShowFatal;
-        set
-        {
-            if (Filters.ShowFatal == value)
-            {
-                return;
-            }
-
-            Filters.ShowFatal = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public IReadOnlyList<string> MinimumLevelOptions => Filters.MinimumLevelOptions;
-
-    public IRelayCommand ClearSearchCommand => Filters.ClearSearchCommand;
-
-    public IRelayCommand ClearStructuredFiltersCommand => Filters.ClearStructuredFiltersCommand;
-
-    public IRelayCommand ResetLevelsCommand => Filters.ResetLevelsCommand;
-
     public LogStreamViewModel Stream { get; }
 
-    public ObservableCollection<LogEntry> VisibleEntries => Stream.VisibleEntries;
-
-    public bool IsCompactDensity
-    {
-        get => Stream.IsCompactDensity;
-        set
-        {
-            if (Stream.IsCompactDensity == value)
-            {
-                return;
-            }
-
-            Stream.IsCompactDensity = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string DensityButtonText => Stream.DensityButtonText;
-
-    public double LogRowFontSize => Stream.LogRowFontSize;
-
-    public Thickness LogRowMargin => Stream.LogRowMargin;
-
-    public double TimestampColumnWidth
-    {
-        get => Stream.TimestampColumnWidth;
-        set
-        {
-            if (Math.Abs(Stream.TimestampColumnWidth - value) < 0.001)
-            {
-                return;
-            }
-
-            Stream.TimestampColumnWidth = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public double LevelColumnWidth
-    {
-        get => Stream.LevelColumnWidth;
-        set
-        {
-            if (Math.Abs(Stream.LevelColumnWidth - value) < 0.001)
-            {
-                return;
-            }
-
-            Stream.LevelColumnWidth = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public double LoggerColumnWidth
-    {
-        get => Stream.LoggerColumnWidth;
-        set
-        {
-            if (Math.Abs(Stream.LoggerColumnWidth - value) < 0.001)
-            {
-                return;
-            }
-
-            Stream.LoggerColumnWidth = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public IRelayCommand ToggleDensityCommand => Stream.ToggleDensityCommand;
-
-    public IRelayCommand DecreaseColumnWidthsCommand => Stream.DecreaseColumnWidthsCommand;
-
-    public IRelayCommand IncreaseColumnWidthsCommand => Stream.IncreaseColumnWidthsCommand;
-
-    public IRelayCommand ResetColumnWidthsCommand => Stream.ResetColumnWidthsCommand;
-
     public EntryDetailsViewModel Details { get; }
-
-    public LogEntry? SelectedEntry
-    {
-        get => Stream.SelectedEntry;
-        set
-        {
-            if (ReferenceEquals(Stream.SelectedEntry, value))
-            {
-                return;
-            }
-
-            Stream.SelectedEntry = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string SelectedDetailsText => Details.SelectedDetailsText;
-
-    public string CopyStatus => Details.CopyStatus;
-
-    public IAsyncRelayCommand CopySelectedMessageCommand => Details.CopySelectedMessageCommand;
-
-    public IAsyncRelayCommand CopySelectedDetailsCommand => Details.CopySelectedDetailsCommand;
 
     [RelayCommand]
     private void UseSystemTheme()
@@ -554,28 +213,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is null)
+        if (e.PropertyName is null || FilterCriteriaPropertyNames.Contains(e.PropertyName))
         {
-            OnPropertyChanged(nameof(SearchText));
-            OnPropertyChanged(nameof(ReceiverFilter));
-            OnPropertyChanged(nameof(LoggerFilter));
-            OnPropertyChanged(nameof(ThreadFilter));
-            OnPropertyChanged(nameof(TenantFilter));
-            OnPropertyChanged(nameof(TraceIdFilter));
-            OnPropertyChanged(nameof(MinimumLevelOption));
-            OnPropertyChanged(nameof(ShowTrace));
-            OnPropertyChanged(nameof(ShowDebug));
-            OnPropertyChanged(nameof(ShowInfo));
-            OnPropertyChanged(nameof(ShowWarn));
-            OnPropertyChanged(nameof(ShowError));
-            OnPropertyChanged(nameof(ShowFatal));
-            OnFiltersChanged();
-            return;
-        }
-
-        if (FilterCriteriaPropertyNames.Contains(e.PropertyName))
-        {
-            OnPropertyChanged(e.PropertyName);
             OnFiltersChanged();
         }
     }
@@ -585,35 +224,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is null ||
             string.Equals(e.PropertyName, nameof(ReceiverSetupViewModel.SelectedReceiverDefinition), StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(SelectedReceiverDefinition));
             QueuePersistWorkspaceState();
-        }
-
-        if (e.PropertyName is null ||
-            string.Equals(e.PropertyName, nameof(ReceiverSetupViewModel.ReceiverSetupStatus), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(ReceiverSetupStatus));
-        }
-    }
-
-    private void OnDetailsPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is null)
-        {
-            OnPropertyChanged(nameof(SelectedDetailsText));
-            OnPropertyChanged(nameof(CopyStatus));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.SelectedDetailsText), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(SelectedDetailsText));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.CopyStatus), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(CopyStatus));
         }
     }
 
@@ -622,15 +233,6 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is null)
         {
             Details.SelectedEntry = Stream.SelectedEntry;
-            OnPropertyChanged(nameof(SelectedEntry));
-            OnPropertyChanged(nameof(IsCompactDensity));
-            OnPropertyChanged(nameof(DensityButtonText));
-            OnPropertyChanged(nameof(LogRowFontSize));
-            OnPropertyChanged(nameof(LogRowMargin));
-            OnPropertyChanged(nameof(TimestampColumnWidth));
-            OnPropertyChanged(nameof(LevelColumnWidth));
-            OnPropertyChanged(nameof(LoggerColumnWidth));
-            OnPropertyChanged(nameof(LogColumnDefinitions));
             QueuePersistWorkspaceState();
             return;
         }
@@ -638,55 +240,29 @@ public partial class MainWindowViewModel : ViewModelBase
         if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.SelectedEntry), StringComparison.Ordinal))
         {
             Details.SelectedEntry = Stream.SelectedEntry;
-            OnPropertyChanged(nameof(SelectedEntry));
             return;
         }
 
         if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsCompactDensity), StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(IsCompactDensity));
             QueuePersistWorkspaceState();
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.DensityButtonText), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(DensityButtonText));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LogRowFontSize), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(LogRowFontSize));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LogRowMargin), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(LogRowMargin));
             return;
         }
 
         if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.TimestampColumnWidth), StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(TimestampColumnWidth));
-            OnPropertyChanged(nameof(LogColumnDefinitions));
             QueuePersistWorkspaceState();
             return;
         }
 
         if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LevelColumnWidth), StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(LevelColumnWidth));
-            OnPropertyChanged(nameof(LogColumnDefinitions));
             QueuePersistWorkspaceState();
             return;
         }
 
         if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LoggerColumnWidth), StringComparison.Ordinal))
         {
-            OnPropertyChanged(nameof(LoggerColumnWidth));
-            OnPropertyChanged(nameof(LogColumnDefinitions));
             QueuePersistWorkspaceState();
         }
     }
@@ -774,7 +350,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var dropped = _ingestionSession.DroppedCount;
         var state = IsPaused ? "Paused" : "Running";
         var pin = IsAutoScrollEnabled ? "On" : "Off";
-        StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
+        StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {Stream.VisibleEntries.Count}  Dropped: {dropped}";
     }
 
     private void UpdateStatisticsSummary()
@@ -826,13 +402,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ApplyPendingReceiverSelection()
     {
-        if (string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) || ReceiverDefinitions.Count == 0)
+        if (string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) || ReceiverSetup.ReceiverDefinitions.Count == 0)
         {
             return;
         }
 
         ReceiverSetup.TrySelectReceiverById(_pendingSelectedReceiverId);
-        SelectedReceiverDefinition ??= ReceiverDefinitions.FirstOrDefault();
+        ReceiverSetup.SelectedReceiverDefinition ??= ReceiverSetup.ReceiverDefinitions.FirstOrDefault();
         _pendingSelectedReceiverId = null;
     }
 
@@ -859,25 +435,25 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            SearchText = workspace.SearchText;
-            ReceiverFilter = workspace.ReceiverFilter;
-            LoggerFilter = workspace.LoggerFilter;
-            ThreadFilter = workspace.ThreadFilter;
-            TenantFilter = workspace.TenantFilter;
-            TraceIdFilter = workspace.TraceIdFilter;
-            MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
-            IsCompactDensity = workspace.CompactDensity;
-            TimestampColumnWidth = ClampColumnWidth(layout.TimestampColumnWidth, 100, 420);
-            LevelColumnWidth = ClampColumnWidth(layout.LevelColumnWidth, 70, 200);
-            LoggerColumnWidth = ClampColumnWidth(layout.LoggerColumnWidth, 120, 520);
+            Filters.SearchText = workspace.SearchText;
+            Filters.ReceiverFilter = workspace.ReceiverFilter;
+            Filters.LoggerFilter = workspace.LoggerFilter;
+            Filters.ThreadFilter = workspace.ThreadFilter;
+            Filters.TenantFilter = workspace.TenantFilter;
+            Filters.TraceIdFilter = workspace.TraceIdFilter;
+            Filters.MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
+            Stream.IsCompactDensity = workspace.CompactDensity;
+            Stream.TimestampColumnWidth = ClampColumnWidth(layout.TimestampColumnWidth, 100, 420);
+            Stream.LevelColumnWidth = ClampColumnWidth(layout.LevelColumnWidth, 70, 200);
+            Stream.LoggerColumnWidth = ClampColumnWidth(layout.LoggerColumnWidth, 120, 520);
 
             var enabled = new HashSet<string>(workspace.EnabledLevels, StringComparer.OrdinalIgnoreCase);
-            ShowTrace = enabled.Contains(nameof(LogLevel.Trace));
-            ShowDebug = enabled.Contains(nameof(LogLevel.Debug));
-            ShowInfo = enabled.Contains(nameof(LogLevel.Info));
-            ShowWarn = enabled.Contains(nameof(LogLevel.Warn));
-            ShowError = enabled.Contains(nameof(LogLevel.Error));
-            ShowFatal = enabled.Contains(nameof(LogLevel.Fatal));
+            Filters.ShowTrace = enabled.Contains(nameof(LogLevel.Trace));
+            Filters.ShowDebug = enabled.Contains(nameof(LogLevel.Debug));
+            Filters.ShowInfo = enabled.Contains(nameof(LogLevel.Info));
+            Filters.ShowWarn = enabled.Contains(nameof(LogLevel.Warn));
+            Filters.ShowError = enabled.Contains(nameof(LogLevel.Error));
+            Filters.ShowFatal = enabled.Contains(nameof(LogLevel.Fatal));
         }
         finally
         {
@@ -924,15 +500,15 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         return _workspaceSettings with
         {
-            SearchText = SearchText,
-            ReceiverFilter = ReceiverFilter,
-            LoggerFilter = LoggerFilter,
-            ThreadFilter = ThreadFilter,
-            TenantFilter = TenantFilter,
-            TraceIdFilter = TraceIdFilter,
-            MinimumLevelOption = MinimumLevelOption,
-            CompactDensity = IsCompactDensity,
-            SelectedReceiverId = SelectedReceiverDefinition?.Id ?? string.Empty,
+            SearchText = Filters.SearchText,
+            ReceiverFilter = Filters.ReceiverFilter,
+            LoggerFilter = Filters.LoggerFilter,
+            ThreadFilter = Filters.ThreadFilter,
+            TenantFilter = Filters.TenantFilter,
+            TraceIdFilter = Filters.TraceIdFilter,
+            MinimumLevelOption = Filters.MinimumLevelOption,
+            CompactDensity = Stream.IsCompactDensity,
+            SelectedReceiverId = ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
             EnabledLevels = Filters.GetEnabledLevels(),
             AutoScroll = IsAutoScrollEnabled,
             PauseIngest = IsPaused
@@ -943,9 +519,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         return _uiLayoutSettings with
         {
-            TimestampColumnWidth = TimestampColumnWidth,
-            LevelColumnWidth = LevelColumnWidth,
-            LoggerColumnWidth = LoggerColumnWidth
+            TimestampColumnWidth = Stream.TimestampColumnWidth,
+            LevelColumnWidth = Stream.LevelColumnWidth,
+            LoggerColumnWidth = Stream.LoggerColumnWidth
         };
     }
 }

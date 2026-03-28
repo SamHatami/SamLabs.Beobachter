@@ -23,10 +23,10 @@ public sealed class MainWindowWorkspaceStateTests
 
         MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
 
-        await MainWindowTestSupport.WaitForConditionAsync(() => vm.SelectedReceiverDefinition is not null);
+        await MainWindowTestSupport.WaitForConditionAsync(() => vm.ReceiverSetup.SelectedReceiverDefinition is not null);
 
-        Assert.NotNull(vm.SelectedReceiverDefinition);
-        Assert.Equal("tcp-prod", vm.SelectedReceiverDefinition!.Id);
+        Assert.NotNull(vm.ReceiverSetup.SelectedReceiverDefinition);
+        Assert.Equal("tcp-prod", vm.ReceiverSetup.SelectedReceiverDefinition!.Id);
     }
 
     [Fact]
@@ -43,17 +43,17 @@ public sealed class MainWindowWorkspaceStateTests
         };
 
         MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
-        await MainWindowTestSupport.WaitForConditionAsync(() => vm.ReceiverDefinitions.Count == 2);
+        await MainWindowTestSupport.WaitForConditionAsync(() => vm.ReceiverSetup.ReceiverDefinitions.Count == 2);
 
-        vm.SearchText = "gateway";
-        vm.ReceiverFilter = "udp-a";
-        vm.LoggerFilter = "Orders.Api";
-        vm.ThreadFilter = "worker-9";
-        vm.TenantFilter = "alpha";
-        vm.TraceIdFilter = "trace-xyz";
-        vm.MinimumLevelOption = "Warn";
-        vm.IsCompactDensity = true;
-        vm.SelectedReceiverDefinition = vm.ReceiverDefinitions.Single(x => x.Id == "tcp-b");
+        vm.Filters.SearchText = "gateway";
+        vm.Filters.ReceiverFilter = "udp-a";
+        vm.Filters.LoggerFilter = "Orders.Api";
+        vm.Filters.ThreadFilter = "worker-9";
+        vm.Filters.TenantFilter = "alpha";
+        vm.Filters.TraceIdFilter = "trace-xyz";
+        vm.Filters.MinimumLevelOption = "Warn";
+        vm.Stream.IsCompactDensity = true;
+        vm.ReceiverSetup.SelectedReceiverDefinition = vm.ReceiverSetup.ReceiverDefinitions.Single(x => x.Id == "tcp-b");
 
         await MainWindowTestSupport.WaitForConditionAsync(() => settings.LastSavedWorkspaceSettings is not null);
 
@@ -75,9 +75,9 @@ public sealed class MainWindowWorkspaceStateTests
         FakeSettingsStore settings = new();
         MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
 
-        vm.TimestampColumnWidth = 210;
-        vm.LevelColumnWidth = 130;
-        vm.LoggerColumnWidth = 260;
+        vm.Stream.TimestampColumnWidth = 210;
+        vm.Stream.LevelColumnWidth = 130;
+        vm.Stream.LoggerColumnWidth = 260;
 
         await MainWindowTestSupport.WaitForConditionAsync(() => settings.LastSavedUiLayoutSettings is not null);
 

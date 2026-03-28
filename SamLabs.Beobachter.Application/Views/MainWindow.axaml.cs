@@ -29,7 +29,7 @@ public partial class MainWindow : Window
     {
         if (_boundViewModel is not null)
         {
-            _boundViewModel.VisibleEntries.CollectionChanged -= OnVisibleEntriesChanged;
+            _boundViewModel.Stream.VisibleEntries.CollectionChanged -= OnVisibleEntriesChanged;
             _boundViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         }
 
@@ -37,7 +37,7 @@ public partial class MainWindow : Window
 
         if (_boundViewModel is not null)
         {
-            _boundViewModel.VisibleEntries.CollectionChanged += OnVisibleEntriesChanged;
+            _boundViewModel.Stream.VisibleEntries.CollectionChanged += OnVisibleEntriesChanged;
             _boundViewModel.PropertyChanged += OnViewModelPropertyChanged;
         }
     }
@@ -99,7 +99,7 @@ public partial class MainWindow : Window
 
         if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.C)
         {
-            _boundViewModel.CopySelectedDetailsCommand.Execute(null);
+            _boundViewModel.Details.CopySelectedDetailsCommand.Execute(null);
             e.Handled = true;
             return;
         }
@@ -165,19 +165,19 @@ public partial class MainWindow : Window
 
     private void MoveSelection(int delta)
     {
-        if (_boundViewModel is null || _boundViewModel.VisibleEntries.Count == 0)
+        if (_boundViewModel is null || _boundViewModel.Stream.VisibleEntries.Count == 0)
         {
             return;
         }
 
-        var current = _boundViewModel.SelectedEntry;
-        var currentIndex = current is null ? -1 : _boundViewModel.VisibleEntries.IndexOf(current);
+        var current = _boundViewModel.Stream.SelectedEntry;
+        var currentIndex = current is null ? -1 : _boundViewModel.Stream.VisibleEntries.IndexOf(current);
         var nextIndex = currentIndex < 0
-            ? (delta > 0 ? 0 : _boundViewModel.VisibleEntries.Count - 1)
-            : Math.Clamp(currentIndex + delta, 0, _boundViewModel.VisibleEntries.Count - 1);
+            ? (delta > 0 ? 0 : _boundViewModel.Stream.VisibleEntries.Count - 1)
+            : Math.Clamp(currentIndex + delta, 0, _boundViewModel.Stream.VisibleEntries.Count - 1);
 
-        var next = _boundViewModel.VisibleEntries[nextIndex];
-        _boundViewModel.SelectedEntry = next;
+        var next = _boundViewModel.Stream.VisibleEntries[nextIndex];
+        _boundViewModel.Stream.SelectedEntry = next;
         LogEntriesList.ScrollIntoView(next);
     }
 }
