@@ -4,9 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
+using SamLabs.Beobachter.Core.Settings;
 using SamLabs.Beobachter.ViewModels;
 using Xunit;
 
@@ -108,6 +110,84 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(12, vm.LogRowFontSize);
     }
 
+    [Fact]
+    public async Task SaveReceiverSetup_PersistsDefinitionsAndReloadsSession()
+    {
+        var settings = new FakeSettingsStore();
+        var session = new FakeIngestionSession([]);
+        var vm = new MainWindowViewModel(new ThemeService(), session, new FakeClipboardService(), settings);
+
+        await WaitForReceiverLoadAsync(vm);
+
+        vm.AddUdpReceiverCommand.Execute(null);
+        vm.AddTcpReceiverCommand.Execute(null);
+        vm.AddFileReceiverCommand.Execute(null);
+
+        var fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
+        fileReceiver.FilePath = "C:/logs/app.log";
+
+        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+
+        var saved = settings.LastSavedReceiverDefinitions;
+        Assert.NotNull(saved);
+        Assert.Single(saved!.UdpReceivers);
+        Assert.Single(saved.TcpReceivers);
+        Assert.Single(saved.FileTailReceivers);
+        Assert.Equal("C:/logs/app.log", saved.FileTailReceivers[0].FilePath);
+        Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    [Fact]
+    public async Task ReloadReceiverSetup_LoadsDefinitionsFromSettings()
+    {
+        var settings = new FakeSettingsStore
+        {
+            ReceiverDefinitions = new ReceiverDefinitions
+            {
+                UdpReceivers =
+                [
+                    new UdpReceiverDefinition
+                    {
+                        Id = "udp-prod",
+                        DisplayName = "UDP Prod",
+                        BindAddress = "127.0.0.1",
+                        Port = 17071
+                    }
+                ],
+                FileTailReceivers =
+                [
+                    new FileTailReceiverDefinition
+                    {
+                        Id = "file-prod",
+                        DisplayName = "File Prod",
+                        FilePath = "C:/logs/prod.log",
+                        PollIntervalMs = 250
+                    }
+                ]
+            }
+        };
+
+        var session = new FakeIngestionSession([]);
+        var vm = new MainWindowViewModel(new ThemeService(), session, new FakeClipboardService(), settings);
+
+        await ((IAsyncRelayCommand)vm.ReloadReceiverSetupCommand).ExecuteAsync(null);
+
+        Assert.Equal(2, vm.ReceiverDefinitions.Count);
+        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "udp-prod" && x.IsUdp && x.Port == 17071);
+        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "file-prod" && x.IsFile && x.PollIntervalMs == 250);
+        Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    private static async Task WaitForReceiverLoadAsync(MainWindowViewModel vm)
+    {
+        var attempt = 0;
+        while (attempt < 25 && vm.ReceiverSetupStatus.Length == 0 && vm.ReceiverDefinitions.Count == 0)
+        {
+            await Task.Delay(10);
+            attempt++;
+        }
+    }
+
     private static LogEntry CreateEntry(string logger, LogLevel level, string message)
     {
         return new LogEntry
@@ -152,6 +232,8 @@ public sealed class MainWindowViewModelTests
 
         public bool IsAutoScrollEnabled { get; private set; } = true;
 
+        public int ReloadReceiversCalls { get; private set; }
+
         public bool TryPublish(LogEntry entry)
         {
             _entries.Add(entry);
@@ -181,6 +263,12 @@ public sealed class MainWindowViewModelTests
             return ValueTask.CompletedTask;
         }
 
+        public ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+        {
+            ReloadReceiversCalls++;
+            return ValueTask.CompletedTask;
+        }
+
         public ValueTask StopAsync(CancellationToken cancellationToken = default)
         {
             return ValueTask.CompletedTask;
@@ -199,6 +287,55 @@ public sealed class MainWindowViewModelTests
         public ValueTask SetTextAsync(string text, CancellationToken cancellationToken = default)
         {
             LastText = text;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class FakeSettingsStore : ISettingsStore
+    {
+        public ReceiverDefinitions ReceiverDefinitions { get; set; } = new();
+
+        public ReceiverDefinitions? LastSavedReceiverDefinitions { get; private set; }
+
+        public ValueTask<AppSettings> LoadAppSettingsAsync(CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(new AppSettings());
+        }
+
+        public ValueTask<ReceiverDefinitions> LoadReceiverDefinitionsAsync(CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(ReceiverDefinitions);
+        }
+
+        public ValueTask<WorkspaceSettings> LoadWorkspaceSettingsAsync(CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(new WorkspaceSettings());
+        }
+
+        public ValueTask<UiLayoutSettings> LoadUiLayoutSettingsAsync(CancellationToken cancellationToken = default)
+        {
+            return ValueTask.FromResult(new UiLayoutSettings());
+        }
+
+        public ValueTask SaveAppSettingsAsync(AppSettings settings, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask SaveReceiverDefinitionsAsync(ReceiverDefinitions settings, CancellationToken cancellationToken = default)
+        {
+            ReceiverDefinitions = settings;
+            LastSavedReceiverDefinitions = settings;
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask SaveWorkspaceSettingsAsync(WorkspaceSettings settings, CancellationToken cancellationToken = default)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask SaveUiLayoutSettingsAsync(UiLayoutSettings settings, CancellationToken cancellationToken = default)
+        {
             return ValueTask.CompletedTask;
         }
     }

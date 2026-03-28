@@ -9,8 +9,10 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
+using SamLabs.Beobachter.Core.Settings;
 
 namespace SamLabs.Beobachter.ViewModels;
 
@@ -21,6 +23,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IClipboardService _clipboardService;
+    private readonly ISettingsStore _settingsStore;
     private readonly Random _random = new();
     private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
 
@@ -84,18 +87,30 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _copyStatus = string.Empty;
 
-    public MainWindowViewModel() : this(new ThemeService(), new DesignIngestionSession(), new NullClipboardService())
+    [ObservableProperty]
+    private ReceiverDefinitionViewModel? _selectedReceiverDefinition;
+
+    [ObservableProperty]
+    private string _receiverSetupStatus = string.Empty;
+
+    public MainWindowViewModel() : this(
+        new ThemeService(),
+        new DesignIngestionSession(),
+        new NullClipboardService(),
+        new DesignSettingsStore())
     {
     }
 
     public MainWindowViewModel(
         IThemeService themeService,
         IIngestionSession ingestionSession,
-        IClipboardService? clipboardService = null)
+        IClipboardService? clipboardService = null,
+        ISettingsStore? settingsStore = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _clipboardService = clipboardService ?? new NullClipboardService();
+        _settingsStore = settingsStore ?? new DesignSettingsStore();
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
@@ -105,11 +120,14 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateThemeSummary();
         UpdateDensityVisuals();
         UpdateStatusSummary();
+        _ = LoadReceiverDefinitionsAsync();
     }
 
     public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
 
     public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
+
+    public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions { get; } = [];
 
     [RelayCommand]
     private void UseSystemTheme()
@@ -235,6 +253,78 @@ public partial class MainWindowViewModel : ViewModelBase
 
         await _clipboardService.SetTextAsync(SelectedDetailsText).ConfigureAwait(false);
         CopyStatus = "Details copied.";
+    }
+
+    [RelayCommand]
+    private void AddUdpReceiver()
+    {
+        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
+        {
+            Id = BuildUniqueReceiverId("udp"),
+            DisplayName = $"UDP {ReceiverDefinitions.Count(x => x.IsUdp) + 1}",
+            BindAddress = "0.0.0.0",
+            Port = 7071
+        };
+        ReceiverDefinitions.Add(vm);
+        SelectedReceiverDefinition = vm;
+    }
+
+    [RelayCommand]
+    private void AddTcpReceiver()
+    {
+        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
+        {
+            Id = BuildUniqueReceiverId("tcp"),
+            DisplayName = $"TCP {ReceiverDefinitions.Count(x => x.IsTcp) + 1}",
+            BindAddress = "0.0.0.0",
+            Port = 4505
+        };
+        ReceiverDefinitions.Add(vm);
+        SelectedReceiverDefinition = vm;
+    }
+
+    [RelayCommand]
+    private void AddFileReceiver()
+    {
+        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.File)
+        {
+            Id = BuildUniqueReceiverId("file"),
+            DisplayName = $"File {ReceiverDefinitions.Count(x => x.IsFile) + 1}",
+            FilePath = string.Empty,
+            PollIntervalMs = 150
+        };
+        ReceiverDefinitions.Add(vm);
+        SelectedReceiverDefinition = vm;
+    }
+
+    [RelayCommand]
+    private void RemoveSelectedReceiver()
+    {
+        if (SelectedReceiverDefinition is null)
+        {
+            return;
+        }
+
+        var toRemove = SelectedReceiverDefinition;
+        ReceiverDefinitions.Remove(toRemove);
+        SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault();
+    }
+
+    [RelayCommand]
+    private async Task SaveReceiverSetupAsync()
+    {
+        var mapped = MapToReceiverDefinitions();
+        await _settingsStore.SaveReceiverDefinitionsAsync(mapped);
+        await _ingestionSession.ReloadReceiversAsync();
+        ReceiverSetupStatus = $"Saved {ReceiverDefinitions.Count} receiver(s) and reloaded listeners.";
+    }
+
+    [RelayCommand]
+    private async Task ReloadReceiverSetupAsync()
+    {
+        await LoadReceiverDefinitionsAsync();
+        await _ingestionSession.ReloadReceiversAsync();
+        ReceiverSetupStatus = $"Reloaded {ReceiverDefinitions.Count} receiver(s) from settings.";
     }
 
     partial void OnSearchTextChanged(string value)
@@ -494,5 +584,125 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         return builder.ToString();
+    }
+
+    private async Task LoadReceiverDefinitionsAsync()
+    {
+        var definitions = await _settingsStore.LoadReceiverDefinitionsAsync().ConfigureAwait(false);
+
+        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
+        {
+            ApplyReceiverDefinitions(definitions);
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() => ApplyReceiverDefinitions(definitions));
+    }
+
+    private void ApplyReceiverDefinitions(ReceiverDefinitions definitions)
+    {
+        ReceiverDefinitions.Clear();
+        foreach (var udp in definitions.UdpReceivers)
+        {
+            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
+            {
+                Id = udp.Id,
+                DisplayName = udp.DisplayName,
+                Enabled = udp.Enabled,
+                BindAddress = udp.BindAddress,
+                Port = udp.Port
+            });
+        }
+
+        foreach (var tcp in definitions.TcpReceivers)
+        {
+            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
+            {
+                Id = tcp.Id,
+                DisplayName = tcp.DisplayName,
+                Enabled = tcp.Enabled,
+                BindAddress = tcp.BindAddress,
+                Port = tcp.Port
+            });
+        }
+
+        foreach (var file in definitions.FileTailReceivers)
+        {
+            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.File)
+            {
+                Id = file.Id,
+                DisplayName = file.DisplayName,
+                Enabled = file.Enabled,
+                FilePath = file.FilePath,
+                PollIntervalMs = file.PollIntervalMs
+            });
+        }
+
+        SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault();
+    }
+
+    private ReceiverDefinitions MapToReceiverDefinitions()
+    {
+        var udp = ReceiverDefinitions
+            .Where(static x => x.IsUdp)
+            .Select(x => new UdpReceiverDefinition
+            {
+                Id = x.Id,
+                DisplayName = x.DisplayName,
+                Enabled = x.Enabled,
+                BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
+                Port = x.Port <= 0 ? 7071 : x.Port,
+                DefaultLoggerName = x.DisplayName
+            })
+            .ToArray();
+
+        var tcp = ReceiverDefinitions
+            .Where(static x => x.IsTcp)
+            .Select(x => new TcpReceiverDefinition
+            {
+                Id = x.Id,
+                DisplayName = x.DisplayName,
+                Enabled = x.Enabled,
+                BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
+                Port = x.Port <= 0 ? 4505 : x.Port,
+                DefaultLoggerName = x.DisplayName
+            })
+            .ToArray();
+
+        var file = ReceiverDefinitions
+            .Where(static x => x.IsFile)
+            .Select(x => new FileTailReceiverDefinition
+            {
+                Id = x.Id,
+                DisplayName = x.DisplayName,
+                Enabled = x.Enabled,
+                FilePath = x.FilePath.Trim(),
+                PollIntervalMs = x.PollIntervalMs <= 0 ? 150 : x.PollIntervalMs,
+                DefaultLoggerName = x.DisplayName
+            })
+            .ToArray();
+
+        return new ReceiverDefinitions
+        {
+            UdpReceivers = udp,
+            TcpReceivers = tcp,
+            FileTailReceivers = file
+        };
+    }
+
+    private string BuildUniqueReceiverId(string prefix)
+    {
+        var next = 1;
+        var existing = new HashSet<string>(ReceiverDefinitions.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
+        while (true)
+        {
+            var candidate = $"{prefix}-{next}";
+            if (!existing.Contains(candidate))
+            {
+                return candidate;
+            }
+
+            next++;
+        }
     }
 }

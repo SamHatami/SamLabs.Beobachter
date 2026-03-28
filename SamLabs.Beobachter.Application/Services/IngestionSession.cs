@@ -150,6 +150,45 @@ public sealed class IngestionSession : IIngestionSession
         await _settingsStore.SaveWorkspaceSettingsAsync(_workspaceSettings, cancellationToken).ConfigureAwait(false);
     }
 
+    public async ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<ILogReceiver> currentReceivers;
+        ChannelWriter<LogEntry>? writer;
+        CancellationToken receiverToken;
+        bool shouldReload;
+
+        lock (_gate)
+        {
+            shouldReload = _started && _runCts is not null && _writer is not null;
+            currentReceivers = _receivers;
+            _receivers = [];
+            writer = _writer;
+            receiverToken = _runCts?.Token ?? CancellationToken.None;
+        }
+
+        if (!shouldReload || writer is null)
+        {
+            return;
+        }
+
+        await StopReceiversAsync(currentReceivers, cancellationToken).ConfigureAwait(false);
+
+        var receiverDefinitions = await _settingsStore.LoadReceiverDefinitionsAsync(cancellationToken).ConfigureAwait(false);
+        var reloaded = _receiverFactory.CreateReceivers(receiverDefinitions);
+        foreach (var receiver in reloaded)
+        {
+            await receiver.StartAsync(writer, receiverToken).ConfigureAwait(false);
+        }
+
+        lock (_gate)
+        {
+            if (_started)
+            {
+                _receivers = reloaded;
+            }
+        }
+    }
+
     public async ValueTask StopAsync(CancellationToken cancellationToken = default)
     {
         bool shouldStop;
@@ -179,17 +218,7 @@ public sealed class IngestionSession : IIngestionSession
         writer?.TryComplete();
         runCts?.Cancel();
 
-        foreach (var receiver in receivers)
-        {
-            try
-            {
-                await receiver.StopAsync(cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                await receiver.DisposeAsync().ConfigureAwait(false);
-            }
-        }
+        await StopReceiversAsync(receivers, cancellationToken).ConfigureAwait(false);
 
         if (consumeTask is not null)
         {
@@ -299,6 +328,23 @@ public sealed class IngestionSession : IIngestionSession
     private void OnStoreEntriesAppended(object? sender, LogEntriesAppendedEventArgs e)
     {
         EntriesAppended?.Invoke(this, e);
+    }
+
+    private static async ValueTask StopReceiversAsync(
+        IEnumerable<ILogReceiver> receivers,
+        CancellationToken cancellationToken)
+    {
+        foreach (var receiver in receivers)
+        {
+            try
+            {
+                await receiver.StopAsync(cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                await receiver.DisposeAsync().ConfigureAwait(false);
+            }
+        }
     }
 
     private sealed class DropCountingWriter : ChannelWriter<LogEntry>

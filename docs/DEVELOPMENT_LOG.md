@@ -523,3 +523,37 @@ Impact:
 
 Follow-ups:
 - Add configurable keymap if custom shortcuts become a requirement.
+
+## 2026-03-28 - Phase 4 Slice 9: Receiver Setup UI + Session Reload Hook
+What changed:
+- Extended ingestion session API to support receiver reload without full session restart:
+  [IIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IIngestionSession.cs),
+  [IngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IngestionSession.cs),
+  [DesignIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/DesignIngestionSession.cs)
+- Added design-time settings store for VM fallback:
+  [DesignSettingsStore.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/DesignSettingsStore.cs)
+- Added receiver-definition editor VM model:
+  [ReceiverDefinitionViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverDefinitionViewModel.cs)
+- Extended main VM with receiver setup actions:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - load receiver definitions from settings
+  - add/remove UDP/TCP/File receiver drafts
+  - save + reload listeners
+  - reload definitions from disk
+- Added receiver setup panel in the main workspace:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Added VM tests for receiver setup flows:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- Legacy Log2Console required receiver/listener setup; this restores that operational flow in the new MVVM shell.
+- Reloading receivers in-place avoids full app restart and keeps stateful UI workflows intact.
+- Explicit tests lock persistence/reload behavior before moving into structured logging support.
+
+Impact:
+- Users can now define listeners in-app (UDP/TCP/File), persist settings, and reload active receivers from the UI.
+- Session lifecycle remains stable while receiver topology changes.
+- Test suite increased to 50 passing tests.
+
+Follow-ups:
+- Add per-receiver parser-order editing and validation messages in the setup panel.

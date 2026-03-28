@@ -71,6 +71,11 @@ internal sealed class DesignIngestionSession : IIngestionSession
         return ValueTask.CompletedTask;
     }
 
+    public ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.CompletedTask;
+    }
+
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
     {
         return ValueTask.CompletedTask;

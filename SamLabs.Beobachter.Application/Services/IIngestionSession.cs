@@ -29,5 +29,7 @@ public interface IIngestionSession : IAsyncDisposable
 
     ValueTask SetAutoScrollAsync(bool isEnabled, CancellationToken cancellationToken = default);
 
+    ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default);
+
     ValueTask StopAsync(CancellationToken cancellationToken = default);
 }
