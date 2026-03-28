@@ -23,6 +23,7 @@ public static class Root
     {
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
+        services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
 

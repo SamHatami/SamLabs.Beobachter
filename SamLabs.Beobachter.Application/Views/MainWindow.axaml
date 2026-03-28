@@ -41,6 +41,14 @@
                                Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                     <TextBlock Text="{Binding StatusSummary}"
                                Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <TextBlock Text="{Binding StatsSummary1Minute}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <TextBlock Text="{Binding StatsSummary5Minutes}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <TextBlock Text="{Binding TopLoggersSummary}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <TextBlock Text="{Binding TopReceiversSummary}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right"
                             Orientation="Horizontal"

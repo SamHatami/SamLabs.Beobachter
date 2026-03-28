@@ -27,6 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IClipboardService _clipboardService;
     private readonly ISettingsStore _settingsStore;
     private readonly ILogQueryEvaluator _queryEvaluator = new LogQueryEvaluator();
+    private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
     private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
 
@@ -35,6 +36,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _statusSummary = string.Empty;
+
+    [ObservableProperty]
+    private string _statsSummary1Minute = "1m: 0 logs/s | 0 err/s";
+
+    [ObservableProperty]
+    private string _statsSummary5Minutes = "5m: 0 logs/s | 0 err/s";
+
+    [ObservableProperty]
+    private string _topLoggersSummary = "Top loggers (5m): -";
+
+    [ObservableProperty]
+    private string _topReceiversSummary = "Top receivers (5m): -";
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -129,7 +142,8 @@ public partial class MainWindowViewModel : ViewModelBase
         new ThemeService(),
         new DesignIngestionSession(),
         new NullClipboardService(),
-        new DesignSettingsStore())
+        new DesignSettingsStore(),
+        new RollingLogStatisticsService())
     {
     }
 
@@ -137,21 +151,25 @@ public partial class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IIngestionSession ingestionSession,
         IClipboardService? clipboardService = null,
-        ISettingsStore? settingsStore = null)
+        ISettingsStore? settingsStore = null,
+        ILogStatisticsService? statisticsService = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _clipboardService = clipboardService ?? new NullClipboardService();
         _settingsStore = settingsStore ?? new DesignSettingsStore();
+        _statisticsService = statisticsService ?? new RollingLogStatisticsService();
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
         IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
+        _statisticsService.RecordRange(_ingestionSession.Snapshot());
         RebuildLoggerTreeFromSnapshot();
         RebuildVisibleEntries();
         UpdateThemeSummary();
         UpdateDensityVisuals();
         UpdateStatusSummary();
+        UpdateStatisticsSummary();
         _ = LoadReceiverDefinitionsAsync();
     }
 
@@ -427,6 +445,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Dispatcher.UIThread.Post(() =>
         {
+            _statisticsService.RecordRange(e.AppendedEntries);
             var query = BuildCurrentQuery();
             foreach (var entry in e.AppendedEntries)
             {
@@ -444,6 +463,7 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             UpdateStatusSummary();
+            UpdateStatisticsSummary();
         });
     }
 
@@ -624,6 +644,26 @@ public partial class MainWindowViewModel : ViewModelBase
         var state = IsPaused ? "Paused" : "Running";
         var pin = IsAutoScrollEnabled ? "On" : "Off";
         StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
+    }
+
+    private void UpdateStatisticsSummary()
+    {
+        var snapshot = _statisticsService.GetSnapshot();
+        StatsSummary1Minute = $"1m: {snapshot.LogsPerSecond1Minute:F1} logs/s | {snapshot.ErrorsPerSecond1Minute:F1} err/s";
+        StatsSummary5Minutes = $"5m: {snapshot.LogsPerSecond5Minutes:F1} logs/s | {snapshot.ErrorsPerSecond5Minutes:F1} err/s";
+        TopLoggersSummary = FormatTop("Top loggers (5m)", snapshot.TopLoggers);
+        TopReceiversSummary = FormatTop("Top receivers (5m)", snapshot.TopReceivers);
+    }
+
+    private static string FormatTop(string label, IReadOnlyList<NamedCount> entries)
+    {
+        if (entries.Count == 0)
+        {
+            return $"{label}: -";
+        }
+
+        var summary = string.Join(", ", entries.Select(static x => $"{x.Name} ({x.Count})"));
+        return $"{label}: {summary}";
     }
 
     private LogLevel PickRandomLevel()

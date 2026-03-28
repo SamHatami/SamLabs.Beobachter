@@ -646,3 +646,34 @@ Impact:
 
 Follow-ups:
 - Add an advanced filter mode for arbitrary property key/value entries beyond `tenant` and `traceId`.
+
+## 2026-03-28 - Phase 4 Slice 12: Rolling Statistics Service + Live Summary Panel
+What changed:
+- Added rolling statistics contracts/models:
+  [ILogStatisticsService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/ILogStatisticsService.cs),
+  [LogStatisticsSnapshot.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/LogStatisticsSnapshot.cs)
+- Added rolling 1-second bucket aggregator:
+  [RollingLogStatisticsService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/RollingLogStatisticsService.cs)
+  - 1-minute and 5-minute throughput/error rates
+  - top loggers and top receivers in 5-minute window
+  - automatic stale-bucket trimming
+- Wired stats service in composition root:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Updated main VM to record appended batches and project live summaries:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Updated main view to show live stats in header:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Added unit tests:
+  [RollingLogStatisticsServiceTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/RollingLogStatisticsServiceTests.cs)
+
+Why:
+- Real-time ops workflows need trend visibility, not only raw line-by-line logs.
+- A dedicated rolling aggregator avoids mixing stats math into VM/UI event handlers.
+
+Impact:
+- Header now displays live 1m/5m log/error rates and top noisy logger/receiver sources.
+- Stats logic is isolated and testable as a standalone service.
+- Test suite increased to 61 passing tests.
+
+Follow-ups:
+- Add chart-ready time-series output from the same buckets for a future visual trend panel.
