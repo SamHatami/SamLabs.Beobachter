@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -23,32 +22,6 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const int MaxVisibleEntries = 2_000;
-    private static readonly StringComparer ParserNameComparer = StringComparer.OrdinalIgnoreCase;
-    private static readonly string[] DefaultParserOrder =
-    [
-        "Log4jXmlParser",
-        "JsonLogParser",
-        "CsvParser",
-        "PlainTextParser"
-    ];
-    private static readonly HashSet<string> KnownParserNames = new(ParserNameComparer)
-    {
-        "Log4jXmlParser",
-        "JsonLogParser",
-        "CsvParser",
-        "PlainTextParser"
-    };
-    private static readonly HashSet<string> ReceiverEditablePropertyNames = new(StringComparer.Ordinal)
-    {
-        nameof(ReceiverDefinitionViewModel.Id),
-        nameof(ReceiverDefinitionViewModel.DisplayName),
-        nameof(ReceiverDefinitionViewModel.Enabled),
-        nameof(ReceiverDefinitionViewModel.BindAddress),
-        nameof(ReceiverDefinitionViewModel.Port),
-        nameof(ReceiverDefinitionViewModel.FilePath),
-        nameof(ReceiverDefinitionViewModel.PollIntervalMs),
-        nameof(ReceiverDefinitionViewModel.ParserOrderText)
-    };
     private static readonly HashSet<string> FilterCriteriaPropertyNames = new(StringComparer.Ordinal)
     {
         nameof(LogFiltersViewModel.SearchText),
@@ -130,12 +103,6 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private double _loggerColumnWidth = 220;
 
-    [ObservableProperty]
-    private ReceiverDefinitionViewModel? _selectedReceiverDefinition;
-
-    [ObservableProperty]
-    private string _receiverSetupStatus = string.Empty;
-
     public string LogColumnDefinitions =>
         $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
 
@@ -162,6 +129,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IClipboardService resolvedClipboardService = clipboardService ?? new NullClipboardService();
         Filters = new LogFiltersViewModel();
         Filters.PropertyChanged += OnFiltersPropertyChanged;
+        ReceiverSetup = new ReceiverSetupViewModel(_settingsStore, _ingestionSession);
+        ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
         Details.PropertyChanged += OnDetailsPropertyChanged;
 
@@ -175,7 +144,7 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateDensityVisuals();
         UpdateStatusSummary();
         UpdateStatisticsSummary();
-        _ = LoadReceiverDefinitionsAsync();
+        _ = LoadReceiverSetupAsync();
         _ = LoadWorkspaceStateAsync();
     }
 
@@ -183,7 +152,38 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
 
-    public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions { get; } = [];
+    public ReceiverSetupViewModel ReceiverSetup { get; }
+
+    public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions => ReceiverSetup.ReceiverDefinitions;
+
+    public ReceiverDefinitionViewModel? SelectedReceiverDefinition
+    {
+        get => ReceiverSetup.SelectedReceiverDefinition;
+        set
+        {
+            if (ReferenceEquals(ReceiverSetup.SelectedReceiverDefinition, value))
+            {
+                return;
+            }
+
+            ReceiverSetup.SelectedReceiverDefinition = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string ReceiverSetupStatus => ReceiverSetup.ReceiverSetupStatus;
+
+    public IRelayCommand AddUdpReceiverCommand => ReceiverSetup.AddUdpReceiverCommand;
+
+    public IRelayCommand AddTcpReceiverCommand => ReceiverSetup.AddTcpReceiverCommand;
+
+    public IRelayCommand AddFileReceiverCommand => ReceiverSetup.AddFileReceiverCommand;
+
+    public IRelayCommand RemoveSelectedReceiverCommand => ReceiverSetup.RemoveSelectedReceiverCommand;
+
+    public IAsyncRelayCommand SaveReceiverSetupCommand => ReceiverSetup.SaveReceiverSetupCommand;
+
+    public IAsyncRelayCommand ReloadReceiverSetupCommand => ReceiverSetup.ReloadReceiverSetupCommand;
 
     public LogFiltersViewModel Filters { get; }
 
@@ -520,99 +520,6 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
     }
 
-    [RelayCommand]
-    private void AddUdpReceiver()
-    {
-        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
-        {
-            Id = BuildUniqueReceiverId("udp"),
-            DisplayName = $"UDP {ReceiverDefinitions.Count(x => x.IsUdp) + 1}",
-            BindAddress = "0.0.0.0",
-            Port = 7071
-        };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
-    private void AddTcpReceiver()
-    {
-        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
-        {
-            Id = BuildUniqueReceiverId("tcp"),
-            DisplayName = $"TCP {ReceiverDefinitions.Count(x => x.IsTcp) + 1}",
-            BindAddress = "0.0.0.0",
-            Port = 4505
-        };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
-    private void AddFileReceiver()
-    {
-        var vm = new ReceiverDefinitionViewModel(ReceiverKinds.File)
-        {
-            Id = BuildUniqueReceiverId("file"),
-            DisplayName = $"File {ReceiverDefinitions.Count(x => x.IsFile) + 1}",
-            FilePath = string.Empty,
-            PollIntervalMs = 150
-        };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
-    private void RemoveSelectedReceiver()
-    {
-        if (SelectedReceiverDefinition is null)
-        {
-            return;
-        }
-
-        var toRemove = SelectedReceiverDefinition;
-        DetachReceiverDefinition(toRemove);
-        ReceiverDefinitions.Remove(toRemove);
-        if (!string.IsNullOrWhiteSpace(_pendingSelectedReceiverId))
-        {
-            SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault(x =>
-                x.Id.Equals(_pendingSelectedReceiverId, StringComparison.OrdinalIgnoreCase));
-        }
-
-        SelectedReceiverDefinition ??= ReceiverDefinitions.FirstOrDefault();
-        _pendingSelectedReceiverId = null;
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
-    private async Task SaveReceiverSetupAsync()
-    {
-        if (!TryValidateReceiverDefinitions(out var validationError))
-        {
-            ReceiverSetupStatus = $"Validation failed: {validationError}";
-            return;
-        }
-
-        var mapped = MapToReceiverDefinitions();
-        await _settingsStore.SaveReceiverDefinitionsAsync(mapped);
-        await _ingestionSession.ReloadReceiversAsync();
-        ReceiverSetupStatus = $"Saved {ReceiverDefinitions.Count} receiver(s) and reloaded listeners.";
-    }
-
-    [RelayCommand]
-    private async Task ReloadReceiverSetupAsync()
-    {
-        await LoadReceiverDefinitionsAsync();
-        await _ingestionSession.ReloadReceiversAsync();
-        ReceiverSetupStatus = $"Reloaded {ReceiverDefinitions.Count} receiver(s) from settings.";
-    }
-
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
@@ -623,11 +530,6 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
         UpdateStatusSummary();
-    }
-
-    partial void OnSelectedReceiverDefinitionChanged(ReceiverDefinitionViewModel? value)
-    {
-        QueuePersistWorkspaceState();
     }
 
     partial void OnIsCompactDensityChanged(bool value)
@@ -682,11 +584,19 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void OnReceiverDefinitionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnReceiverSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is null || ReceiverEditablePropertyNames.Contains(e.PropertyName))
+        if (e.PropertyName is null ||
+            string.Equals(e.PropertyName, nameof(ReceiverSetupViewModel.SelectedReceiverDefinition), StringComparison.Ordinal))
         {
-            TryValidateReceiverDefinitions(out _);
+            OnPropertyChanged(nameof(SelectedReceiverDefinition));
+            QueuePersistWorkspaceState();
+        }
+
+        if (e.PropertyName is null ||
+            string.Equals(e.PropertyName, nameof(ReceiverSetupViewModel.ReceiverSetupStatus), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(ReceiverSetupStatus));
         }
     }
 
@@ -913,14 +823,29 @@ public partial class MainWindowViewModel : ViewModelBase
         return levels[_random.Next(0, levels.Length)];
     }
 
-    private void AttachReceiverDefinition(ReceiverDefinitionViewModel receiver)
+    private async Task LoadReceiverSetupAsync()
     {
-        receiver.PropertyChanged += OnReceiverDefinitionPropertyChanged;
+        await ReceiverSetup.LoadAsync().ConfigureAwait(false);
+
+        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
+        {
+            ApplyPendingReceiverSelection();
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(ApplyPendingReceiverSelection);
     }
 
-    private void DetachReceiverDefinition(ReceiverDefinitionViewModel receiver)
+    private void ApplyPendingReceiverSelection()
     {
-        receiver.PropertyChanged -= OnReceiverDefinitionPropertyChanged;
+        if (string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) || ReceiverDefinitions.Count == 0)
+        {
+            return;
+        }
+
+        ReceiverSetup.TrySelectReceiverById(_pendingSelectedReceiverId);
+        SelectedReceiverDefinition ??= ReceiverDefinitions.FirstOrDefault();
+        _pendingSelectedReceiverId = null;
     }
 
     private async Task LoadWorkspaceStateAsync()
@@ -971,297 +896,10 @@ public partial class MainWindowViewModel : ViewModelBase
             _isApplyingWorkspaceState = false;
         }
 
-        if (!string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) && ReceiverDefinitions.Count > 0)
-        {
-            SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault(x =>
-                x.Id.Equals(_pendingSelectedReceiverId, StringComparison.OrdinalIgnoreCase))
-                ?? ReceiverDefinitions.FirstOrDefault();
-            _pendingSelectedReceiverId = null;
-        }
+        ApplyPendingReceiverSelection();
 
         RebuildVisibleEntries();
         UpdateStatusSummary();
-    }
-
-    private async Task LoadReceiverDefinitionsAsync()
-    {
-        var definitions = await _settingsStore.LoadReceiverDefinitionsAsync().ConfigureAwait(false);
-
-        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
-        {
-            ApplyReceiverDefinitions(definitions);
-            return;
-        }
-
-        await Dispatcher.UIThread.InvokeAsync(() => ApplyReceiverDefinitions(definitions));
-    }
-
-    private void ApplyReceiverDefinitions(ReceiverDefinitions definitions)
-    {
-        foreach (var existing in ReceiverDefinitions)
-        {
-            DetachReceiverDefinition(existing);
-        }
-
-        ReceiverDefinitions.Clear();
-        foreach (var udp in definitions.UdpReceivers)
-        {
-            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
-            {
-                Id = udp.Id,
-                DisplayName = udp.DisplayName,
-                Enabled = udp.Enabled,
-                BindAddress = udp.BindAddress,
-                Port = udp.Port,
-                ParserOrderText = FormatParserOrder(udp.ParserOrder)
-            };
-            AttachReceiverDefinition(receiver);
-            ReceiverDefinitions.Add(receiver);
-        }
-
-        foreach (var tcp in definitions.TcpReceivers)
-        {
-            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
-            {
-                Id = tcp.Id,
-                DisplayName = tcp.DisplayName,
-                Enabled = tcp.Enabled,
-                BindAddress = tcp.BindAddress,
-                Port = tcp.Port,
-                ParserOrderText = FormatParserOrder(tcp.ParserOrder)
-            };
-            AttachReceiverDefinition(receiver);
-            ReceiverDefinitions.Add(receiver);
-        }
-
-        foreach (var file in definitions.FileTailReceivers)
-        {
-            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.File)
-            {
-                Id = file.Id,
-                DisplayName = file.DisplayName,
-                Enabled = file.Enabled,
-                FilePath = file.FilePath,
-                PollIntervalMs = file.PollIntervalMs,
-                ParserOrderText = FormatParserOrder(file.ParserOrder)
-            };
-            AttachReceiverDefinition(receiver);
-            ReceiverDefinitions.Add(receiver);
-        }
-
-        SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault();
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    private ReceiverDefinitions MapToReceiverDefinitions()
-    {
-        var udp = ReceiverDefinitions
-            .Where(static x => x.IsUdp)
-            .Select(x => new UdpReceiverDefinition
-            {
-                Id = x.Id,
-                DisplayName = x.DisplayName,
-                Enabled = x.Enabled,
-                BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
-                Port = x.Port <= 0 ? 7071 : x.Port,
-                DefaultLoggerName = x.DisplayName,
-                ParserOrder = ParseParserOrder(x.ParserOrderText)
-            })
-            .ToArray();
-
-        var tcp = ReceiverDefinitions
-            .Where(static x => x.IsTcp)
-            .Select(x => new TcpReceiverDefinition
-            {
-                Id = x.Id,
-                DisplayName = x.DisplayName,
-                Enabled = x.Enabled,
-                BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
-                Port = x.Port <= 0 ? 4505 : x.Port,
-                DefaultLoggerName = x.DisplayName,
-                ParserOrder = ParseParserOrder(x.ParserOrderText)
-            })
-            .ToArray();
-
-        var file = ReceiverDefinitions
-            .Where(static x => x.IsFile)
-            .Select(x => new FileTailReceiverDefinition
-            {
-                Id = x.Id,
-                DisplayName = x.DisplayName,
-                Enabled = x.Enabled,
-                FilePath = x.FilePath.Trim(),
-                PollIntervalMs = x.PollIntervalMs <= 0 ? 150 : x.PollIntervalMs,
-                DefaultLoggerName = x.DisplayName,
-                ParserOrder = ParseParserOrder(x.ParserOrderText)
-            })
-            .ToArray();
-
-        return new ReceiverDefinitions
-        {
-            UdpReceivers = udp,
-            TcpReceivers = tcp,
-            FileTailReceivers = file
-        };
-    }
-
-    private bool TryValidateReceiverDefinitions(out string error)
-    {
-        error = string.Empty;
-        var isValid = true;
-        var ids = new Dictionary<string, List<ReceiverDefinitionViewModel>>(StringComparer.OrdinalIgnoreCase);
-        string? firstError = null;
-
-        foreach (var receiver in ReceiverDefinitions)
-        {
-            receiver.ClearValidationErrors();
-        }
-
-        void RegisterError(string message)
-        {
-            isValid = false;
-            if (firstError == null)
-            {
-                firstError = message;
-            }
-        }
-
-        for (var index = 0; index < ReceiverDefinitions.Count; index++)
-        {
-            var receiver = ReceiverDefinitions[index];
-            var label = $"{receiver.Kind} #{index + 1}";
-
-            if (string.IsNullOrWhiteSpace(receiver.Id))
-            {
-                receiver.IdValidationError = "Id is required.";
-                RegisterError($"{label} requires a non-empty Id.");
-            }
-            else
-            {
-                var normalizedId = receiver.Id.Trim();
-                if (!ids.TryGetValue(normalizedId, out var matching))
-                {
-                    matching = [];
-                    ids[normalizedId] = matching;
-                }
-                matching.Add(receiver);
-            }
-
-            if (string.IsNullOrWhiteSpace(receiver.DisplayName))
-            {
-                receiver.DisplayNameValidationError = "Display name is required.";
-                RegisterError($"{label} requires a display name.");
-            }
-
-            if (!IsValidPort(receiver.Port))
-            {
-                receiver.PortValidationError = "Port must be between 1 and 65535.";
-                RegisterError($"{label} port must be between 1 and 65535.");
-            }
-
-            // Use correct enum for kind
-            if (receiver.Kind == ReceiverKinds.Udp || receiver.Kind == ReceiverKinds.Tcp)
-            {
-                if (!IsValidBindAddress(receiver.BindAddress))
-                {
-                    receiver.BindAddressValidationError = $"Bind address '{receiver.BindAddress}' is invalid.";
-                    RegisterError($"{label} bind address '{receiver.BindAddress}' is invalid.");
-                }
-            }
-
-            if (receiver.Kind == ReceiverKinds.File)
-            {
-                if (string.IsNullOrWhiteSpace(receiver.FilePath))
-                {
-                    receiver.FilePathValidationError = "File path is required.";
-                    RegisterError($"{label} file path is required.");
-                }
-                if (receiver.PollIntervalMs <= 0)
-                {
-                    receiver.PollIntervalValidationError = "Poll interval must be greater than zero.";
-                    RegisterError($"{label} poll interval must be greater than zero.");
-                }
-            }
-
-            // Parser order validation
-            var parserOrder = ParseParserOrder(receiver.ParserOrderText);
-            if (parserOrder.Count == 0)
-            {
-                receiver.ParserOrderValidationError = "Parser order cannot be empty.";
-                RegisterError($"{label} parser order cannot be empty.");
-            }
-            else
-            {
-                var unknown = parserOrder.FirstOrDefault(p => !KnownParserNames.Contains(p));
-                if (!string.IsNullOrEmpty(unknown))
-                {
-                    receiver.ParserOrderValidationError = $"Unknown parser '{unknown}'.";
-                    RegisterError($"{label} uses unknown parser '{unknown}'");
-                }
-            }
-        }
-
-        foreach (var entry in ids)
-        {
-            if (entry.Value.Count > 1)
-            {
-                foreach (var receiver in entry.Value)
-                {
-                    receiver.IdValidationError = "Id must be unique.";
-                }
-                RegisterError($"Receiver Id '{entry.Key}' is duplicated.");
-            }
-        }
-
-        error = firstError ?? string.Empty;
-        return isValid;
-    }
-
-    private static bool IsValidPort(int value)
-    {
-        return value is >= 1 and <= 65535;
-    }
-
-    private static bool IsValidBindAddress(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return false;
-        }
-
-        var trimmed = value.Trim();
-        if (trimmed == "*")
-        {
-            return true;
-        }
-
-        if (IPAddress.TryParse(trimmed, out _))
-        {
-            return true;
-        }
-
-        return Uri.CheckHostName(trimmed) != UriHostNameType.Unknown;
-    }
-
-    private static string FormatParserOrder(IReadOnlyList<string> parserOrder)
-    {
-        return parserOrder.Count == 0
-            ? string.Join(", ", DefaultParserOrder)
-            : string.Join(", ", parserOrder);
-    }
-
-    private static IReadOnlyList<string> ParseParserOrder(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return DefaultParserOrder;
-        }
-
-        return value
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(static name => name.Length > 0)
-            .Distinct(ParserNameComparer)
-            .ToArray();
     }
 
     private void QueuePersistWorkspaceState()
@@ -1321,21 +959,5 @@ public partial class MainWindowViewModel : ViewModelBase
             LevelColumnWidth = LevelColumnWidth,
             LoggerColumnWidth = LoggerColumnWidth
         };
-    }
-
-    private string BuildUniqueReceiverId(string prefix)
-    {
-        var next = 1;
-        var existing = new HashSet<string>(ReceiverDefinitions.Select<ReceiverDefinitionViewModel, string>(x => x.Id), StringComparer.OrdinalIgnoreCase);
-        while (true)
-        {
-            var candidate = $"{prefix}-{next}";
-            if (!existing.Contains(candidate))
-            {
-                return candidate;
-            }
-
-            next++;
-        }
     }
 }

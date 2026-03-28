@@ -851,3 +851,31 @@ Impact:
 
 Follow-ups:
 - Move XAML bindings from shell filter pass-throughs to direct `Filters.*` bindings and remove wrapper properties in shell cleanup phase.
+
+## 2026-03-28 - MVVM Refactor Phase 1C: Receiver Setup Extraction
+What changed:
+- Extracted receiver setup surface into:
+  [ReceiverSetupViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverSetupViewModel.cs)
+  - owns receiver definition collection
+  - owns add/remove/save/reload commands
+  - owns load/apply mapping from settings
+  - owns validation and parser-order normalization logic
+- Updated shell VM to compose receiver setup VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed direct receiver setup command/validation/mapping implementation
+  - added `ReceiverSetup` child VM with compatibility pass-throughs (`ReceiverDefinitions`, selected receiver, setup status, setup commands)
+  - replaced direct receiver-definition loading with child-VM `LoadAsync()` orchestration and pending selection application
+- Added focused child-VM tests:
+  [ReceiverSetupViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/ReceiverSetupViewModelTests.cs)
+
+Why:
+- Receiver setup is a full feature surface with independent lifecycle/validation and should not be embedded in shell orchestration code.
+- Extracting this now isolates the highest-churn setup logic before stream and source-tree refactors.
+
+Impact:
+- Current UI behavior remains unchanged through shell pass-through bindings.
+- Receiver setup responsibilities now live behind a dedicated VM boundary.
+- Test suite increased to 75 passing tests.
+
+Follow-ups:
+- Rebind receiver setup panel directly to `ReceiverSetup.*` and remove pass-through properties during shell cleanup.
