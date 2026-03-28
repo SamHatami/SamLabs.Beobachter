@@ -879,3 +879,31 @@ Impact:
 
 Follow-ups:
 - Rebind receiver setup panel directly to `ReceiverSetup.*` and remove pass-through properties during shell cleanup.
+
+## 2026-03-28 - MVVM Refactor Phase 2: Log Stream Extraction
+What changed:
+- Extracted stream surface into:
+  [LogStreamViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/LogStreamViewModel.cs)
+  - owns visible entry collection and selected row
+  - owns append/rebuild entry projection with max-visible cap
+  - owns density and column-width state/commands
+- Updated shell VM to compose stream VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed direct stream collection mutation and row-density/column-width implementation
+  - delegated append/rebuild operations to `Stream`
+  - bridged stream selected row to `Details.SelectedEntry`
+  - kept compatibility pass-throughs for existing bindings (`VisibleEntries`, `SelectedEntry`, density/column properties and commands)
+- Added focused stream tests:
+  [LogStreamViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/LogStreamViewModelTests.cs)
+
+Why:
+- Stream virtualization-facing state and projection logic are independent responsibilities that should not live in shell orchestration.
+- This extraction removes one of the largest mutable-state clusters from `MainWindowViewModel`.
+
+Impact:
+- UI behavior remains unchanged at current bindings.
+- Stream append/rebuild and row/column behavior now live in a dedicated VM boundary.
+- Test suite increased to 79 passing tests.
+
+Follow-ups:
+- Rebind log surface controls directly to `Stream.*` and drop pass-through stream properties during shell cleanup.

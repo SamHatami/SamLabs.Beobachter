@@ -21,7 +21,6 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private const int MaxVisibleEntries = 2_000;
     private static readonly HashSet<string> FilterCriteriaPropertyNames = new(StringComparer.Ordinal)
     {
         nameof(LogFiltersViewModel.SearchText),
@@ -82,29 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _autoScrollButtonText = "Pin: On";
 
-    [ObservableProperty]
-    private bool _isCompactDensity;
-
-    [ObservableProperty]
-    private string _densityButtonText = "Density: Comfortable";
-
-    [ObservableProperty]
-    private double _logRowFontSize = 12;
-
-    [ObservableProperty]
-    private Thickness _logRowMargin = new(4, 2, 4, 2);
-
-    [ObservableProperty]
-    private double _timestampColumnWidth = 180;
-
-    [ObservableProperty]
-    private double _levelColumnWidth = 90;
-
-    [ObservableProperty]
-    private double _loggerColumnWidth = 220;
-
-    public string LogColumnDefinitions =>
-        $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
+    public string LogColumnDefinitions => Stream.LogColumnDefinitions;
 
     public MainWindowViewModel() : this(
         new ThemeService(),
@@ -133,6 +110,8 @@ public partial class MainWindowViewModel : ViewModelBase
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
         Details.PropertyChanged += OnDetailsPropertyChanged;
+        Stream = new LogStreamViewModel();
+        Stream.PropertyChanged += OnStreamPropertyChanged;
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
@@ -141,14 +120,11 @@ public partial class MainWindowViewModel : ViewModelBase
         RebuildLoggerTreeFromSnapshot();
         RebuildVisibleEntries();
         UpdateThemeSummary();
-        UpdateDensityVisuals();
         UpdateStatusSummary();
         UpdateStatisticsSummary();
         _ = LoadReceiverSetupAsync();
         _ = LoadWorkspaceStateAsync();
     }
-
-    public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
 
     public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
 
@@ -390,19 +366,97 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IRelayCommand ResetLevelsCommand => Filters.ResetLevelsCommand;
 
-    public EntryDetailsViewModel Details { get; }
+    public LogStreamViewModel Stream { get; }
 
-    public LogEntry? SelectedEntry
+    public ObservableCollection<LogEntry> VisibleEntries => Stream.VisibleEntries;
+
+    public bool IsCompactDensity
     {
-        get => Details.SelectedEntry;
+        get => Stream.IsCompactDensity;
         set
         {
-            if (ReferenceEquals(Details.SelectedEntry, value))
+            if (Stream.IsCompactDensity == value)
             {
                 return;
             }
 
-            Details.SelectedEntry = value;
+            Stream.IsCompactDensity = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string DensityButtonText => Stream.DensityButtonText;
+
+    public double LogRowFontSize => Stream.LogRowFontSize;
+
+    public Thickness LogRowMargin => Stream.LogRowMargin;
+
+    public double TimestampColumnWidth
+    {
+        get => Stream.TimestampColumnWidth;
+        set
+        {
+            if (Math.Abs(Stream.TimestampColumnWidth - value) < 0.001)
+            {
+                return;
+            }
+
+            Stream.TimestampColumnWidth = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public double LevelColumnWidth
+    {
+        get => Stream.LevelColumnWidth;
+        set
+        {
+            if (Math.Abs(Stream.LevelColumnWidth - value) < 0.001)
+            {
+                return;
+            }
+
+            Stream.LevelColumnWidth = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public double LoggerColumnWidth
+    {
+        get => Stream.LoggerColumnWidth;
+        set
+        {
+            if (Math.Abs(Stream.LoggerColumnWidth - value) < 0.001)
+            {
+                return;
+            }
+
+            Stream.LoggerColumnWidth = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public IRelayCommand ToggleDensityCommand => Stream.ToggleDensityCommand;
+
+    public IRelayCommand DecreaseColumnWidthsCommand => Stream.DecreaseColumnWidthsCommand;
+
+    public IRelayCommand IncreaseColumnWidthsCommand => Stream.IncreaseColumnWidthsCommand;
+
+    public IRelayCommand ResetColumnWidthsCommand => Stream.ResetColumnWidthsCommand;
+
+    public EntryDetailsViewModel Details { get; }
+
+    public LogEntry? SelectedEntry
+    {
+        get => Stream.SelectedEntry;
+        set
+        {
+            if (ReferenceEquals(Stream.SelectedEntry, value))
+            {
+                return;
+            }
+
+            Stream.SelectedEntry = value;
             OnPropertyChanged();
         }
     }
@@ -482,32 +536,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ToggleDensity()
-    {
-        IsCompactDensity = !IsCompactDensity;
-    }
-
-    [RelayCommand]
-    private void DecreaseColumnWidths()
-    {
-        AdjustColumnWidths(-16);
-    }
-
-    [RelayCommand]
-    private void IncreaseColumnWidths()
-    {
-        AdjustColumnWidths(16);
-    }
-
-    [RelayCommand]
-    private void ResetColumnWidths()
-    {
-        TimestampColumnWidth = 180;
-        LevelColumnWidth = 90;
-        LoggerColumnWidth = 220;
-    }
-
-    [RelayCommand]
     private void EnableAllLoggers()
     {
         _loggerRoot.SetEnabled(true, recursive: true);
@@ -530,30 +558,6 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
         UpdateStatusSummary();
-    }
-
-    partial void OnIsCompactDensityChanged(bool value)
-    {
-        UpdateDensityVisuals();
-        QueuePersistWorkspaceState();
-    }
-
-    partial void OnTimestampColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
-        QueuePersistWorkspaceState();
-    }
-
-    partial void OnLevelColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
-        QueuePersistWorkspaceState();
-    }
-
-    partial void OnLoggerColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
-        QueuePersistWorkspaceState();
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -604,15 +608,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (e.PropertyName is null)
         {
-            OnPropertyChanged(nameof(SelectedEntry));
             OnPropertyChanged(nameof(SelectedDetailsText));
             OnPropertyChanged(nameof(CopyStatus));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.SelectedEntry), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(SelectedEntry));
             return;
         }
 
@@ -628,26 +625,92 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void OnStreamPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null)
+        {
+            Details.SelectedEntry = Stream.SelectedEntry;
+            OnPropertyChanged(nameof(SelectedEntry));
+            OnPropertyChanged(nameof(IsCompactDensity));
+            OnPropertyChanged(nameof(DensityButtonText));
+            OnPropertyChanged(nameof(LogRowFontSize));
+            OnPropertyChanged(nameof(LogRowMargin));
+            OnPropertyChanged(nameof(TimestampColumnWidth));
+            OnPropertyChanged(nameof(LevelColumnWidth));
+            OnPropertyChanged(nameof(LoggerColumnWidth));
+            OnPropertyChanged(nameof(LogColumnDefinitions));
+            QueuePersistWorkspaceState();
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.SelectedEntry), StringComparison.Ordinal))
+        {
+            Details.SelectedEntry = Stream.SelectedEntry;
+            OnPropertyChanged(nameof(SelectedEntry));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsCompactDensity), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(IsCompactDensity));
+            QueuePersistWorkspaceState();
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.DensityButtonText), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(DensityButtonText));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LogRowFontSize), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(LogRowFontSize));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LogRowMargin), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(LogRowMargin));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.TimestampColumnWidth), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(TimestampColumnWidth));
+            OnPropertyChanged(nameof(LogColumnDefinitions));
+            QueuePersistWorkspaceState();
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LevelColumnWidth), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(LevelColumnWidth));
+            OnPropertyChanged(nameof(LogColumnDefinitions));
+            QueuePersistWorkspaceState();
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LoggerColumnWidth), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(LoggerColumnWidth));
+            OnPropertyChanged(nameof(LogColumnDefinitions));
+            QueuePersistWorkspaceState();
+        }
+    }
+
     private void OnEntriesAppended(object? sender, LogEntriesAppendedEventArgs e)
     {
         Dispatcher.UIThread.Post(() =>
         {
             _statisticsService.RecordRange(e.AppendedEntries);
-            var query = BuildCurrentQuery();
-            foreach (var entry in e.AppendedEntries)
+            LogQuery query = BuildCurrentQuery();
+            foreach (LogEntry entry in e.AppendedEntries)
             {
                 RegisterLogger(entry.LoggerName);
-                if (!MatchesFilter(entry, query))
-                {
-                    continue;
-                }
-
-                VisibleEntries.Add(entry);
-                if (VisibleEntries.Count > MaxVisibleEntries)
-                {
-                    VisibleEntries.RemoveAt(0);
-                }
             }
+
+            Stream.AppendEntries(e.AppendedEntries, entry => MatchesFilter(entry, query));
 
             UpdateStatusSummary();
             UpdateStatisticsSummary();
@@ -656,15 +719,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RebuildVisibleEntries()
     {
-        var snapshot = _ingestionSession.Snapshot();
-        var query = BuildCurrentQuery();
-        var filtered = snapshot.Where(entry => MatchesFilter(entry, query)).TakeLast(MaxVisibleEntries).ToArray();
-
-        VisibleEntries.Clear();
-        foreach (var entry in filtered)
-        {
-            VisibleEntries.Add(entry);
-        }
+        IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
+        LogQuery query = BuildCurrentQuery();
+        Stream.RebuildEntries(snapshot, entry => MatchesFilter(entry, query));
     }
 
     private bool MatchesFilter(LogEntry entry, LogQuery query)
@@ -749,13 +806,6 @@ public partial class MainWindowViewModel : ViewModelBase
         return Filters.BuildQuery();
     }
 
-    private void AdjustColumnWidths(double delta)
-    {
-        TimestampColumnWidth = ClampColumnWidth(TimestampColumnWidth + delta, 100, 420);
-        LevelColumnWidth = ClampColumnWidth(LevelColumnWidth + delta, 70, 200);
-        LoggerColumnWidth = ClampColumnWidth(LoggerColumnWidth + delta, 120, 520);
-    }
-
     private static double ClampColumnWidth(double value, double min, double max)
     {
         return Math.Clamp(value, min, max);
@@ -764,21 +814,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateThemeSummary()
     {
         ThemeSummary = $"Theme: {_themeService.CurrentMode}";
-    }
-
-    private void UpdateDensityVisuals()
-    {
-        if (IsCompactDensity)
-        {
-            DensityButtonText = "Density: Compact";
-            LogRowFontSize = 11;
-            LogRowMargin = new Thickness(4, 0, 4, 0);
-            return;
-        }
-
-        DensityButtonText = "Density: Comfortable";
-        LogRowFontSize = 12;
-        LogRowMargin = new Thickness(4, 2, 4, 2);
     }
 
     private void UpdateStatusSummary()
