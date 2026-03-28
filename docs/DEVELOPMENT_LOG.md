@@ -472,3 +472,22 @@ Impact:
 Follow-ups:
 - Add optional "only pin if user already near bottom" nuance.
 - Add high-volume UI perf benchmark harness for batching/virtualization tuning.
+
+## 2026-03-28 - Phase 4 Slice 7: Near-Bottom Auto-Scroll Nuance
+What changed:
+- Refined `MainWindow` auto-scroll behavior to scroll to latest only when the user is already near the bottom:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+  - resolves internal list `ScrollViewer`
+  - checks distance-to-bottom threshold before auto-scroll on new entries
+  - keeps `Pin` control semantics and still jumps to latest when pin is toggled on
+
+Why:
+- Always-forced auto-scroll while pinned can disrupt investigation when the user intentionally scrolls up a short distance.
+- Near-bottom gating preserves operator control while still behaving like a live tail when appropriate.
+
+Impact:
+- Pinned mode now behaves more predictably during active inspection.
+- Build/tests remain green with existing VM coverage.
+
+Follow-ups:
+- Optionally expose the near-bottom threshold as an advanced setting if needed for different display densities.
