@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamLabs.Beobachter.Application", "SamLabs.Beobachter.Application\SamLabs.Beobachter.Application.csproj", "{8C58ADB9-7EEE-44DD-B2F2-FD6A064C47B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamLabs.Beobachter.Infrastructure", "SamLabs.Beobachter.Infrastructure\SamLabs.Beobachter.Infrastructure.csproj", "{77B46387-7E36-42AC-BBC9-58B09D77B69B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamLabs.Beobachter.Core", "SamLabs.Beobachter.Core\SamLabs.Beobachter.Core.csproj", "{5C202F5E-0D74-4CE5-A3EF-7CD6C3A06C7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamLabs.Beobachter.Tests", "SamLabs.Beobachter.Tests\SamLabs.Beobachter.Tests.csproj", "{16AACB3D-5AAB-427D-8626-D382BF30D80F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C58ADB9-7EEE-44DD-B2F2-FD6A064C47B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C58ADB9-7EEE-44DD-B2F2-FD6A064C47B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C58ADB9-7EEE-44DD-B2F2-FD6A064C47B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C58ADB9-7EEE-44DD-B2F2-FD6A064C47B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77B46387-7E36-42AC-BBC9-58B09D77B69B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B46387-7E36-42AC-BBC9-58B09D77B69B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B46387-7E36-42AC-BBC9-58B09D77B69B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B46387-7E36-42AC-BBC9-58B09D77B69B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C202F5E-0D74-4CE5-A3EF-7CD6C3A06C7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C202F5E-0D74-4CE5-A3EF-7CD6C3A06C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C202F5E-0D74-4CE5-A3EF-7CD6C3A06C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C202F5E-0D74-4CE5-A3EF-7CD6C3A06C7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16AACB3D-5AAB-427D-8626-D382BF30D80F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16AACB3D-5AAB-427D-8626-D382BF30D80F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16AACB3D-5AAB-427D-8626-D382BF30D80F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16AACB3D-5AAB-427D-8626-D382BF30D80F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

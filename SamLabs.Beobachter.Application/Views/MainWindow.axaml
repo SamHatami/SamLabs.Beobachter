@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SamLabs.Beobachter.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="960"
+        d:DesignHeight="600"
+        x:Class="SamLabs.Beobachter.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="SamLabs.Beobachter">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*"
+          Background="{DynamicResource ShellBackgroundBrush}">
+        <Border Grid.Row="0"
+                Margin="16,16,16,8"
+                Padding="14"
+                CornerRadius="10"
+                Background="{DynamicResource ShellPanelBrush}">
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Left"
+                            Spacing="2">
+                    <TextBlock Text="SamLabs.Beobachter"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource ShellForegroundBrush}" />
+                    <TextBlock Text="{Binding ThemeSummary}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                    <Button Content="System"
+                            Command="{Binding UseSystemThemeCommand}" />
+                    <Button Content="Light"
+                            Command="{Binding UseLightThemeCommand}" />
+                    <Button Content="Dark"
+                            Command="{Binding UseDarkThemeCommand}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Row="1"
+                Margin="16,8,16,16"
+                Padding="24"
+                CornerRadius="10"
+                Background="{DynamicResource ShellPanelBrush}">
+            <TextBlock Text="{Binding Greeting}"
+                       FontSize="20"
+                       Foreground="{DynamicResource ShellForegroundBrush}" />
+        </Border>
+    </Grid>
+</Window>

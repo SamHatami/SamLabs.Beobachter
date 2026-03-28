@@ -1,0 +1,75 @@
+name: Alpha Release
+
+on:
+  push:
+    tags:
+      - 'v*-alpha.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (for example v0.1.0-alpha.1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            "value=${{ inputs.tag }}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+          else {
+            $tag = "${{ github.ref_name }}"
+            "value=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
+      - name: Checkout selected tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.value }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish editor
+        shell: pwsh
+        run: |
+          dotnet publish SamLabs.Armatura.Editor/SamLabs.Armatura.Editor.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            /p:PublishSingleFile=true `
+            /p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Create archive
+        id: archive
+        shell: pwsh
+        run: |
+          $tag = '${{ steps.tag.outputs.value }}'
+          $publishDir = 'SamLabs.Armatura.Editor/bin/Release/net10.0/win-x64/publish'
+          $archiveName = "armatura-editor-$tag-win-x64.zip"
+          Compress-Archive -Path "$publishDir/*" -DestinationPath $archiveName -Force
+          "path=$archiveName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Create prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          prerelease: true
+          files: ${{ steps.archive.outputs.path }}
+          generate_release_notes: true
