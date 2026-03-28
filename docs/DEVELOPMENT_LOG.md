@@ -440,3 +440,35 @@ Impact:
 Follow-ups:
 - Add explicit auto-scroll/pin-to-bottom behavior controls.
 - Introduce virtualization-aware list strategy for very high entry counts.
+
+## 2026-03-28 - Phase 4 Slice 6: Pin-to-Bottom Auto-Scroll + Explicit Virtualization
+What changed:
+- Extended ingestion session contract with persisted auto-scroll state:
+  [IIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IIngestionSession.cs),
+  [IngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IngestionSession.cs),
+  [DesignIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/DesignIngestionSession.cs)
+- Updated main VM with auto-scroll pin state and toggle command:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Added view-level pin-to-bottom behavior:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+  - subscribes to visible-entry collection changes
+  - scrolls to latest only when pin is enabled
+- Made list virtualization explicit in XAML:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - named log list for scroll targeting
+  - `VirtualizingStackPanel` with cache length
+- Added VM test coverage for auto-scroll toggle:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- Auto-scroll needed explicit user control so operators can inspect historical rows without fighting live ingest.
+- Explicit virtualization configuration reduces rendering pressure as visible rows grow.
+
+Impact:
+- Workspace now supports predictable pin-to-bottom behavior (`Pin: On/Off`).
+- Auto-scroll preference is persisted via workspace settings through ingestion session.
+- Test suite increased to 47 passing tests.
+
+Follow-ups:
+- Add optional "only pin if user already near bottom" nuance.
+- Add high-volume UI perf benchmark harness for batching/virtualization tuning.

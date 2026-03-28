@@ -39,6 +39,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _pauseButtonText = "Pause";
 
     [ObservableProperty]
+    private bool _isAutoScrollEnabled = true;
+
+    [ObservableProperty]
+    private string _autoScrollButtonText = "Pin: On";
+
+    [ObservableProperty]
     private bool _showTrace = true;
 
     [ObservableProperty]
@@ -80,6 +86,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
+        IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
         RebuildLoggerTreeFromSnapshot();
         RebuildVisibleEntries();
         UpdateThemeSummary();
@@ -154,6 +161,15 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ToggleAutoScrollAsync()
+    {
+        var nextState = !IsAutoScrollEnabled;
+        await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
+        IsAutoScrollEnabled = nextState;
+        Dispatcher.UIThread.Post(UpdateStatusSummary);
+    }
+
+    [RelayCommand]
     private void ResetLevels()
     {
         ShowTrace = true;
@@ -210,6 +226,12 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
+        UpdateStatusSummary();
+    }
+
+    partial void OnIsAutoScrollEnabledChanged(bool value)
+    {
+        AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
         UpdateStatusSummary();
     }
 
@@ -375,7 +397,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var dropped = _ingestionSession.DroppedCount;
         var state = IsPaused ? "Paused" : "Running";
-        StatusSummary = $"State: {state}  Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
+        var pin = IsAutoScrollEnabled ? "On" : "Off";
+        StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
     }
 
     private LogLevel PickRandomLevel()

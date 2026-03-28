@@ -55,7 +55,7 @@
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid RowDefinitions="Auto,Auto">
                 <Grid Grid.Row="0"
-                      ColumnDefinitions="*,Auto,Auto,Auto">
+                      ColumnDefinitions="*,Auto,Auto,Auto,Auto">
                     <TextBox Grid.Column="0"
                              Watermark="Search logger/message/exception/thread..."
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
@@ -71,6 +71,10 @@
                             Margin="8,0,0,0"
                             Content="{Binding PauseButtonText}"
                             Command="{Binding TogglePauseCommand}" />
+                    <Button Grid.Column="4"
+                            Margin="8,0,0,0"
+                            Content="{Binding AutoScrollButtonText}"
+                            Command="{Binding ToggleAutoScrollCommand}" />
                 </Grid>
 
                 <WrapPanel Grid.Row="1"
@@ -155,9 +159,16 @@
                                    Foreground="{DynamicResource ShellForegroundBrush}" />
                     </Grid>
 
-                    <ListBox Grid.Row="1"
+                    <ListBox x:Name="LogEntriesList"
+                             Grid.Row="1"
+                             Background="Transparent"
                              ItemsSource="{Binding VisibleEntries}"
                              SelectedItem="{Binding SelectedEntry}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel CacheLength="256" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:LogEntry">
                                 <Grid Margin="4,1"

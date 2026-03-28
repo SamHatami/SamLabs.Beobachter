@@ -57,6 +57,21 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public async Task ToggleAutoScroll_UpdatesSessionState()
+    {
+        var session = new FakeIngestionSession([]);
+        var vm = new MainWindowViewModel(new ThemeService(), session, new FakeClipboardService());
+
+        await ((IAsyncRelayCommand)vm.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.False(vm.IsAutoScrollEnabled);
+        Assert.False(session.IsAutoScrollEnabled);
+
+        await ((IAsyncRelayCommand)vm.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.True(vm.IsAutoScrollEnabled);
+        Assert.True(session.IsAutoScrollEnabled);
+    }
+
+    [Fact]
     public async Task CopyCommands_UseClipboardService()
     {
         var clipboard = new FakeClipboardService();
@@ -115,6 +130,8 @@ public sealed class MainWindowViewModelTests
 
         public bool IsPaused { get; private set; }
 
+        public bool IsAutoScrollEnabled { get; private set; } = true;
+
         public bool TryPublish(LogEntry entry)
         {
             _entries.Add(entry);
@@ -135,6 +152,12 @@ public sealed class MainWindowViewModelTests
         public ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
         {
             IsPaused = isPaused;
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask SetAutoScrollAsync(bool isEnabled, CancellationToken cancellationToken = default)
+        {
+            IsAutoScrollEnabled = isEnabled;
             return ValueTask.CompletedTask;
         }
 

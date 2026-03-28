@@ -40,6 +40,8 @@ internal sealed class DesignIngestionSession : IIngestionSession
 
     public bool IsPaused { get; private set; }
 
+    public bool IsAutoScrollEnabled { get; private set; } = true;
+
     public bool TryPublish(LogEntry entry)
     {
         _entries.Add(entry);
@@ -60,6 +62,12 @@ internal sealed class DesignIngestionSession : IIngestionSession
     public ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
     {
         IsPaused = isPaused;
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask SetAutoScrollAsync(bool isEnabled, CancellationToken cancellationToken = default)
+    {
+        IsAutoScrollEnabled = isEnabled;
         return ValueTask.CompletedTask;
     }
 

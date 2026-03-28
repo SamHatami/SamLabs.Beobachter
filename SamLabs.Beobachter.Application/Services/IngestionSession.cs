@@ -63,6 +63,17 @@ public sealed class IngestionSession : IIngestionSession
         }
     }
 
+    public bool IsAutoScrollEnabled
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _workspaceSettings.AutoScroll;
+            }
+        }
+    }
+
     public bool TryPublish(LogEntry entry)
     {
         var writer = _writer;
@@ -112,6 +123,23 @@ public sealed class IngestionSession : IIngestionSession
             changed = _isPaused != isPaused;
             _isPaused = isPaused;
             _workspaceSettings = _workspaceSettings with { PauseIngest = isPaused };
+        }
+
+        if (!changed)
+        {
+            return;
+        }
+
+        await _settingsStore.SaveWorkspaceSettingsAsync(_workspaceSettings, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask SetAutoScrollAsync(bool isEnabled, CancellationToken cancellationToken = default)
+    {
+        bool changed;
+        lock (_gate)
+        {
+            changed = _workspaceSettings.AutoScroll != isEnabled;
+            _workspaceSettings = _workspaceSettings with { AutoScroll = isEnabled };
         }
 
         if (!changed)

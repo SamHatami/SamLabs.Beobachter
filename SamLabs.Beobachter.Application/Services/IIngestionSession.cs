@@ -17,6 +17,8 @@ public interface IIngestionSession : IAsyncDisposable
 
     bool IsPaused { get; }
 
+    bool IsAutoScrollEnabled { get; }
+
     bool TryPublish(LogEntry entry);
 
     IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null);
@@ -24,6 +26,8 @@ public interface IIngestionSession : IAsyncDisposable
     ValueTask StartAsync(CancellationToken cancellationToken = default);
 
     ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default);
+
+    ValueTask SetAutoScrollAsync(bool isEnabled, CancellationToken cancellationToken = default);
 
     ValueTask StopAsync(CancellationToken cancellationToken = default);
 }
