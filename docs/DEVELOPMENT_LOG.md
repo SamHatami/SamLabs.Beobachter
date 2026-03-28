@@ -127,3 +127,76 @@ Impact:
 Follow-ups:
 - Add tests for `InMemoryLogStore` query behavior and append notifications.
 - Add characterization tests for log4j/NLog XML parsing during phase 3.
+
+## 2026-03-28 - Phase 3 Slice 1: Infrastructure XML Parser
+What changed:
+- Added first infrastructure parser implementation:
+  [Log4jXmlParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/Log4jXmlParser.cs)
+- Parser implements Core contract:
+  [ILogParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Interfaces/ILogParser.cs)
+- Added parser characterization tests:
+  [Log4jXmlParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/Log4jXmlParserTests.cs)
+
+Why:
+- Phase 3 starts with a vertical slice that converts raw XML payloads into normalized `LogEntry` objects.
+- Legacy compatibility required:
+  - log4j/nlog namespace handling
+  - integer and string level normalization through `LogLevelTable`
+  - extraction of sequence, location info, properties, and exception fields
+- Keeping this in `Infrastructure` preserves dependency direction (`Infrastructure -> Core`) and keeps parser logic out of App.
+
+Impact:
+- We can now parse representative log4j/NLog XML payloads into the new domain model.
+- Parser behavior is test-locked before adding receivers.
+- Test suite now covers Core + first Infrastructure behavior.
+
+Follow-ups:
+- Implement receiver integrations (`Udp`, `Tcp`, `File`) that feed this parser.
+- Add CSV/plain-text parser implementations.
+- Add malformed/partial input stress tests for parser robustness.
+
+## 2026-03-28 - Phase 3 Slice 2: log4j2 XML Compatibility
+What changed:
+- Added architecture decision entry:
+  [DECISION_LOG.md](/C:/Workspace/SamLabs.Beobachter/docs/DECISION_LOG.md)
+- Extended parser implementation to support both legacy log4j/log4net-style XML and log4j2 `XmlLayout` events:
+  [Log4jXmlParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/Log4jXmlParser.cs)
+- Added characterization tests for log4j2 shape (`Event`, `ContextMap`, `Source`, `Instant`, `Thrown`):
+  [Log4jXmlParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/Log4jXmlParserTests.cs)
+
+Why:
+- We cannot assume one “latest” schema in production pipelines; mixed emitters are common.
+- Legacy compatibility remains required while modern log4j2 payloads must parse into the same normalized domain model.
+
+Impact:
+- One parser now accepts both schema families and maps them to the existing `LogEntry` contract.
+- Receiver and app layers remain schema-agnostic.
+
+Follow-ups:
+- Add parser dispatch abstraction once CSV/plain-text parsers land.
+- Add negative tests for malformed log4j2 payload fragments and namespace edge-cases.
+
+## 2026-03-28 - Phase 3 Slice 3: UDP Receiver Vertical Slice
+What changed:
+- Added first channel-based receiver implementation:
+  [UdpReceiver.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/UdpReceiver.cs)
+- Added typed receiver options:
+  [UdpReceiverOptions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/UdpReceiverOptions.cs)
+- Added integration-style loopback tests:
+  [UdpReceiverTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Receivers/UdpReceiverTests.cs)
+
+Why:
+- Phase 3 requires concrete receiver loops that write normalized entries into `ChannelWriter<LogEntry>`.
+- UDP is the smallest network receiver slice to validate lifecycle (`Start`/`Stop`) and parser integration end-to-end.
+
+Impact:
+- Infrastructure now has a working receiver that:
+  - binds to configured address/port
+  - parses datagrams through `ILogParser`
+  - writes parsed entries to the injected channel
+  - handles cancellation and disposal safely
+- Test suite increased to 25 passing tests.
+
+Follow-ups:
+- Implement `TcpReceiver` with equivalent lifecycle guarantees.
+- Implement file-tail receiver and shared parser dispatch for XML/CSV/plain text.
