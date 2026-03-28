@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.ReceiverSetupView"
+             x:DataType="viewModels:ReceiverSetupViewModel">
+    <Grid Margin="0,8,0,0"
+          ColumnDefinitions="*,Auto"
+          ColumnSpacing="10">
+        <ListBox Grid.Column="0"
+                 MinHeight="130"
+                 SelectedItem="{Binding SelectedReceiverDefinition}"
+                 ItemsSource="{Binding ReceiverDefinitions}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
+                    <Border Margin="0,0,0,6"
+                            Padding="8"
+                            CornerRadius="6"
+                            Background="{DynamicResource ShellBackgroundBrush}">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnDefinitions="120,*,90">
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Kind}"
+                                       FontWeight="SemiBold" />
+                            <TextBox Grid.Row="0"
+                                     Grid.Column="1"
+                                     Margin="8,0,8,0"
+                                     Watermark="Display name"
+                                     Text="{Binding DisplayName}" />
+                            <CheckBox Grid.Row="0"
+                                      Grid.Column="2"
+                                      VerticalAlignment="Center"
+                                      Content="Enabled"
+                                      IsChecked="{Binding Enabled}" />
+
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="Id" />
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="1"
+                                     Grid.ColumnSpan="2"
+                                     Margin="8,6,0,0"
+                                     Text="{Binding Id}" />
+
+                            <StackPanel Grid.Row="2"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Margin="0,6,0,0"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                <TextBox Width="180"
+                                         Watermark="Bind address"
+                                         IsVisible="{Binding IsUdp}"
+                                         Text="{Binding BindAddress}" />
+                                <TextBox Width="90"
+                                         Watermark="Port"
+                                         IsVisible="{Binding IsUdp}"
+                                         Text="{Binding Port}" />
+                                <TextBox Width="180"
+                                         Watermark="Bind address"
+                                         IsVisible="{Binding IsTcp}"
+                                         Text="{Binding BindAddress}" />
+                                <TextBox Width="90"
+                                         Watermark="Port"
+                                         IsVisible="{Binding IsTcp}"
+                                         Text="{Binding Port}" />
+                                <TextBox Width="380"
+                                         Watermark="File path"
+                                         IsVisible="{Binding IsFile}"
+                                         Text="{Binding FilePath}" />
+                                <TextBox Width="90"
+                                         Watermark="Poll ms"
+                                         IsVisible="{Binding IsFile}"
+                                         Text="{Binding PollIntervalMs}" />
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       Margin="0,6,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Parsers" />
+                            <TextBox Grid.Row="3"
+                                     Grid.Column="1"
+                                     Grid.ColumnSpan="2"
+                                     Margin="8,6,0,0"
+                                     ToolTip.Tip="Comma-separated parser names: Log4jXmlParser, JsonLogParser, CsvParser, PlainTextParser"
+                                     Text="{Binding ParserOrderText}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Column="1"
+                    Spacing="6">
+            <Button Content="Add UDP"
+                    Command="{Binding AddUdpReceiverCommand}" />
+            <Button Content="Add TCP"
+                    Command="{Binding AddTcpReceiverCommand}" />
+            <Button Content="Add File"
+                    Command="{Binding AddFileReceiverCommand}" />
+            <Button Content="Remove"
+                    Command="{Binding RemoveSelectedReceiverCommand}" />
+            <Button Content="Save + Reload"
+                    Command="{Binding SaveReceiverSetupCommand}" />
+            <Button Content="Reload From Disk"
+                    Command="{Binding ReloadReceiverSetupCommand}" />
+            <TextBlock Width="170"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource ShellMutedForegroundBrush}"
+                       Text="{Binding ReceiverSetupStatus}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

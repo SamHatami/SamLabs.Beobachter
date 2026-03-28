@@ -1004,3 +1004,28 @@ Impact:
 
 Follow-ups:
 - Move remaining inlined sections (filters, source tree, receiver setup, stream, details) into separate view files to complete the skeleton layout migration.
+
+## 2026-03-28 - MVVM Refactor Phase 5B: Source Tree + Receiver Setup View Extraction
+What changed:
+- Added dedicated views for two previously inlined sections:
+  [SourceTreeView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/SourceTreeView.axaml),
+  [ReceiverSetupView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/ReceiverSetupView.axaml)
+- Added minimal code-behind stubs:
+  [SourceTreeView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/SourceTreeView.axaml.cs),
+  [ReceiverSetupView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/ReceiverSetupView.axaml.cs)
+- Updated shell view composition:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - replaced inline source tree markup with `ContentControl` bound to `Sources`
+  - replaced inline receiver setup editor markup with `ContentControl` bound to `ReceiverSetup` inside the existing expander
+
+Why:
+- These sections were still large inline fragments in `MainWindow.axaml`, which made shell layout edits noisy and harder to review.
+- Extracting them keeps behavior unchanged while moving toward the intended panel-based view composition model.
+
+Impact:
+- No behavior change in source tree or receiver setup workflows.
+- `MainWindow.axaml` is smaller and now delegates two more surfaces to ViewLocator.
+- Full suite remains green (`84` passing tests).
+
+Follow-ups:
+- Extract remaining inlined surfaces (`LogFilters`, `LogStream`, `EntryDetails`) with care around `MainWindow` keyboard/auto-scroll behavior currently tied to named controls.
