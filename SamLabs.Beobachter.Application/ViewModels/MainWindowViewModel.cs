@@ -19,6 +19,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly Random _random = new();
+    private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
 
     [ObservableProperty]
     private string _themeSummary = string.Empty;
@@ -46,12 +47,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
+        RebuildLoggerTreeFromSnapshot();
         RebuildVisibleEntries();
         UpdateThemeSummary();
         UpdateStatusSummary();
     }
 
     public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
+
+    public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
 
     [RelayCommand]
     private void UseSystemTheme()
@@ -134,6 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             foreach (var entry in e.AppendedEntries)
             {
+                RegisterLogger(entry.LoggerName);
                 if (!MatchesFilter(entry))
                 {
                     continue;
@@ -164,6 +169,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool MatchesFilter(LogEntry entry)
     {
+        if (!IsLoggerEnabled(entry.LoggerName))
+        {
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(SearchText))
         {
             return true;
@@ -180,6 +190,56 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         return !string.IsNullOrWhiteSpace(text) &&
                text.Contains(term, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsLoggerEnabled(string loggerName)
+    {
+        return !_loggerRoot.TryGetPath(loggerName, out var node) || node?.IsEnabled != false;
+    }
+
+    private void RebuildLoggerTreeFromSnapshot()
+    {
+        _loggerRoot = LoggerNode.CreateRoot();
+        foreach (var entry in _ingestionSession.Snapshot())
+        {
+            RegisterLogger(entry.LoggerName, refreshTree: false);
+        }
+
+        RebuildLoggerTreeItems();
+    }
+
+    private void RegisterLogger(string loggerName, bool refreshTree = true)
+    {
+        if (string.IsNullOrWhiteSpace(loggerName))
+        {
+            return;
+        }
+
+        if (_loggerRoot.TryGetPath(loggerName, out _))
+        {
+            return;
+        }
+
+        _loggerRoot.GetOrCreatePath(loggerName);
+        if (refreshTree)
+        {
+            RebuildLoggerTreeItems();
+        }
+    }
+
+    private void RebuildLoggerTreeItems()
+    {
+        LoggerTreeItems.Clear();
+        foreach (var child in _loggerRoot.Children.Values.OrderBy(static x => x.Name, StringComparer.Ordinal))
+        {
+            LoggerTreeItems.Add(new LoggerTreeItemViewModel(child, OnLoggerTreeStateChanged));
+        }
+    }
+
+    private void OnLoggerTreeStateChanged()
+    {
+        RebuildVisibleEntries();
+        UpdateStatusSummary();
     }
 
     private void UpdateThemeSummary()

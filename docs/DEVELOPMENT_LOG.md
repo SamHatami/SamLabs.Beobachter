@@ -381,3 +381,27 @@ Impact:
 
 Follow-ups:
 - Add logger tree filtering and details pane to complete parity-oriented workspace interactions.
+
+## 2026-03-28 - Phase 4 Slice 4: Logger Tree Bound to Core `LoggerNode`
+What changed:
+- Added logger tree item VM wrapper bound to `Core.LoggerNode`:
+  [LoggerTreeItemViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/LoggerTreeItemViewModel.cs)
+- Updated main VM to:
+  - maintain logger trie state from session snapshots/appends
+  - expose hierarchical logger tree items
+  - apply logger enabled/disabled state in the same filter path as visible logs
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Updated UI to render tree with hierarchical checkboxes:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+
+Why:
+- Logger grouping/filtering must be driven by the shared Core trie, not reimplemented in UI-specific path logic.
+- This closes a key parity behavior from the legacy app while preserving current architecture boundaries.
+
+Impact:
+- Logger enable/disable is now interactive and immediately affects visible entries.
+- Tree state is derived from live ingestion data and remains aligned with domain model semantics.
+
+Follow-ups:
+- Add details pane with selected-entry fields and copy actions.
+- Add level toggle controls integrated with existing filter path.
