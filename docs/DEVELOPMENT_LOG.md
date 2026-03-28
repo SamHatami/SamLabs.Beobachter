@@ -268,3 +268,37 @@ Impact:
 Follow-ups:
 - Wire receiver-specific parser chains through typed receiver definitions/settings.
 - Add malformed CSV and quoted multiline payload edge-case tests.
+
+## 2026-03-28 - Phase 3 Slice 7: Typed Settings + Receiver Factory Wiring
+What changed:
+- Added split typed settings records in Core:
+  [AppSettings.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/AppSettings.cs),
+  [ReceiverDefinitions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/ReceiverDefinitions.cs),
+  [WorkspaceSettings.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/WorkspaceSettings.cs),
+  [UiLayoutSettings.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/UiLayoutSettings.cs)
+- Added Core settings persistence contract:
+  [ISettingsStore.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Interfaces/ISettingsStore.cs)
+- Added source-generated JSON settings store in Infrastructure:
+  [JsonSettingsStore.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Settings/JsonSettingsStore.cs),
+  [SettingsJsonContext.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Settings/SettingsJsonContext.cs),
+  [JsonSettingsStoreOptions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Settings/JsonSettingsStoreOptions.cs)
+- Added parser pipeline + receiver materialization wiring from typed definitions:
+  [ParserPipelineFactory.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/ParserPipelineFactory.cs),
+  [ReceiverFactory.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/ReceiverFactory.cs)
+- Added tests:
+  [JsonSettingsStoreTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Settings/JsonSettingsStoreTests.cs),
+  [ParserPipelineFactoryTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/ParserPipelineFactoryTests.cs),
+  [ReceiverFactoryTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Receivers/ReceiverFactoryTests.cs)
+
+Why:
+- Phase 3 needed explicit typed settings split and deterministic parser selection per receiver definition.
+- This closes the gap between configuration data and concrete receiver/parser runtime objects.
+
+Impact:
+- Settings now persist as four JSON files with source-generated serializers.
+- Receiver creation can now be driven by typed config with parser-order control.
+- Test suite increased to 43 passing tests.
+
+Follow-ups:
+- Integrate settings store and receiver factory into App composition/session lifecycle.
+- Add migration shim only if legacy settings import is required.
