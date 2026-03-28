@@ -10,7 +10,7 @@ public sealed class ReceiverFactoryTests
     [Fact]
     public void CreateReceivers_CreatesEnabledReceiversOnly()
     {
-        var parserFactory = new ParserPipelineFactory([new Log4jXmlParser(), new CsvParser(), new PlainTextParser()]);
+        var parserFactory = new ParserPipelineFactory([new Log4jXmlParser(), new JsonLogParser(), new CsvParser(), new PlainTextParser()]);
         var factory = new ReceiverFactory(parserFactory);
         var definitions = new ReceiverDefinitions
         {

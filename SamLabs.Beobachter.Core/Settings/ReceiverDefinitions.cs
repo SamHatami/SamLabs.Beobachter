@@ -25,7 +25,7 @@ public sealed record class UdpReceiverDefinition
 
     public string? HostName { get; init; }
 
-    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "CsvParser", "PlainTextParser"];
+    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
 }
 
 public sealed record class TcpReceiverDefinition
@@ -48,7 +48,7 @@ public sealed record class TcpReceiverDefinition
 
     public string? HostName { get; init; }
 
-    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "CsvParser", "PlainTextParser"];
+    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
 }
 
 public sealed record class FileTailReceiverDefinition
@@ -71,5 +71,5 @@ public sealed record class FileTailReceiverDefinition
 
     public string? HostName { get; init; }
 
-    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "CsvParser", "PlainTextParser"];
+    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
 }

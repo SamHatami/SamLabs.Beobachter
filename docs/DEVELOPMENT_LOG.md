@@ -557,3 +557,32 @@ Impact:
 
 Follow-ups:
 - Add per-receiver parser-order editing and validation messages in the setup panel.
+
+## 2026-03-28 - Phase 3 Slice 8: Structured JSON Parser
+What changed:
+- Added JSON parser implementation:
+  [JsonLogParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/JsonLogParser.cs)
+  - supports common structured shapes (`timestamp/time/@t`, `level/@l`, `message/@m`, `logger/SourceContext`)
+  - supports numeric and string log-level normalization through `LogLevelTable`
+  - maps JSON property bags and extra root fields into `LogEntry.Properties`
+- Wired JSON parser into app parser registration:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Updated default receiver parser order to include JSON:
+  [ReceiverDefinitions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/ReceiverDefinitions.cs)
+- Added parser coverage tests:
+  [JsonLogParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/JsonLogParserTests.cs)
+- Extended composition/factory tests to include JSON parser in real parser chains:
+  [CompositeLogParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/CompositeLogParserTests.cs),
+  [ReceiverFactoryTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Receivers/ReceiverFactoryTests.cs)
+
+Why:
+- Structured logging payloads are common in modern stacks (Serilog/NLog/logback JSON layouts).
+- We need schema-flexible ingestion so operators can use the same viewer across XML, CSV, plain text, and JSON senders.
+
+Impact:
+- Receiver pipelines can now parse structured JSON payloads without custom receiver code.
+- Structured fields are preserved into `Properties` for filtering/details workflows.
+- Test suite increased to 55 passing tests.
+
+Follow-ups:
+- Add optional parser-specific settings for strict vs permissive JSON field-name matching.

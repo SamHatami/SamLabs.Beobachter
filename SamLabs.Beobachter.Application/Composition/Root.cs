@@ -27,6 +27,7 @@ public static class Root
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
 
         services.AddSingleton<ILogParser, Log4jXmlParser>();
+        services.AddSingleton<ILogParser, JsonLogParser>();
         services.AddSingleton<ILogParser, CsvParser>();
         services.AddSingleton<ILogParser, PlainTextParser>();
 
