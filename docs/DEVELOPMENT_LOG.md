@@ -796,3 +796,30 @@ Impact:
 
 Follow-ups:
 - During each extraction phase, move the matching tests from shell-oriented names to feature VM-specific test classes.
+
+## 2026-03-28 - MVVM Refactor Phase 1A: Entry Details Extraction
+What changed:
+- Extracted details projection and copy behavior into:
+  [EntryDetailsViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/EntryDetailsViewModel.cs)
+  - owns selected entry projection (`SelectedDetailsText`)
+  - owns copy status and copy commands
+  - owns details text formatting
+- Updated shell VM to compose details VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - added `Details` child VM
+  - removed direct details/copy command implementation
+  - added temporary shell pass-through properties/commands (`SelectedEntry`, `SelectedDetailsText`, `CopyStatus`, copy commands) for compatibility during phased migration
+- Added focused tests for the new child VM:
+  [EntryDetailsViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/EntryDetailsViewModelTests.cs)
+
+Why:
+- Details projection/copy logic is a distinct panel responsibility and should not remain in the shell VM.
+- A compatibility bridge allows extraction now without forcing broad XAML/code-behind churn in the same commit.
+
+Impact:
+- Behavior is unchanged in the current UI surface.
+- `MainWindowViewModel` now delegates details-specific state and commands to a dedicated child VM.
+- Test suite increased to 68 passing tests.
+
+Follow-ups:
+- Rebind details area and keyboard handlers directly to `Details` in a later shell-cleanup phase and remove pass-throughs.

@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -53,7 +52,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
-    private readonly IClipboardService _clipboardService;
     private readonly ISettingsStore _settingsStore;
     private readonly ILogQueryEvaluator _queryEvaluator = new LogQueryEvaluator();
     private readonly ILogStatisticsService _statisticsService;
@@ -156,15 +154,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _showFatal = true;
 
     [ObservableProperty]
-    private LogEntry? _selectedEntry;
-
-    [ObservableProperty]
-    private string _selectedDetailsText = "No entry selected.";
-
-    [ObservableProperty]
-    private string _copyStatus = string.Empty;
-
-    [ObservableProperty]
     private ReceiverDefinitionViewModel? _selectedReceiverDefinition;
 
     [ObservableProperty]
@@ -202,9 +191,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
-        _clipboardService = clipboardService ?? new NullClipboardService();
         _settingsStore = settingsStore ?? new DesignSettingsStore();
         _statisticsService = statisticsService ?? new RollingLogStatisticsService();
+        IClipboardService resolvedClipboardService = clipboardService ?? new NullClipboardService();
+        Details = new EntryDetailsViewModel(resolvedClipboardService);
+        Details.PropertyChanged += OnDetailsPropertyChanged;
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
@@ -225,6 +216,31 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
 
     public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions { get; } = [];
+
+    public EntryDetailsViewModel Details { get; }
+
+    public LogEntry? SelectedEntry
+    {
+        get => Details.SelectedEntry;
+        set
+        {
+            if (ReferenceEquals(Details.SelectedEntry, value))
+            {
+                return;
+            }
+
+            Details.SelectedEntry = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string SelectedDetailsText => Details.SelectedDetailsText;
+
+    public string CopyStatus => Details.CopyStatus;
+
+    public IAsyncRelayCommand CopySelectedMessageCommand => Details.CopySelectedMessageCommand;
+
+    public IAsyncRelayCommand CopySelectedDetailsCommand => Details.CopySelectedDetailsCommand;
 
     [RelayCommand]
     private void UseSystemTheme()
@@ -360,30 +376,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task CopySelectedMessageAsync()
-    {
-        if (SelectedEntry is null)
-        {
-            return;
-        }
-
-        await _clipboardService.SetTextAsync(SelectedEntry.Message).ConfigureAwait(false);
-        CopyStatus = "Message copied.";
-    }
-
-    [RelayCommand]
-    private async Task CopySelectedDetailsAsync()
-    {
-        if (SelectedEntry is null)
-        {
-            return;
-        }
-
-        await _clipboardService.SetTextAsync(SelectedDetailsText).ConfigureAwait(false);
-        CopyStatus = "Details copied.";
-    }
-
-    [RelayCommand]
     private void AddUdpReceiver()
     {
         var vm = new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
@@ -507,12 +499,6 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
     }
 
-    partial void OnSelectedEntryChanged(LogEntry? value)
-    {
-        SelectedDetailsText = BuildDetailsText(value);
-        CopyStatus = string.Empty;
-    }
-
     partial void OnSelectedReceiverDefinitionChanged(ReceiverDefinitionViewModel? value)
     {
         QueuePersistWorkspaceState();
@@ -559,6 +545,34 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is null || ReceiverEditablePropertyNames.Contains(e.PropertyName))
         {
             TryValidateReceiverDefinitions(out _);
+        }
+    }
+
+    private void OnDetailsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null)
+        {
+            OnPropertyChanged(nameof(SelectedEntry));
+            OnPropertyChanged(nameof(SelectedDetailsText));
+            OnPropertyChanged(nameof(CopyStatus));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.SelectedEntry), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(SelectedEntry));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.SelectedDetailsText), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(SelectedDetailsText));
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(EntryDetailsViewModel.CopyStatus), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(CopyStatus));
         }
     }
 
@@ -813,58 +827,6 @@ public partial class MainWindowViewModel : ViewModelBase
             LogLevel.Fatal
         ];
         return levels[_random.Next(0, levels.Length)];
-    }
-
-    private static string BuildDetailsText(LogEntry? entry)
-    {
-        if (entry is null)
-        {
-            return "No entry selected.";
-        }
-
-        var builder = new StringBuilder();
-        builder.AppendLine($"Timestamp: {entry.Timestamp:O}");
-        builder.AppendLine($"Level: {entry.Level}");
-        builder.AppendLine($"Receiver: {entry.ReceiverId}");
-        builder.AppendLine($"Logger: {entry.LoggerName}");
-        builder.AppendLine($"Thread: {entry.ThreadName}");
-        builder.AppendLine($"Message: {entry.Message}");
-        if (!string.IsNullOrWhiteSpace(entry.MessageTemplate))
-        {
-            builder.AppendLine($"MessageTemplate: {entry.MessageTemplate}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(entry.Exception))
-        {
-            builder.AppendLine();
-            builder.AppendLine("Exception:");
-            builder.AppendLine(entry.Exception);
-        }
-
-        if (!string.IsNullOrWhiteSpace(entry.SourceFileName) || entry.SourceFileLineNumber.HasValue)
-        {
-            builder.AppendLine();
-            builder.AppendLine($"Source: {entry.SourceFileName}:{entry.SourceFileLineNumber}");
-        }
-
-        if (entry.Properties.Count > 0)
-        {
-            builder.AppendLine();
-            builder.AppendLine("Properties:");
-            foreach (var pair in entry.Properties.OrderBy(static x => x.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                builder.AppendLine($"- {pair.Key}: {pair.Value}");
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(entry.StructuredPayloadJson))
-        {
-            builder.AppendLine();
-            builder.AppendLine("StructuredPayload:");
-            builder.AppendLine(entry.StructuredPayloadJson);
-        }
-
-        return builder.ToString();
     }
 
     private void AttachReceiverDefinition(ReceiverDefinitionViewModel receiver)
