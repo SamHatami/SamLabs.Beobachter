@@ -9,4 +9,10 @@ public sealed record class UiLayoutSettings
     public bool IsMaximized { get; init; }
 
     public double DetailsPaneWidthRatio { get; init; } = 0.35;
+
+    public double TimestampColumnWidth { get; init; } = 180;
+
+    public double LevelColumnWidth { get; init; } = 90;
+
+    public double LoggerColumnWidth { get; init; } = 220;
 }

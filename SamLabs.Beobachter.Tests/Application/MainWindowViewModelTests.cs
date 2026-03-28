@@ -296,6 +296,84 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(1, session.ReloadReceiversCalls);
     }
 
+    [Fact]
+    public async Task WorkspaceState_RestoresSelectedReceiverFromSettings()
+    {
+        var settings = new FakeSettingsStore
+        {
+            WorkspaceSettings = new WorkspaceSettings { SelectedReceiverId = "tcp-prod" },
+            ReceiverDefinitions = new ReceiverDefinitions
+            {
+                UdpReceivers = [new UdpReceiverDefinition { Id = "udp-prod", DisplayName = "UDP Prod" }],
+                TcpReceivers = [new TcpReceiverDefinition { Id = "tcp-prod", DisplayName = "TCP Prod" }]
+            }
+        };
+
+        var vm = new MainWindowViewModel(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+
+        await WaitForConditionAsync(() => vm.SelectedReceiverDefinition is not null);
+
+        Assert.NotNull(vm.SelectedReceiverDefinition);
+        Assert.Equal("tcp-prod", vm.SelectedReceiverDefinition!.Id);
+    }
+
+    [Fact]
+    public async Task WorkspaceState_PersistsFiltersDensityAndSelectedReceiver()
+    {
+        var settings = new FakeSettingsStore
+        {
+            ReceiverDefinitions = new ReceiverDefinitions
+            {
+                UdpReceivers = [new UdpReceiverDefinition { Id = "udp-a", DisplayName = "UDP A" }],
+                TcpReceivers = [new TcpReceiverDefinition { Id = "tcp-b", DisplayName = "TCP B" }]
+            }
+        };
+
+        var vm = new MainWindowViewModel(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+        await WaitForConditionAsync(() => vm.ReceiverDefinitions.Count == 2);
+
+        vm.SearchText = "gateway";
+        vm.ReceiverFilter = "udp-a";
+        vm.LoggerFilter = "Orders.Api";
+        vm.ThreadFilter = "worker-9";
+        vm.TenantFilter = "alpha";
+        vm.TraceIdFilter = "trace-xyz";
+        vm.MinimumLevelOption = "Warn";
+        vm.IsCompactDensity = true;
+        vm.SelectedReceiverDefinition = vm.ReceiverDefinitions.Single(x => x.Id == "tcp-b");
+
+        await WaitForConditionAsync(() => settings.LastSavedWorkspaceSettings is not null);
+
+        var saved = settings.LastSavedWorkspaceSettings!;
+        Assert.Equal("gateway", saved.SearchText);
+        Assert.Equal("udp-a", saved.ReceiverFilter);
+        Assert.Equal("Orders.Api", saved.LoggerFilter);
+        Assert.Equal("worker-9", saved.ThreadFilter);
+        Assert.Equal("alpha", saved.TenantFilter);
+        Assert.Equal("trace-xyz", saved.TraceIdFilter);
+        Assert.Equal("Warn", saved.MinimumLevelOption);
+        Assert.True(saved.CompactDensity);
+        Assert.Equal("tcp-b", saved.SelectedReceiverId);
+    }
+
+    [Fact]
+    public async Task UiLayoutState_PersistsColumnWidths()
+    {
+        var settings = new FakeSettingsStore();
+        var vm = new MainWindowViewModel(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+
+        vm.TimestampColumnWidth = 210;
+        vm.LevelColumnWidth = 130;
+        vm.LoggerColumnWidth = 260;
+
+        await WaitForConditionAsync(() => settings.LastSavedUiLayoutSettings is not null);
+
+        Assert.NotNull(settings.LastSavedUiLayoutSettings);
+        Assert.Equal(210, settings.LastSavedUiLayoutSettings!.TimestampColumnWidth);
+        Assert.Equal(130, settings.LastSavedUiLayoutSettings.LevelColumnWidth);
+        Assert.Equal(260, settings.LastSavedUiLayoutSettings.LoggerColumnWidth);
+    }
+
     private static async Task WaitForReceiverLoadAsync(MainWindowViewModel vm)
     {
         var attempt = 0;
@@ -304,6 +382,18 @@ public sealed class MainWindowViewModelTests
             await Task.Delay(10);
             attempt++;
         }
+    }
+
+    private static async Task WaitForConditionAsync(Func<bool> condition)
+    {
+        var attempt = 0;
+        while (attempt < 60 && !condition())
+        {
+            await Task.Delay(20);
+            attempt++;
+        }
+
+        Assert.True(condition());
     }
 
     private static LogEntry CreateEntry(string logger, LogLevel level, string message)
@@ -413,7 +503,15 @@ public sealed class MainWindowViewModelTests
     {
         public ReceiverDefinitions ReceiverDefinitions { get; set; } = new();
 
+        public WorkspaceSettings WorkspaceSettings { get; set; } = new();
+
+        public UiLayoutSettings UiLayoutSettings { get; set; } = new();
+
         public ReceiverDefinitions? LastSavedReceiverDefinitions { get; private set; }
+
+        public WorkspaceSettings? LastSavedWorkspaceSettings { get; private set; }
+
+        public UiLayoutSettings? LastSavedUiLayoutSettings { get; private set; }
 
         public ValueTask<AppSettings> LoadAppSettingsAsync(CancellationToken cancellationToken = default)
         {
@@ -427,12 +525,12 @@ public sealed class MainWindowViewModelTests
 
         public ValueTask<WorkspaceSettings> LoadWorkspaceSettingsAsync(CancellationToken cancellationToken = default)
         {
-            return ValueTask.FromResult(new WorkspaceSettings());
+            return ValueTask.FromResult(WorkspaceSettings);
         }
 
         public ValueTask<UiLayoutSettings> LoadUiLayoutSettingsAsync(CancellationToken cancellationToken = default)
         {
-            return ValueTask.FromResult(new UiLayoutSettings());
+            return ValueTask.FromResult(UiLayoutSettings);
         }
 
         public ValueTask SaveAppSettingsAsync(AppSettings settings, CancellationToken cancellationToken = default)
@@ -449,11 +547,15 @@ public sealed class MainWindowViewModelTests
 
         public ValueTask SaveWorkspaceSettingsAsync(WorkspaceSettings settings, CancellationToken cancellationToken = default)
         {
+            WorkspaceSettings = settings;
+            LastSavedWorkspaceSettings = settings;
             return ValueTask.CompletedTask;
         }
 
         public ValueTask SaveUiLayoutSettingsAsync(UiLayoutSettings settings, CancellationToken cancellationToken = default)
         {
+            UiLayoutSettings = settings;
+            LastSavedUiLayoutSettings = settings;
             return ValueTask.CompletedTask;
         }
     }

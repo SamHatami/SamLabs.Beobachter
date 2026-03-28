@@ -706,3 +706,38 @@ Impact:
 
 Follow-ups:
 - Add inline field-level validation visuals (not only status text) in the setup panel.
+
+## 2026-03-28 - Phase 4 Slice 14: Workspace/UI Persistence Completion
+What changed:
+- Extended workspace settings model to persist filter/density/profile state:
+  [WorkspaceSettings.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/WorkspaceSettings.cs)
+  - receiver/logger/thread/tenant/trace filters
+  - minimum-level option
+  - compact density flag
+  - selected receiver profile id
+- Extended UI layout settings model to persist log column widths:
+  [UiLayoutSettings.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Settings/UiLayoutSettings.cs)
+- Updated main VM with debounced persistence workflow:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - load workspace/ui settings on startup
+  - restore selected receiver profile
+  - save workspace/ui state on relevant UI changes (filters, levels, density, selected profile, column widths)
+  - added column width commands (`Col -`, `Col +`, `Col Reset`)
+- Updated main view bindings:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - bound log list/header column widths to persisted VM properties
+  - added quick controls for column width adjustment
+- Extended app VM tests for restore/persist behavior:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- Session continuity is a core productivity requirement for a log inspector.
+- State persistence is now explicit and centralized instead of incidental in ad hoc view-model defaults.
+
+Impact:
+- Restarting the app now restores filter context, density mode, selected receiver profile, and log column widths.
+- UI layout and workspace state are saved incrementally with debounce to avoid excessive disk writes.
+- Test suite increased to 65 passing tests.
+
+Follow-ups:
+- Persist actual window geometry/maximized state through app lifetime hooks (currently model supports it, but the shell does not wire runtime updates yet).

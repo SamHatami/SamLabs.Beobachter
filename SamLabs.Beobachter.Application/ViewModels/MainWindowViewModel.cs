@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
@@ -46,6 +47,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
     private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
+    private WorkspaceSettings _workspaceSettings = new();
+    private UiLayoutSettings _uiLayoutSettings = new();
+    private CancellationTokenSource? _persistStateCts;
+    private string? _pendingSelectedReceiverId;
+    private bool _isApplyingWorkspaceState;
 
     [ObservableProperty]
     private string _themeSummary = string.Empty;
@@ -111,6 +117,15 @@ public partial class MainWindowViewModel : ViewModelBase
     private Thickness _logRowMargin = new(4, 2, 4, 2);
 
     [ObservableProperty]
+    private double _timestampColumnWidth = 180;
+
+    [ObservableProperty]
+    private double _levelColumnWidth = 90;
+
+    [ObservableProperty]
+    private double _loggerColumnWidth = 220;
+
+    [ObservableProperty]
     private bool _showTrace = true;
 
     [ObservableProperty]
@@ -154,6 +169,9 @@ public partial class MainWindowViewModel : ViewModelBase
         nameof(LogLevel.Fatal)
     ];
 
+    public string LogColumnDefinitions =>
+        $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
+
     public MainWindowViewModel() : this(
         new ThemeService(),
         new DesignIngestionSession(),
@@ -187,6 +205,7 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
         UpdateStatisticsSummary();
         _ = LoadReceiverDefinitionsAsync();
+        _ = LoadWorkspaceStateAsync();
     }
 
     public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
@@ -282,6 +301,26 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ToggleDensity()
     {
         IsCompactDensity = !IsCompactDensity;
+    }
+
+    [RelayCommand]
+    private void DecreaseColumnWidths()
+    {
+        AdjustColumnWidths(-16);
+    }
+
+    [RelayCommand]
+    private void IncreaseColumnWidths()
+    {
+        AdjustColumnWidths(16);
+    }
+
+    [RelayCommand]
+    private void ResetColumnWidths()
+    {
+        TimestampColumnWidth = 180;
+        LevelColumnWidth = 90;
+        LoggerColumnWidth = 220;
     }
 
     [RelayCommand]
@@ -384,7 +423,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var toRemove = SelectedReceiverDefinition;
         ReceiverDefinitions.Remove(toRemove);
-        SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(_pendingSelectedReceiverId))
+        {
+            SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault(x =>
+                x.Id.Equals(_pendingSelectedReceiverId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        SelectedReceiverDefinition ??= ReceiverDefinitions.FirstOrDefault();
+        _pendingSelectedReceiverId = null;
     }
 
     [RelayCommand]
@@ -414,6 +460,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
+        QueuePersistWorkspaceState();
     }
 
     partial void OnReceiverFilterChanged(string value) => OnFieldFilterChanged();
@@ -446,9 +493,33 @@ public partial class MainWindowViewModel : ViewModelBase
         CopyStatus = string.Empty;
     }
 
+    partial void OnSelectedReceiverDefinitionChanged(ReceiverDefinitionViewModel? value)
+    {
+        QueuePersistWorkspaceState();
+    }
+
     partial void OnIsCompactDensityChanged(bool value)
     {
         UpdateDensityVisuals();
+        QueuePersistWorkspaceState();
+    }
+
+    partial void OnTimestampColumnWidthChanged(double value)
+    {
+        OnPropertyChanged(nameof(LogColumnDefinitions));
+        QueuePersistWorkspaceState();
+    }
+
+    partial void OnLevelColumnWidthChanged(double value)
+    {
+        OnPropertyChanged(nameof(LogColumnDefinitions));
+        QueuePersistWorkspaceState();
+    }
+
+    partial void OnLoggerColumnWidthChanged(double value)
+    {
+        OnPropertyChanged(nameof(LogColumnDefinitions));
+        QueuePersistWorkspaceState();
     }
 
     partial void OnShowTraceChanged(bool value) => OnLevelFilterChanged();
@@ -585,12 +656,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
+        QueuePersistWorkspaceState();
     }
 
     private void OnFieldFilterChanged()
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
+        QueuePersistWorkspaceState();
     }
 
     private LogQuery BuildCurrentQuery()
@@ -638,6 +711,18 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         return value.Trim();
+    }
+
+    private void AdjustColumnWidths(double delta)
+    {
+        TimestampColumnWidth = ClampColumnWidth(TimestampColumnWidth + delta, 100, 420);
+        LevelColumnWidth = ClampColumnWidth(LevelColumnWidth + delta, 70, 200);
+        LoggerColumnWidth = ClampColumnWidth(LoggerColumnWidth + delta, 120, 520);
+    }
+
+    private static double ClampColumnWidth(double value, double min, double max)
+    {
+        return Math.Clamp(value, min, max);
     }
 
     private void UpdateThemeSummary()
@@ -752,6 +837,66 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         return builder.ToString();
+    }
+
+    private async Task LoadWorkspaceStateAsync()
+    {
+        var workspace = await _settingsStore.LoadWorkspaceSettingsAsync().ConfigureAwait(false);
+        var layout = await _settingsStore.LoadUiLayoutSettingsAsync().ConfigureAwait(false);
+
+        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
+        {
+            ApplyWorkspaceState(workspace, layout);
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() => ApplyWorkspaceState(workspace, layout));
+    }
+
+    private void ApplyWorkspaceState(WorkspaceSettings workspace, UiLayoutSettings layout)
+    {
+        _workspaceSettings = workspace;
+        _uiLayoutSettings = layout;
+        _pendingSelectedReceiverId = workspace.SelectedReceiverId;
+        _isApplyingWorkspaceState = true;
+
+        try
+        {
+            SearchText = workspace.SearchText;
+            ReceiverFilter = workspace.ReceiverFilter;
+            LoggerFilter = workspace.LoggerFilter;
+            ThreadFilter = workspace.ThreadFilter;
+            TenantFilter = workspace.TenantFilter;
+            TraceIdFilter = workspace.TraceIdFilter;
+            MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
+            IsCompactDensity = workspace.CompactDensity;
+            TimestampColumnWidth = ClampColumnWidth(layout.TimestampColumnWidth, 100, 420);
+            LevelColumnWidth = ClampColumnWidth(layout.LevelColumnWidth, 70, 200);
+            LoggerColumnWidth = ClampColumnWidth(layout.LoggerColumnWidth, 120, 520);
+
+            var enabled = new HashSet<string>(workspace.EnabledLevels, StringComparer.OrdinalIgnoreCase);
+            ShowTrace = enabled.Contains(nameof(LogLevel.Trace));
+            ShowDebug = enabled.Contains(nameof(LogLevel.Debug));
+            ShowInfo = enabled.Contains(nameof(LogLevel.Info));
+            ShowWarn = enabled.Contains(nameof(LogLevel.Warn));
+            ShowError = enabled.Contains(nameof(LogLevel.Error));
+            ShowFatal = enabled.Contains(nameof(LogLevel.Fatal));
+        }
+        finally
+        {
+            _isApplyingWorkspaceState = false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) && ReceiverDefinitions.Count > 0)
+        {
+            SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault(x =>
+                x.Id.Equals(_pendingSelectedReceiverId, StringComparison.OrdinalIgnoreCase))
+                ?? ReceiverDefinitions.FirstOrDefault();
+            _pendingSelectedReceiverId = null;
+        }
+
+        RebuildVisibleEntries();
+        UpdateStatusSummary();
     }
 
     private async Task LoadReceiverDefinitionsAsync()
@@ -985,6 +1130,73 @@ public partial class MainWindowViewModel : ViewModelBase
             .Where(static name => name.Length > 0)
             .Distinct(ParserNameComparer)
             .ToArray();
+    }
+
+    private void QueuePersistWorkspaceState()
+    {
+        if (_isApplyingWorkspaceState)
+        {
+            return;
+        }
+
+        _persistStateCts?.Cancel();
+        _persistStateCts = new CancellationTokenSource();
+        _ = PersistWorkspaceStateAsync(_persistStateCts.Token);
+    }
+
+    private async Task PersistWorkspaceStateAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(250, cancellationToken).ConfigureAwait(false);
+            var workspace = BuildWorkspaceSettingsSnapshot();
+            var layout = BuildUiLayoutSettingsSnapshot();
+            await _settingsStore.SaveWorkspaceSettingsAsync(workspace, cancellationToken).ConfigureAwait(false);
+            await _settingsStore.SaveUiLayoutSettingsAsync(layout, cancellationToken).ConfigureAwait(false);
+            _workspaceSettings = workspace;
+            _uiLayoutSettings = layout;
+        }
+        catch (OperationCanceledException)
+        {
+            // Debounce cancellation path.
+        }
+    }
+
+    private WorkspaceSettings BuildWorkspaceSettingsSnapshot()
+    {
+        var enabledLevels = new List<string>(6);
+        if (ShowTrace) enabledLevels.Add(nameof(LogLevel.Trace));
+        if (ShowDebug) enabledLevels.Add(nameof(LogLevel.Debug));
+        if (ShowInfo) enabledLevels.Add(nameof(LogLevel.Info));
+        if (ShowWarn) enabledLevels.Add(nameof(LogLevel.Warn));
+        if (ShowError) enabledLevels.Add(nameof(LogLevel.Error));
+        if (ShowFatal) enabledLevels.Add(nameof(LogLevel.Fatal));
+
+        return _workspaceSettings with
+        {
+            SearchText = SearchText,
+            ReceiverFilter = ReceiverFilter,
+            LoggerFilter = LoggerFilter,
+            ThreadFilter = ThreadFilter,
+            TenantFilter = TenantFilter,
+            TraceIdFilter = TraceIdFilter,
+            MinimumLevelOption = MinimumLevelOption,
+            CompactDensity = IsCompactDensity,
+            SelectedReceiverId = SelectedReceiverDefinition?.Id ?? string.Empty,
+            EnabledLevels = enabledLevels,
+            AutoScroll = IsAutoScrollEnabled,
+            PauseIngest = IsPaused
+        };
+    }
+
+    private UiLayoutSettings BuildUiLayoutSettingsSnapshot()
+    {
+        return _uiLayoutSettings with
+        {
+            TimestampColumnWidth = TimestampColumnWidth,
+            LevelColumnWidth = LevelColumnWidth,
+            LoggerColumnWidth = LoggerColumnWidth
+        };
     }
 
     private string BuildUniqueReceiverId(string prefix)

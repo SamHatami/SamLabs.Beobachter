@@ -70,7 +70,7 @@
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid RowDefinitions="Auto,Auto,Auto,Auto">
                 <Grid Grid.Row="0"
-                      ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
+                      ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
                     <TextBox x:Name="SearchTextBox"
                              Grid.Column="0"
                              Watermark="Search logger/message/exception/thread..."
@@ -95,6 +95,18 @@
                             Margin="8,0,0,0"
                             Content="{Binding DensityButtonText}"
                             Command="{Binding ToggleDensityCommand}" />
+                    <Button Grid.Column="6"
+                            Margin="8,0,0,0"
+                            Content="Col -"
+                            Command="{Binding DecreaseColumnWidthsCommand}" />
+                    <Button Grid.Column="7"
+                            Margin="8,0,0,0"
+                            Content="Col +"
+                            Command="{Binding IncreaseColumnWidthsCommand}" />
+                    <Button Grid.Column="8"
+                            Margin="8,0,0,0"
+                            Content="Col Reset"
+                            Command="{Binding ResetColumnWidthsCommand}" />
                 </Grid>
 
                 <WrapPanel Grid.Row="1"
@@ -332,8 +344,13 @@
                 <Grid Grid.Column="1"
                       RowDefinitions="Auto,*,Auto">
                     <Grid Grid.Row="0"
-                          Margin="4,0,4,6"
-                          ColumnDefinitions="180,90,220,*">
+                          Margin="4,0,4,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
+                            <ColumnDefinition Width="{Binding LevelColumnWidth}" />
+                            <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    Text="Timestamp"
                                    FontWeight="SemiBold"
@@ -368,7 +385,13 @@
                                         Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
                                         CornerRadius="4">
                                     <Grid Margin="4,0"
-                                          ColumnDefinitions="180,90,220,*">
+                                          >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=MainWindowRoot}" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0"
                                                    FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
                                                    Text="{Binding Timestamp}" />
