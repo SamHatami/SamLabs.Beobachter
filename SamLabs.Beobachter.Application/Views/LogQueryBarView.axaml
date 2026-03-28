@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.LogQueryBarView"
+             x:DataType="viewModels:MainWindowViewModel">
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
+        <TextBox x:Name="SearchTextBox"
+                 Grid.Column="0"
+                 Watermark="Search logger/message/exception/thread..."
+                 Text="{Binding Filters.SearchText, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Column="1"
+                Margin="8,0,0,0"
+                Content="Clear"
+                Command="{Binding Filters.ClearSearchCommand}" />
+        <Button Grid.Column="2"
+                Margin="8,0,0,0"
+                Content="Add Sample"
+                Command="{Binding GenerateSampleEntriesCommand}" />
+        <Button Grid.Column="3"
+                Margin="8,0,0,0"
+                Content="Col -"
+                Command="{Binding Stream.DecreaseColumnWidthsCommand}" />
+        <Button Grid.Column="4"
+                Margin="8,0,0,0"
+                Content="Col +"
+                Command="{Binding Stream.IncreaseColumnWidthsCommand}" />
+        <Button Grid.Column="5"
+                Margin="8,0,0,0"
+                Content="Col Reset"
+                Command="{Binding Stream.ResetColumnWidthsCommand}" />
+    </Grid>
+</UserControl>

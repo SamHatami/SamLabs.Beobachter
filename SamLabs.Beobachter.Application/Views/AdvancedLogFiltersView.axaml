@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.AdvancedLogFiltersView"
+             x:DataType="viewModels:MainWindowViewModel">
+    <Grid RowDefinitions="Auto,Auto,Auto">
+        <WrapPanel Grid.Row="0"
+                   Margin="0,8,0,0"
+                   ItemHeight="56">
+            <StackPanel Width="140"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Receiver"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <TextBox Watermark="udp-1"
+                         Text="{Binding Filters.ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Width="200"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Logger"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <TextBox Watermark="Orders.Api"
+                         Text="{Binding Filters.LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Width="140"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Thread"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <TextBox Watermark="worker-7"
+                         Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Width="130"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Tenant"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <TextBox Watermark="alpha"
+                         Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Width="130"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Trace Id"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <TextBox Watermark="abcd1234"
+                         Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+            <StackPanel Width="120"
+                        Margin="0,0,8,0"
+                        Spacing="2">
+                <TextBlock Text="Min Level"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
+                          SelectedItem="{Binding Filters.MinimumLevelOption}" />
+            </StackPanel>
+            <Button Content="Clear Fields"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,8,0"
+                    Command="{Binding Filters.ClearStructuredFiltersCommand}" />
+        </WrapPanel>
+
+        <WrapPanel Grid.Row="1"
+                   Margin="0,8,0,0">
+            <CheckBox Content="Trace"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowTrace}" />
+            <CheckBox Content="Debug"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowDebug}" />
+            <CheckBox Content="Info"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowInfo}" />
+            <CheckBox Content="Warn"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowWarn}" />
+            <CheckBox Content="Error"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowError}" />
+            <CheckBox Content="Fatal"
+                      Margin="0,0,10,0"
+                      IsChecked="{Binding Filters.ShowFatal}" />
+            <Button Content="Reset Levels"
+                    Margin="0,0,10,0"
+                    Command="{Binding Filters.ResetLevelsCommand}" />
+            <Button Content="Enable All Loggers"
+                    Command="{Binding Sources.EnableAllLoggersCommand}" />
+        </WrapPanel>
+
+        <Expander Grid.Row="2"
+                  Margin="0,10,0,0"
+                  Header="Receiver Setup"
+                  IsExpanded="False">
+            <ContentControl Content="{Binding ReceiverSetup}" />
+        </Expander>
+    </Grid>
+</UserControl>

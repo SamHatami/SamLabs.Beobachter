@@ -1138,3 +1138,32 @@ Impact:
 
 Follow-ups:
 - Extract query/filter strip into dedicated views (`LogQueryBarView` + advanced filters) to complete shell-first decomposition.
+
+## 2026-03-28 - MVVM Refactor Phase 7C: Filter Surface Extraction (Query Bar + Advanced Filters)
+What changed:
+- Added dedicated query-bar view:
+  [LogQueryBarView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/LogQueryBarView.axaml),
+  [LogQueryBarView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/LogQueryBarView.axaml.cs)
+  - includes search, clear, sample generation, and column-width controls
+  - exposes `FocusSearchBox()` for shell keyboard shortcut routing (`Ctrl+F`)
+- Added dedicated advanced-filters view:
+  [AdvancedLogFiltersView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/AdvancedLogFiltersView.axaml),
+  [AdvancedLogFiltersView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/AdvancedLogFiltersView.axaml.cs)
+  - contains structured fields, level toggles, and receiver setup expander composition
+- Updated shell composition:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - replaced large inline filter markup with `LogQueryBarView` + `AdvancedLogFiltersView`
+- Updated shell keyboard handler to target extracted query bar:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+
+Why:
+- The filter region remained one of the largest inline blocks in shell markup and slowed down iterative UI changes.
+- Separating query bar from advanced filters matches intended UX structure without changing binding behavior.
+
+Impact:
+- `MainWindow.axaml` now focuses more on region placement and less on control-level implementation details.
+- Search focus shortcut behavior is preserved after extraction.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Extract a dedicated sidebar composition view to finalize shell-level markup reduction and prepare receiver-setup relocation from the filter band.

@@ -29,8 +29,7 @@ public partial class MainWindow : Window
 
         if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.F)
         {
-            SearchTextBox.Focus();
-            SearchTextBox.SelectAll();
+            LogQueryBar.FocusSearchBox();
             e.Handled = true;
             return;
         }
