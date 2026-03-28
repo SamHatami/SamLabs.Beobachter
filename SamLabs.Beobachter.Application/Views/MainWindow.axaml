@@ -2,19 +2,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:SamLabs.Beobachter.ViewModels"
         xmlns:models="using:SamLabs.Beobachter.Core.Models"
+        xmlns:conv="using:SamLabs.Beobachter.Application.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         d:DesignWidth="1200"
         d:DesignHeight="760"
         x:Class="SamLabs.Beobachter.Views.MainWindow"
+        x:Name="MainWindowRoot"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="SamLabs.Beobachter">
+        Title="SamLabs.Beobachter"
+        KeyDown="OnWindowKeyDown">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
+
+    <Window.Resources>
+        <conv:LogLevelToRowBrushConverter x:Key="LogLevelToRowBrushConverter" />
+    </Window.Resources>
 
     <Grid RowDefinitions="Auto,Auto,*"
           Background="{DynamicResource ShellBackgroundBrush}">
@@ -55,8 +62,9 @@
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid RowDefinitions="Auto,Auto">
                 <Grid Grid.Row="0"
-                      ColumnDefinitions="*,Auto,Auto,Auto,Auto">
-                    <TextBox Grid.Column="0"
+                      ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
+                    <TextBox x:Name="SearchTextBox"
+                             Grid.Column="0"
                              Watermark="Search logger/message/exception/thread..."
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Column="1"
@@ -75,6 +83,10 @@
                             Margin="8,0,0,0"
                             Content="{Binding AutoScrollButtonText}"
                             Command="{Binding ToggleAutoScrollCommand}" />
+                    <Button Grid.Column="5"
+                            Margin="8,0,0,0"
+                            Content="{Binding DensityButtonText}"
+                            Command="{Binding ToggleDensityCommand}" />
                 </Grid>
 
                 <WrapPanel Grid.Row="1"
@@ -171,17 +183,25 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:LogEntry">
-                                <Grid Margin="4,1"
-                                      ColumnDefinitions="180,90,220,*">
-                                    <TextBlock Grid.Column="0"
-                                               Text="{Binding Timestamp}" />
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding Level}" />
-                                    <TextBlock Grid.Column="2"
-                                               Text="{Binding LoggerName}" />
-                                    <TextBlock Grid.Column="3"
-                                               Text="{Binding Message}" />
-                                </Grid>
+                                <Border Margin="{Binding DataContext.LogRowMargin, ElementName=MainWindowRoot}"
+                                        Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
+                                        CornerRadius="4">
+                                    <Grid Margin="4,0"
+                                          ColumnDefinitions="180,90,220,*">
+                                        <TextBlock Grid.Column="0"
+                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   Text="{Binding Timestamp}" />
+                                        <TextBlock Grid.Column="1"
+                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   Text="{Binding Level}" />
+                                        <TextBlock Grid.Column="2"
+                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   Text="{Binding LoggerName}" />
+                                        <TextBlock Grid.Column="3"
+                                                   FontSize="{Binding DataContext.LogRowFontSize, ElementName=MainWindowRoot}"
+                                                   Text="{Binding Message}" />
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

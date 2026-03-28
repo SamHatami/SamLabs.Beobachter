@@ -4,4 +4,11 @@
     <SolidColorBrush x:Key="ShellPanelBrush" Color="#FF111827" />
     <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE5E7EB" />
     <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FF9CA3AF" />
+    <SolidColorBrush x:Key="RowTraceBrush" Color="#1A0EA5E9" />
+    <SolidColorBrush x:Key="RowDebugBrush" Color="#1A6366F1" />
+    <SolidColorBrush x:Key="RowInfoBrush" Color="#149CA3AF" />
+    <SolidColorBrush x:Key="RowWarnBrush" Color="#33F59E0B" />
+    <SolidColorBrush x:Key="RowErrorBrush" Color="#33EF4444" />
+    <SolidColorBrush x:Key="RowFatalBrush" Color="#4DB91C1C" />
+    <SolidColorBrush x:Key="RowFallbackBrush" Color="#00000000" />
 </ResourceDictionary>

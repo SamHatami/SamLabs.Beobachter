@@ -491,3 +491,35 @@ Impact:
 
 Follow-ups:
 - Optionally expose the near-bottom threshold as an advanced setting if needed for different display densities.
+
+## 2026-03-28 - Phase 4 Slice 8: UI Behavior Pass (Severity, Density, Shortcuts)
+What changed:
+- Added severity row brushes in theme dictionaries:
+  [Light.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Light.axaml),
+  [Dark.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Dark.axaml)
+- Added log-level-to-row-brush converter:
+  [LogLevelToRowBrushConverter.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Converters/LogLevelToRowBrushConverter.cs)
+- Updated main view to:
+  - render severity-colored rows
+  - support density toggle button and row metrics binding
+  - add explicit search box name and window key handling hook
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Updated view code-behind for keyboard shortcuts:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+  - `Ctrl+F` focuses search
+  - `Ctrl+C` copies selected details
+  - `Up/Down` navigates selected log row outside text input
+- Updated VM with density state/command and row metrics:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Added VM test for density behavior:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- This closes the UI behavior gap for readability (severity cues), operator ergonomics (row density), and keyboard-driven workflows.
+
+Impact:
+- Log list is easier to scan under load and usable without mouse-heavy interaction.
+- Test suite increased to 48 passing tests.
+
+Follow-ups:
+- Add configurable keymap if custom shortcuts become a requirement.

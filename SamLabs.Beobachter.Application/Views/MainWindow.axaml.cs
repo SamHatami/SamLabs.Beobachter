@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using SamLabs.Beobachter.Core.Models;
@@ -81,6 +82,52 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnWindowKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (_boundViewModel is null)
+        {
+            return;
+        }
+
+        if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.F)
+        {
+            SearchTextBox.Focus();
+            SearchTextBox.SelectAll();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.C)
+        {
+            _boundViewModel.CopySelectedDetailsCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.KeyModifiers != KeyModifiers.None)
+        {
+            return;
+        }
+
+        if (e.Source is TextBox)
+        {
+            return;
+        }
+
+        if (e.Key == Key.Down)
+        {
+            MoveSelection(1);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Up)
+        {
+            MoveSelection(-1);
+            e.Handled = true;
+        }
+    }
+
     private void ScrollToLatest()
     {
         TryResolveLogScrollViewer();
@@ -114,5 +161,23 @@ public partial class MainWindow : Window
 
         var distance = _logScrollViewer.Extent.Height - (_logScrollViewer.Offset.Y + _logScrollViewer.Viewport.Height);
         return distance <= NearBottomThreshold;
+    }
+
+    private void MoveSelection(int delta)
+    {
+        if (_boundViewModel is null || _boundViewModel.VisibleEntries.Count == 0)
+        {
+            return;
+        }
+
+        var current = _boundViewModel.SelectedEntry;
+        var currentIndex = current is null ? -1 : _boundViewModel.VisibleEntries.IndexOf(current);
+        var nextIndex = currentIndex < 0
+            ? (delta > 0 ? 0 : _boundViewModel.VisibleEntries.Count - 1)
+            : Math.Clamp(currentIndex + delta, 0, _boundViewModel.VisibleEntries.Count - 1);
+
+        var next = _boundViewModel.VisibleEntries[nextIndex];
+        _boundViewModel.SelectedEntry = next;
+        LogEntriesList.ScrollIntoView(next);
     }
 }

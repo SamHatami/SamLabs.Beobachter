@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -43,6 +44,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _autoScrollButtonText = "Pin: On";
+
+    [ObservableProperty]
+    private bool _isCompactDensity;
+
+    [ObservableProperty]
+    private string _densityButtonText = "Density: Comfortable";
+
+    [ObservableProperty]
+    private double _logRowFontSize = 12;
+
+    [ObservableProperty]
+    private Thickness _logRowMargin = new(4, 2, 4, 2);
 
     [ObservableProperty]
     private bool _showTrace = true;
@@ -90,6 +103,7 @@ public partial class MainWindowViewModel : ViewModelBase
         RebuildLoggerTreeFromSnapshot();
         RebuildVisibleEntries();
         UpdateThemeSummary();
+        UpdateDensityVisuals();
         UpdateStatusSummary();
     }
 
@@ -170,6 +184,12 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void ToggleDensity()
+    {
+        IsCompactDensity = !IsCompactDensity;
+    }
+
+    [RelayCommand]
     private void ResetLevels()
     {
         ShowTrace = true;
@@ -239,6 +259,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         SelectedDetailsText = BuildDetailsText(value);
         CopyStatus = string.Empty;
+    }
+
+    partial void OnIsCompactDensityChanged(bool value)
+    {
+        UpdateDensityVisuals();
     }
 
     partial void OnShowTraceChanged(bool value) => OnLevelFilterChanged();
@@ -391,6 +416,21 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateThemeSummary()
     {
         ThemeSummary = $"Theme: {_themeService.CurrentMode}";
+    }
+
+    private void UpdateDensityVisuals()
+    {
+        if (IsCompactDensity)
+        {
+            DensityButtonText = "Density: Compact";
+            LogRowFontSize = 11;
+            LogRowMargin = new Thickness(4, 0, 4, 0);
+            return;
+        }
+
+        DensityButtonText = "Density: Comfortable";
+        LogRowFontSize = 12;
+        LogRowMargin = new Thickness(4, 2, 4, 2);
     }
 
     private void UpdateStatusSummary()

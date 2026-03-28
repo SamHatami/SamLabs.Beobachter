@@ -88,6 +88,26 @@ public sealed class MainWindowViewModelTests
         Assert.Contains("Logger: Orders.Api", clipboard.LastText);
     }
 
+    [Fact]
+    public void ToggleDensity_UpdatesRowMetrics()
+    {
+        var vm = new MainWindowViewModel(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService());
+
+        Assert.False(vm.IsCompactDensity);
+        Assert.Equal("Density: Comfortable", vm.DensityButtonText);
+        Assert.Equal(12, vm.LogRowFontSize);
+
+        vm.ToggleDensityCommand.Execute(null);
+        Assert.True(vm.IsCompactDensity);
+        Assert.Equal("Density: Compact", vm.DensityButtonText);
+        Assert.Equal(11, vm.LogRowFontSize);
+
+        vm.ToggleDensityCommand.Execute(null);
+        Assert.False(vm.IsCompactDensity);
+        Assert.Equal("Density: Comfortable", vm.DensityButtonText);
+        Assert.Equal(12, vm.LogRowFontSize);
+    }
+
     private static LogEntry CreateEntry(string logger, LogLevel level, string message)
     {
         return new LogEntry
