@@ -143,6 +143,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
         IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
+        Stream.IsAutoScrollEnabled = IsAutoScrollEnabled;
         _statisticsService.RecordRange(_ingestionSession.Snapshot());
         Sources.RebuildFromSnapshot(_ingestionSession.Snapshot());
         RebuildVisibleEntries();
@@ -246,6 +247,7 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnIsAutoScrollEnabledChanged(bool value)
     {
         AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
+        Stream.IsAutoScrollEnabled = value;
         UpdateStatusSummary();
     }
 

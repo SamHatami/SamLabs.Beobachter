@@ -1083,3 +1083,37 @@ Impact:
 
 Follow-ups:
 - `MainToolbarViewModel` still depends on shell by design; if we want it fully DI-managed later, we should extract a toolbar coordination abstraction to break that dependency cycle.
+
+## 2026-03-28 - MVVM Refactor Phase 7A: Log Stream View Extraction + Interaction Relocation
+What changed:
+- Extracted the log stream header/list/row template into a dedicated view:
+  [LogStreamView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/LogStreamView.axaml),
+  [LogStreamView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/LogStreamView.axaml.cs)
+- Updated shell layout to compose stream surface via ViewLocator:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - removed inline stream table/list markup
+  - replaced with `ContentControl` bound to `Stream`
+- Moved stream-specific UI behavior out of shell code-behind:
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+  - removed list auto-scroll and list-scrolling selection logic
+  - retained shell-level keyboard handling for global shortcuts, now delegating row movement through stream commands
+- Extended stream VM for extracted-view interactions:
+  [LogStreamViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/LogStreamViewModel.cs)
+  - added `IsAutoScrollEnabled` state mirror
+  - added `SelectNextEntry` / `SelectPreviousEntry` commands
+- Synced shell auto-scroll state into stream VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Added selection-command coverage:
+  [LogStreamViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/LogStreamViewModelTests.cs)
+
+Why:
+- `MainWindow.axaml` still carried the heaviest markup chunk (stream table + row template), which made shell decomposition stall.
+- Stream behavior should be owned by the stream surface/viewmodel, not by window-level code-behind.
+
+Impact:
+- Shell markup and code-behind are both smaller and more composition-focused.
+- Stream area is now independently evolvable (row template/layout/interaction changes no longer require shell edits).
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Extract details panel into its own view (`LogEntryDetailsView`) and then split query/filter surfaces into dedicated views to continue shell simplification.

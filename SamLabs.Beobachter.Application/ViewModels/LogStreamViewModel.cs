@@ -17,6 +17,9 @@ public partial class LogStreamViewModel : ViewModelBase
     private bool _isCompactDensity;
 
     [ObservableProperty]
+    private bool _isAutoScrollEnabled = true;
+
+    [ObservableProperty]
     private string _densityButtonText = "Density: Comfortable";
 
     [ObservableProperty]
@@ -66,6 +69,18 @@ public partial class LogStreamViewModel : ViewModelBase
         TimestampColumnWidth = 180;
         LevelColumnWidth = 90;
         LoggerColumnWidth = 220;
+    }
+
+    [RelayCommand]
+    private void SelectNextEntry()
+    {
+        MoveSelection(1);
+    }
+
+    [RelayCommand]
+    private void SelectPreviousEntry()
+    {
+        MoveSelection(-1);
     }
 
     public void AppendEntries(
@@ -128,6 +143,22 @@ public partial class LogStreamViewModel : ViewModelBase
         TimestampColumnWidth = ClampColumnWidth(TimestampColumnWidth + delta, 100, 420);
         LevelColumnWidth = ClampColumnWidth(LevelColumnWidth + delta, 70, 200);
         LoggerColumnWidth = ClampColumnWidth(LoggerColumnWidth + delta, 120, 520);
+    }
+
+    private void MoveSelection(int delta)
+    {
+        if (VisibleEntries.Count == 0)
+        {
+            return;
+        }
+
+        var current = SelectedEntry;
+        var currentIndex = current is null ? -1 : VisibleEntries.IndexOf(current);
+        var nextIndex = currentIndex < 0
+            ? (delta > 0 ? 0 : VisibleEntries.Count - 1)
+            : Math.Clamp(currentIndex + delta, 0, VisibleEntries.Count - 1);
+
+        SelectedEntry = VisibleEntries[nextIndex];
     }
 
     private static double ClampColumnWidth(double value, double min, double max)

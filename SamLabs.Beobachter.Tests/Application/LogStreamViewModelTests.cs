@@ -91,4 +91,30 @@ public sealed class LogStreamViewModelTests
         Assert.Equal(90, vm.LevelColumnWidth);
         Assert.Equal(220, vm.LoggerColumnWidth);
     }
+
+    [Fact]
+    public void SelectionCommands_MoveSelectedEntryWithinBounds()
+    {
+        LogStreamViewModel vm = new();
+        IReadOnlyList<LogEntry> snapshot =
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "first"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Warn, "second"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Error, "third")
+        ];
+
+        vm.RebuildEntries(snapshot, _ => true);
+
+        vm.SelectNextEntryCommand.Execute(null);
+        Assert.Equal("first", vm.SelectedEntry?.Message);
+
+        vm.SelectNextEntryCommand.Execute(null);
+        Assert.Equal("second", vm.SelectedEntry?.Message);
+
+        vm.SelectPreviousEntryCommand.Execute(null);
+        Assert.Equal("first", vm.SelectedEntry?.Message);
+
+        vm.SelectPreviousEntryCommand.Execute(null);
+        Assert.Equal("first", vm.SelectedEntry?.Message);
+    }
 }

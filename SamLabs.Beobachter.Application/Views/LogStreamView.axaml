@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="using:SamLabs.Beobachter.Core.Models"
+             xmlns:conv="using:SamLabs.Beobachter.Application.Converters"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.LogStreamView"
+             x:DataType="viewModels:LogStreamViewModel">
+    <UserControl.Resources>
+        <conv:LogLevelToRowBrushConverter x:Key="LogLevelToRowBrushConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0"
+              Margin="4,0,4,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
+                <ColumnDefinition Width="{Binding LevelColumnWidth}" />
+                <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="Timestamp"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource ShellForegroundBrush}" />
+            <TextBlock Grid.Column="1"
+                       Text="Level"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource ShellForegroundBrush}" />
+            <TextBlock Grid.Column="2"
+                       Text="Logger"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource ShellForegroundBrush}" />
+            <TextBlock Grid.Column="3"
+                       Text="Message"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource ShellForegroundBrush}" />
+        </Grid>
+
+        <ListBox x:Name="LogEntriesList"
+                 Grid.Row="1"
+                 Background="Transparent"
+                 ItemsSource="{Binding VisibleEntries}"
+                 SelectedItem="{Binding SelectedEntry}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel CacheLength="0.5" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="models:LogEntry">
+                    <Border Margin="{Binding DataContext.LogRowMargin, ElementName=LogEntriesList}"
+                            Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
+                            CornerRadius="4">
+                        <Grid Margin="4,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=LogEntriesList}" />
+                                <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=LogEntriesList}" />
+                                <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=LogEntriesList}" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                       Text="{Binding Timestamp}" />
+                            <TextBlock Grid.Column="1"
+                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                       Text="{Binding Level}" />
+                            <TextBlock Grid.Column="2"
+                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                       Text="{Binding LoggerName}" />
+                            <TextBlock Grid.Column="3"
+                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                       Text="{Binding Message}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
