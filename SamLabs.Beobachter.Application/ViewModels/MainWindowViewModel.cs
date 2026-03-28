@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -11,14 +12,14 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
-using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Enums;
+using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
 using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Core.Settings;
 
-namespace SamLabs.Beobachter.ViewModels;
+namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -37,6 +38,17 @@ public partial class MainWindowViewModel : ViewModelBase
         "JsonLogParser",
         "CsvParser",
         "PlainTextParser"
+    };
+    private static readonly HashSet<string> ReceiverEditablePropertyNames = new(StringComparer.Ordinal)
+    {
+        nameof(ReceiverDefinitionViewModel.Id),
+        nameof(ReceiverDefinitionViewModel.DisplayName),
+        nameof(ReceiverDefinitionViewModel.Enabled),
+        nameof(ReceiverDefinitionViewModel.BindAddress),
+        nameof(ReceiverDefinitionViewModel.Port),
+        nameof(ReceiverDefinitionViewModel.FilePath),
+        nameof(ReceiverDefinitionViewModel.PollIntervalMs),
+        nameof(ReceiverDefinitionViewModel.ParserOrderText)
     };
 
     private readonly IThemeService _themeService;
@@ -381,8 +393,10 @@ public partial class MainWindowViewModel : ViewModelBase
             BindAddress = "0.0.0.0",
             Port = 7071
         };
+        AttachReceiverDefinition(vm);
         ReceiverDefinitions.Add(vm);
         SelectedReceiverDefinition = vm;
+        TryValidateReceiverDefinitions(out _);
     }
 
     [RelayCommand]
@@ -395,8 +409,10 @@ public partial class MainWindowViewModel : ViewModelBase
             BindAddress = "0.0.0.0",
             Port = 4505
         };
+        AttachReceiverDefinition(vm);
         ReceiverDefinitions.Add(vm);
         SelectedReceiverDefinition = vm;
+        TryValidateReceiverDefinitions(out _);
     }
 
     [RelayCommand]
@@ -409,8 +425,10 @@ public partial class MainWindowViewModel : ViewModelBase
             FilePath = string.Empty,
             PollIntervalMs = 150
         };
+        AttachReceiverDefinition(vm);
         ReceiverDefinitions.Add(vm);
         SelectedReceiverDefinition = vm;
+        TryValidateReceiverDefinitions(out _);
     }
 
     [RelayCommand]
@@ -422,6 +440,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         var toRemove = SelectedReceiverDefinition;
+        DetachReceiverDefinition(toRemove);
         ReceiverDefinitions.Remove(toRemove);
         if (!string.IsNullOrWhiteSpace(_pendingSelectedReceiverId))
         {
@@ -431,6 +450,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         SelectedReceiverDefinition ??= ReceiverDefinitions.FirstOrDefault();
         _pendingSelectedReceiverId = null;
+        TryValidateReceiverDefinitions(out _);
     }
 
     [RelayCommand]
@@ -533,6 +553,14 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnShowErrorChanged(bool value) => OnLevelFilterChanged();
 
     partial void OnShowFatalChanged(bool value) => OnLevelFilterChanged();
+
+    private void OnReceiverDefinitionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null || ReceiverEditablePropertyNames.Contains(e.PropertyName))
+        {
+            TryValidateReceiverDefinitions(out _);
+        }
+    }
 
     private void OnEntriesAppended(object? sender, LogEntriesAppendedEventArgs e)
     {
@@ -839,6 +867,16 @@ public partial class MainWindowViewModel : ViewModelBase
         return builder.ToString();
     }
 
+    private void AttachReceiverDefinition(ReceiverDefinitionViewModel receiver)
+    {
+        receiver.PropertyChanged += OnReceiverDefinitionPropertyChanged;
+    }
+
+    private void DetachReceiverDefinition(ReceiverDefinitionViewModel receiver)
+    {
+        receiver.PropertyChanged -= OnReceiverDefinitionPropertyChanged;
+    }
+
     private async Task LoadWorkspaceStateAsync()
     {
         var workspace = await _settingsStore.LoadWorkspaceSettingsAsync().ConfigureAwait(false);
@@ -914,10 +952,15 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ApplyReceiverDefinitions(ReceiverDefinitions definitions)
     {
+        foreach (var existing in ReceiverDefinitions)
+        {
+            DetachReceiverDefinition(existing);
+        }
+
         ReceiverDefinitions.Clear();
         foreach (var udp in definitions.UdpReceivers)
         {
-            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
+            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.Udp)
             {
                 Id = udp.Id,
                 DisplayName = udp.DisplayName,
@@ -925,12 +968,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 BindAddress = udp.BindAddress,
                 Port = udp.Port,
                 ParserOrderText = FormatParserOrder(udp.ParserOrder)
-            });
+            };
+            AttachReceiverDefinition(receiver);
+            ReceiverDefinitions.Add(receiver);
         }
 
         foreach (var tcp in definitions.TcpReceivers)
         {
-            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
+            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.Tcp)
             {
                 Id = tcp.Id,
                 DisplayName = tcp.DisplayName,
@@ -938,12 +983,14 @@ public partial class MainWindowViewModel : ViewModelBase
                 BindAddress = tcp.BindAddress,
                 Port = tcp.Port,
                 ParserOrderText = FormatParserOrder(tcp.ParserOrder)
-            });
+            };
+            AttachReceiverDefinition(receiver);
+            ReceiverDefinitions.Add(receiver);
         }
 
         foreach (var file in definitions.FileTailReceivers)
         {
-            ReceiverDefinitions.Add(new ReceiverDefinitionViewModel(ReceiverKinds.File)
+            var receiver = new ReceiverDefinitionViewModel(ReceiverKinds.File)
             {
                 Id = file.Id,
                 DisplayName = file.DisplayName,
@@ -951,10 +998,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 FilePath = file.FilePath,
                 PollIntervalMs = file.PollIntervalMs,
                 ParserOrderText = FormatParserOrder(file.ParserOrder)
-            });
+            };
+            AttachReceiverDefinition(receiver);
+            ReceiverDefinitions.Add(receiver);
         }
 
         SelectedReceiverDefinition = ReceiverDefinitions.FirstOrDefault();
+        TryValidateReceiverDefinitions(out _);
     }
 
     private ReceiverDefinitions MapToReceiverDefinitions()
@@ -1012,7 +1062,23 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool TryValidateReceiverDefinitions(out string error)
     {
         error = string.Empty;
-        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var isValid = true;
+        var ids = new Dictionary<string, List<ReceiverDefinitionViewModel>>(StringComparer.OrdinalIgnoreCase);
+        string? firstError = null;
+
+        foreach (var receiver in ReceiverDefinitions)
+        {
+            receiver.ClearValidationErrors();
+        }
+
+        void RegisterError(string message)
+        {
+            isValid = false;
+            if (firstError == null)
+            {
+                firstError = message;
+            }
+        }
 
         for (var index = 0; index < ReceiverDefinitions.Count; index++)
         {
@@ -1021,68 +1087,88 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (string.IsNullOrWhiteSpace(receiver.Id))
             {
-                error = $"{label} requires a non-empty Id.";
-                return false;
+                receiver.IdValidationError = "Id is required.";
+                RegisterError($"{label} requires a non-empty Id.");
             }
-
-            if (!ids.Add(receiver.Id.Trim()))
+            else
             {
-                error = $"Receiver Id '{receiver.Id}' is duplicated.";
-                return false;
+                var normalizedId = receiver.Id.Trim();
+                if (!ids.TryGetValue(normalizedId, out var matching))
+                {
+                    matching = [];
+                    ids[normalizedId] = matching;
+                }
+                matching.Add(receiver);
             }
 
             if (string.IsNullOrWhiteSpace(receiver.DisplayName))
             {
-                error = $"{label} requires a display name.";
-                return false;
+                receiver.DisplayNameValidationError = "Display name is required.";
+                RegisterError($"{label} requires a display name.");
             }
 
-            if (receiver.IsUdp || receiver.IsTcp)
+            if (!IsValidPort(receiver.Port))
             {
-                if (!IsValidPort(receiver.Port))
-                {
-                    error = $"{label} port must be between 1 and 65535.";
-                    return false;
-                }
+                receiver.PortValidationError = "Port must be between 1 and 65535.";
+                RegisterError($"{label} port must be between 1 and 65535.");
+            }
 
+            // Use correct enum for kind
+            if (receiver.Kind == ReceiverKinds.Udp || receiver.Kind == ReceiverKinds.Tcp)
+            {
                 if (!IsValidBindAddress(receiver.BindAddress))
                 {
-                    error = $"{label} bind address '{receiver.BindAddress}' is invalid.";
-                    return false;
+                    receiver.BindAddressValidationError = $"Bind address '{receiver.BindAddress}' is invalid.";
+                    RegisterError($"{label} bind address '{receiver.BindAddress}' is invalid.");
                 }
             }
 
-            if (receiver.IsFile)
+            if (receiver.Kind == ReceiverKinds.File)
             {
                 if (string.IsNullOrWhiteSpace(receiver.FilePath))
                 {
-                    error = $"{label} file path is required.";
-                    return false;
+                    receiver.FilePathValidationError = "File path is required.";
+                    RegisterError($"{label} file path is required.");
                 }
-
                 if (receiver.PollIntervalMs <= 0)
                 {
-                    error = $"{label} poll interval must be greater than zero.";
-                    return false;
+                    receiver.PollIntervalValidationError = "Poll interval must be greater than zero.";
+                    RegisterError($"{label} poll interval must be greater than zero.");
                 }
             }
 
+            // Parser order validation
             var parserOrder = ParseParserOrder(receiver.ParserOrderText);
             if (parserOrder.Count == 0)
             {
-                error = $"{label} parser order cannot be empty.";
-                return false;
+                receiver.ParserOrderValidationError = "Parser order cannot be empty.";
+                RegisterError($"{label} parser order cannot be empty.");
             }
-
-            var unknown = parserOrder.FirstOrDefault(name => !KnownParserNames.Contains(name));
-            if (unknown is not null)
+            else
             {
-                error = $"{label} uses unknown parser '{unknown}'.";
-                return false;
+                var unknown = parserOrder.FirstOrDefault(p => !KnownParserNames.Contains(p));
+                if (!string.IsNullOrEmpty(unknown))
+                {
+                    receiver.ParserOrderValidationError = $"Unknown parser '{unknown}'.";
+                    RegisterError($"{label} uses unknown parser '{unknown}'");
+                }
             }
         }
 
-        return true;
+        foreach (var entry in ids)
+        {
+            if (entry.Value.Count > 1)
+            {
+                foreach (var receiver in entry.Value)
+                {
+                    receiver.IdValidationError = "Id must be unique.";
+                }
+                RegisterError($"Receiver Id '{entry.Key}' is duplicated.");
+            }
+        }
+
+        error = firstError ?? string.Empty;
+        return isValid;
     }
 
     private static bool IsValidPort(int value)
@@ -1202,7 +1288,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private string BuildUniqueReceiverId(string prefix)
     {
         var next = 1;
-        var existing = new HashSet<string>(ReceiverDefinitions.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
+        var existing = new HashSet<string>(ReceiverDefinitions.Select<ReceiverDefinitionViewModel, string>(x => x.Id), StringComparer.OrdinalIgnoreCase);
         while (true)
         {
             var candidate = $"{prefix}-{next}";

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SamLabs.Beobachter.Core.Enums;
+using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
 
 namespace SamLabs.Beobachter.Application.Services;

@@ -6,10 +6,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Models;
-using SamLabs.Beobachter.ViewModels;
 
-namespace SamLabs.Beobachter.Views;
+namespace SamLabs.Beobachter.Application.Views;
 
 public partial class MainWindow : Window
 {
@@ -148,7 +148,7 @@ public partial class MainWindow : Window
 
     private void TryResolveLogScrollViewer()
     {
-        _logScrollViewer ??= LogEntriesList.FindDescendantOfType<ScrollViewer>(includeSelf: true);
+        _logScrollViewer ??= VisualExtensions.FindDescendantOfType<ScrollViewer>(LogEntriesList, includeSelf: true);
     }
 
     private bool IsNearBottom()

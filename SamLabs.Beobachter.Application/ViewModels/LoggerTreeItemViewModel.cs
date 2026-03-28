@@ -4,7 +4,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SamLabs.Beobachter.Core.Models;
 
-namespace SamLabs.Beobachter.ViewModels;
+namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class LoggerTreeItemViewModel : ObservableObject
 {

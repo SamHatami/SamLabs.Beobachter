@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using SamLabs.Beobachter.ViewModels;
+using SamLabs.Beobachter.Application.ViewModels;
 
-namespace SamLabs.Beobachter;
+namespace SamLabs.Beobachter.Application;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.

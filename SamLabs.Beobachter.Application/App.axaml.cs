@@ -3,9 +3,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using SamLabs.Beobachter.Application.Composition;
-using SamLabs.Beobachter.Application.Services;
-using SamLabs.Beobachter.ViewModels;
-using SamLabs.Beobachter.Views;
+using SamLabs.Beobachter.Core.Interfaces;
+using SamLabs.Beobachter.Core.Services;
+using MainWindow = SamLabs.Beobachter.Application.Views.MainWindow;
+using MainWindowViewModel = SamLabs.Beobachter.Application.ViewModels.MainWindowViewModel;
 
 namespace SamLabs.Beobachter.Application;
 

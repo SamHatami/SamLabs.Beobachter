@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace SamLabs.Beobachter.Application.Services;
+namespace SamLabs.Beobachter.Core.Models;
 
 public sealed record class LogStatisticsSnapshot
 {

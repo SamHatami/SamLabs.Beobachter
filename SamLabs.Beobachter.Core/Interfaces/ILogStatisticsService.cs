@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
 using SamLabs.Beobachter.Core.Models;
 
-namespace SamLabs.Beobachter.Application.Services;
+namespace SamLabs.Beobachter.Core.Interfaces;
 
 public interface ILogStatisticsService
 {

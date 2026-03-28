@@ -4,6 +4,7 @@
     <SolidColorBrush x:Key="ShellPanelBrush" Color="#FFFFFFFF" />
     <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FF1F2937" />
     <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FF6B7280" />
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFDC2626" />
     <SolidColorBrush x:Key="RowTraceBrush" Color="#080EA5E9" />
     <SolidColorBrush x:Key="RowDebugBrush" Color="#0A6366F1" />
     <SolidColorBrush x:Key="RowInfoBrush" Color="#066B7280" />

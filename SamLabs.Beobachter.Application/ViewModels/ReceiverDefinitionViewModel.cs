@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace SamLabs.Beobachter.ViewModels;
+namespace SamLabs.Beobachter.Application.ViewModels;
 
 public sealed partial class ReceiverDefinitionViewModel : ObservableObject
 {
@@ -37,11 +37,92 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     [ObservableProperty]
     private string _parserOrderText = string.Join(", ", DefaultParserOrder);
 
+    [ObservableProperty]
+    private string _displayNameValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _idValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _bindAddressValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _portValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _filePathValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _pollIntervalValidationError = string.Empty;
+
+    [ObservableProperty]
+    private string _parserOrderValidationError = string.Empty;
+
     public bool IsUdp => Kind == ReceiverKinds.Udp;
 
     public bool IsTcp => Kind == ReceiverKinds.Tcp;
 
     public bool IsFile => Kind == ReceiverKinds.File;
+
+    public bool HasDisplayNameValidationError => DisplayNameValidationError.Length > 0;
+
+    public bool HasIdValidationError => IdValidationError.Length > 0;
+
+    public bool HasBindAddressValidationError => BindAddressValidationError.Length > 0;
+
+    public bool HasPortValidationError => PortValidationError.Length > 0;
+
+    public bool HasFilePathValidationError => FilePathValidationError.Length > 0;
+
+    public bool HasPollIntervalValidationError => PollIntervalValidationError.Length > 0;
+
+    public bool HasParserOrderValidationError => ParserOrderValidationError.Length > 0;
+
+    public void ClearValidationErrors()
+    {
+        DisplayNameValidationError = string.Empty;
+        IdValidationError = string.Empty;
+        BindAddressValidationError = string.Empty;
+        PortValidationError = string.Empty;
+        FilePathValidationError = string.Empty;
+        PollIntervalValidationError = string.Empty;
+        ParserOrderValidationError = string.Empty;
+    }
+
+    partial void OnDisplayNameValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasDisplayNameValidationError));
+    }
+
+    partial void OnIdValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasIdValidationError));
+    }
+
+    partial void OnBindAddressValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasBindAddressValidationError));
+    }
+
+    partial void OnPortValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasPortValidationError));
+    }
+
+    partial void OnFilePathValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasFilePathValidationError));
+    }
+
+    partial void OnPollIntervalValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasPollIntervalValidationError));
+    }
+
+    partial void OnParserOrderValidationErrorChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasParserOrderValidationError));
+    }
 }
 
 public static class ReceiverKinds

@@ -1,5 +1,6 @@
-using Avalonia;
 using Avalonia.Styling;
+using SamLabs.Beobachter.Core.Interfaces;
+using SamLabs.Beobachter.Core.Services;
 using AvaloniaApp = Avalonia.Application;
 
 namespace SamLabs.Beobachter.Application.Services;
@@ -24,4 +25,6 @@ public sealed class ThemeService : IThemeService
             _ => ThemeVariant.Default
         };
     }
+
+    AppThemeMode IThemeService.CurrentMode { get; }
 }

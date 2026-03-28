@@ -1,4 +1,6 @@
-namespace SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Core.Services;
+
+namespace SamLabs.Beobachter.Core.Interfaces;
 
 public interface IThemeService
 {

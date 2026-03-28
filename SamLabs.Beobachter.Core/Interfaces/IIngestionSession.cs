@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
 
-namespace SamLabs.Beobachter.Application.Services;
+namespace SamLabs.Beobachter.Core.Interfaces;
 
 public interface IIngestionSession : IAsyncDisposable
 {

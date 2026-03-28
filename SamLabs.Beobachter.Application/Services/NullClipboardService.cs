@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using SamLabs.Beobachter.Core.Interfaces;
 
 namespace SamLabs.Beobachter.Application.Services;
 

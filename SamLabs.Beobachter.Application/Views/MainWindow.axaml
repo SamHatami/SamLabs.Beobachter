@@ -1,22 +1,22 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:SamLabs.Beobachter.ViewModels"
         xmlns:models="using:SamLabs.Beobachter.Core.Models"
         xmlns:conv="using:SamLabs.Beobachter.Application.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
         mc:Ignorable="d"
         d:DesignWidth="1200"
         d:DesignHeight="760"
-        x:Class="SamLabs.Beobachter.Views.MainWindow"
+        x:Class="SamLabs.Beobachter.Application.Views.MainWindow"
         x:Name="MainWindowRoot"
-        x:DataType="vm:MainWindowViewModel"
+        x:DataType="viewModels:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="SamLabs.Beobachter"
         KeyDown="OnWindowKeyDown">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel />
+        <viewModels:MainWindowViewModel />
     </Design.DataContext>
 
     <Window.Resources>
@@ -205,7 +205,7 @@
                                  SelectedItem="{Binding SelectedReceiverDefinition}"
                                  ItemsSource="{Binding ReceiverDefinitions}">
                             <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="vm:ReceiverDefinitionViewModel">
+                                <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
                                     <Border Margin="0,0,0,6"
                                             Padding="8"
                                             CornerRadius="6"
@@ -331,7 +331,7 @@
                         <TreeView Grid.Row="1"
                                   ItemsSource="{Binding LoggerTreeItems}">
                             <TreeView.ItemTemplate>
-                                <TreeDataTemplate x:DataType="vm:LoggerTreeItemViewModel"
+                                <TreeDataTemplate x:DataType="viewModels:LoggerTreeItemViewModel"
                                                   ItemsSource="{Binding Children}">
                                     <CheckBox Content="{Binding Name}"
                                               IsChecked="{Binding IsEnabled}" />
@@ -376,7 +376,7 @@
                              SelectedItem="{Binding SelectedEntry}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <VirtualizingStackPanel CacheLength="256" />
+                                <VirtualizingStackPanel CacheLength="0.5" />
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>

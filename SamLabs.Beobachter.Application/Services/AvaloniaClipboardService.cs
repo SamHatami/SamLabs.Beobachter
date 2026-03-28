@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using SamLabs.Beobachter.Core.Interfaces;
 using AvaloniaApp = Avalonia.Application;
 
 namespace SamLabs.Beobachter.Application.Services;

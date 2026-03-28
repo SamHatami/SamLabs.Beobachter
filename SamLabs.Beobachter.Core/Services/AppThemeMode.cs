@@ -1,4 +1,4 @@
-namespace SamLabs.Beobachter.Application.Services;
+namespace SamLabs.Beobachter.Core.Services;
 
 public enum AppThemeMode
 {

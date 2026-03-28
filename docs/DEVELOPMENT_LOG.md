@@ -741,3 +741,35 @@ Impact:
 
 Follow-ups:
 - Persist actual window geometry/maximized state through app lifetime hooks (currently model supports it, but the shell does not wire runtime updates yet).
+
+## 2026-03-28 - Phase 4 Slice 15: Inline Receiver Field Validation
+What changed:
+- Extended receiver editor VM with field-level validation state:
+  [ReceiverDefinitionViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverDefinitionViewModel.cs)
+  - added per-field validation messages/flags for display name, id, bind address, port, file path, poll interval, and parser order
+- Extended receiver setup orchestration to maintain live validation:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - validates all receiver entries on add/remove/edit and on save
+  - keeps duplicate-id validation synchronized across entries
+  - attaches/detaches receiver item change handlers explicitly
+- Updated receiver setup UI with inline validation visuals:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - invalid fields now get red border styling
+  - field-specific error text is shown directly below relevant inputs
+- Added validation brush theme tokens:
+  [Light.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Light.axaml),
+  [Dark.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Dark.axaml)
+- Added/updated VM tests for inline validation behavior:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- Validation feedback only appeared as a single status message during save, which made receiver setup slower and error-prone.
+- Receiver setup is an operational surface; users need immediate, field-local guidance before applying changes.
+
+Impact:
+- Receiver setup now provides immediate field-level validation markers/messages without waiting for save.
+- Invalid save attempts still fail, but with synchronized inline hints on the exact failing fields.
+- Existing build/test verification is currently blocked by unrelated compile issues already present in `Core` interfaces.
+
+Follow-ups:
+- Add inline validation visibility tests at the view layer if UI test coverage is introduced for setup workflows.

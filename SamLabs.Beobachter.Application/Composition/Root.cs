@@ -6,7 +6,7 @@ using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Infrastructure.Parsing;
 using SamLabs.Beobachter.Infrastructure.Receivers;
 using SamLabs.Beobachter.Infrastructure.Settings;
-using SamLabs.Beobachter.ViewModels;
+using MainWindowViewModel = SamLabs.Beobachter.Application.ViewModels.MainWindowViewModel;
 
 namespace SamLabs.Beobachter.Application.Composition;
 

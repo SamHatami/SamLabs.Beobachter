@@ -1,15 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
 using SamLabs.Beobachter.Core.Settings;
-using SamLabs.Beobachter.ViewModels;
 using Xunit;
 
 namespace SamLabs.Beobachter.Tests.Application;
