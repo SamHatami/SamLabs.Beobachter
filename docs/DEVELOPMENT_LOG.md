@@ -677,3 +677,32 @@ Impact:
 
 Follow-ups:
 - Add chart-ready time-series output from the same buckets for a future visual trend panel.
+
+## 2026-03-28 - Phase 4 Slice 13: Receiver Setup Hardening + Parser Order Editing
+What changed:
+- Extended receiver editor model with parser-order text:
+  [ReceiverDefinitionViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverDefinitionViewModel.cs)
+- Extended main VM receiver setup flow with:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - validation for duplicate/empty IDs
+  - validation for display name, port range, bind address, and file path/poll interval
+  - parser-order parsing and known-parser validation
+  - parser-order mapping to/from typed receiver settings
+- Updated receiver setup UI with parser-order editor field:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Extended VM tests:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+  - invalid configuration blocks save/reload
+  - parser-order edits persist into receiver settings
+
+Why:
+- Receiver setup is an operational control plane; invalid values should fail fast before touching running listeners.
+- Parser selection is now explicit per receiver and no longer hidden behind defaults.
+
+Impact:
+- Save now guards against malformed receiver config and surfaces clear validation status.
+- Operators can configure parser order directly in UI with round-trip persistence.
+- Test suite increased to 62 passing tests.
+
+Follow-ups:
+- Add inline field-level validation visuals (not only status text) in the setup panel.

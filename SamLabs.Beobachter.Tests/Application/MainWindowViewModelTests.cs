@@ -218,6 +218,8 @@ public sealed class MainWindowViewModelTests
 
         var fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
         fileReceiver.FilePath = "C:/logs/app.log";
+        var udpReceiver = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        udpReceiver.ParserOrderText = "JsonLogParser, PlainTextParser";
 
         await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
 
@@ -227,7 +229,28 @@ public sealed class MainWindowViewModelTests
         Assert.Single(saved.TcpReceivers);
         Assert.Single(saved.FileTailReceivers);
         Assert.Equal("C:/logs/app.log", saved.FileTailReceivers[0].FilePath);
+        Assert.Equal(["JsonLogParser", "PlainTextParser"], saved.UdpReceivers[0].ParserOrder);
         Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    [Fact]
+    public async Task SaveReceiverSetup_InvalidConfiguration_DoesNotPersistOrReload()
+    {
+        var settings = new FakeSettingsStore();
+        var session = new FakeIngestionSession([]);
+        var vm = new MainWindowViewModel(new ThemeService(), session, new FakeClipboardService(), settings);
+
+        await WaitForReceiverLoadAsync(vm);
+
+        vm.AddUdpReceiverCommand.Execute(null);
+        var udp = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        udp.Port = 70_000;
+
+        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+
+        Assert.Null(settings.LastSavedReceiverDefinitions);
+        Assert.Equal(0, session.ReloadReceiversCalls);
+        Assert.Contains("Validation failed", vm.ReceiverSetupStatus);
     }
 
     [Fact]
@@ -244,7 +267,8 @@ public sealed class MainWindowViewModelTests
                         Id = "udp-prod",
                         DisplayName = "UDP Prod",
                         BindAddress = "127.0.0.1",
-                        Port = 17071
+                        Port = 17071,
+                        ParserOrder = ["JsonLogParser", "PlainTextParser"]
                     }
                 ],
                 FileTailReceivers =
@@ -268,6 +292,7 @@ public sealed class MainWindowViewModelTests
         Assert.Equal(2, vm.ReceiverDefinitions.Count);
         Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "udp-prod" && x.IsUdp && x.Port == 17071);
         Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "file-prod" && x.IsFile && x.PollIntervalMs == 250);
+        Assert.Contains(vm.ReceiverDefinitions, x => x.Id == "udp-prod" && x.ParserOrderText.Contains("JsonLogParser"));
         Assert.Equal(1, session.ReloadReceiversCalls);
     }
 

@@ -4,6 +4,8 @@ namespace SamLabs.Beobachter.ViewModels;
 
 public sealed partial class ReceiverDefinitionViewModel : ObservableObject
 {
+    private static readonly string[] DefaultParserOrder = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
+
     public ReceiverDefinitionViewModel(string kind)
     {
         Kind = kind;
@@ -31,6 +33,9 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
 
     [ObservableProperty]
     private int _pollIntervalMs = 150;
+
+    [ObservableProperty]
+    private string _parserOrderText = string.Join(", ", DefaultParserOrder);
 
     public bool IsUdp => Kind == ReceiverKinds.Udp;
 

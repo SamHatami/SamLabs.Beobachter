@@ -198,7 +198,7 @@
                                             Padding="8"
                                             CornerRadius="6"
                                             Background="{DynamicResource ShellBackgroundBrush}">
-                                        <Grid RowDefinitions="Auto,Auto,Auto"
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                                               ColumnDefinitions="120,*,90">
                                             <TextBlock Grid.Row="0"
                                                        Grid.Column="0"
@@ -257,6 +257,18 @@
                                                          IsVisible="{Binding IsFile}"
                                                          Text="{Binding PollIntervalMs}" />
                                             </StackPanel>
+
+                                            <TextBlock Grid.Row="3"
+                                                       Grid.Column="0"
+                                                       Margin="0,6,0,0"
+                                                       VerticalAlignment="Center"
+                                                       Text="Parsers" />
+                                            <TextBox Grid.Row="3"
+                                                     Grid.Column="1"
+                                                     Grid.ColumnSpan="2"
+                                                     Margin="8,6,0,0"
+                                                     ToolTip.Tip="Comma-separated parser names: Log4jXmlParser, JsonLogParser, CsvParser, PlainTextParser"
+                                                     Text="{Binding ParserOrderText}" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
@@ -21,6 +22,21 @@ namespace SamLabs.Beobachter.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private const int MaxVisibleEntries = 2_000;
+    private static readonly StringComparer ParserNameComparer = StringComparer.OrdinalIgnoreCase;
+    private static readonly string[] DefaultParserOrder =
+    [
+        "Log4jXmlParser",
+        "JsonLogParser",
+        "CsvParser",
+        "PlainTextParser"
+    ];
+    private static readonly HashSet<string> KnownParserNames = new(ParserNameComparer)
+    {
+        "Log4jXmlParser",
+        "JsonLogParser",
+        "CsvParser",
+        "PlainTextParser"
+    };
 
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
@@ -374,6 +390,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveReceiverSetupAsync()
     {
+        if (!TryValidateReceiverDefinitions(out var validationError))
+        {
+            ReceiverSetupStatus = $"Validation failed: {validationError}";
+            return;
+        }
+
         var mapped = MapToReceiverDefinitions();
         await _settingsStore.SaveReceiverDefinitionsAsync(mapped);
         await _ingestionSession.ReloadReceiversAsync();
@@ -756,7 +778,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 DisplayName = udp.DisplayName,
                 Enabled = udp.Enabled,
                 BindAddress = udp.BindAddress,
-                Port = udp.Port
+                Port = udp.Port,
+                ParserOrderText = FormatParserOrder(udp.ParserOrder)
             });
         }
 
@@ -768,7 +791,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 DisplayName = tcp.DisplayName,
                 Enabled = tcp.Enabled,
                 BindAddress = tcp.BindAddress,
-                Port = tcp.Port
+                Port = tcp.Port,
+                ParserOrderText = FormatParserOrder(tcp.ParserOrder)
             });
         }
 
@@ -780,7 +804,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 DisplayName = file.DisplayName,
                 Enabled = file.Enabled,
                 FilePath = file.FilePath,
-                PollIntervalMs = file.PollIntervalMs
+                PollIntervalMs = file.PollIntervalMs,
+                ParserOrderText = FormatParserOrder(file.ParserOrder)
             });
         }
 
@@ -798,7 +823,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 Enabled = x.Enabled,
                 BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
                 Port = x.Port <= 0 ? 7071 : x.Port,
-                DefaultLoggerName = x.DisplayName
+                DefaultLoggerName = x.DisplayName,
+                ParserOrder = ParseParserOrder(x.ParserOrderText)
             })
             .ToArray();
 
@@ -811,7 +837,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 Enabled = x.Enabled,
                 BindAddress = string.IsNullOrWhiteSpace(x.BindAddress) ? "0.0.0.0" : x.BindAddress.Trim(),
                 Port = x.Port <= 0 ? 4505 : x.Port,
-                DefaultLoggerName = x.DisplayName
+                DefaultLoggerName = x.DisplayName,
+                ParserOrder = ParseParserOrder(x.ParserOrderText)
             })
             .ToArray();
 
@@ -824,7 +851,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 Enabled = x.Enabled,
                 FilePath = x.FilePath.Trim(),
                 PollIntervalMs = x.PollIntervalMs <= 0 ? 150 : x.PollIntervalMs,
-                DefaultLoggerName = x.DisplayName
+                DefaultLoggerName = x.DisplayName,
+                ParserOrder = ParseParserOrder(x.ParserOrderText)
             })
             .ToArray();
 
@@ -834,6 +862,129 @@ public partial class MainWindowViewModel : ViewModelBase
             TcpReceivers = tcp,
             FileTailReceivers = file
         };
+    }
+
+    private bool TryValidateReceiverDefinitions(out string error)
+    {
+        error = string.Empty;
+        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var index = 0; index < ReceiverDefinitions.Count; index++)
+        {
+            var receiver = ReceiverDefinitions[index];
+            var label = $"{receiver.Kind} #{index + 1}";
+
+            if (string.IsNullOrWhiteSpace(receiver.Id))
+            {
+                error = $"{label} requires a non-empty Id.";
+                return false;
+            }
+
+            if (!ids.Add(receiver.Id.Trim()))
+            {
+                error = $"Receiver Id '{receiver.Id}' is duplicated.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(receiver.DisplayName))
+            {
+                error = $"{label} requires a display name.";
+                return false;
+            }
+
+            if (receiver.IsUdp || receiver.IsTcp)
+            {
+                if (!IsValidPort(receiver.Port))
+                {
+                    error = $"{label} port must be between 1 and 65535.";
+                    return false;
+                }
+
+                if (!IsValidBindAddress(receiver.BindAddress))
+                {
+                    error = $"{label} bind address '{receiver.BindAddress}' is invalid.";
+                    return false;
+                }
+            }
+
+            if (receiver.IsFile)
+            {
+                if (string.IsNullOrWhiteSpace(receiver.FilePath))
+                {
+                    error = $"{label} file path is required.";
+                    return false;
+                }
+
+                if (receiver.PollIntervalMs <= 0)
+                {
+                    error = $"{label} poll interval must be greater than zero.";
+                    return false;
+                }
+            }
+
+            var parserOrder = ParseParserOrder(receiver.ParserOrderText);
+            if (parserOrder.Count == 0)
+            {
+                error = $"{label} parser order cannot be empty.";
+                return false;
+            }
+
+            var unknown = parserOrder.FirstOrDefault(name => !KnownParserNames.Contains(name));
+            if (unknown is not null)
+            {
+                error = $"{label} uses unknown parser '{unknown}'.";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsValidPort(int value)
+    {
+        return value is >= 1 and <= 65535;
+    }
+
+    private static bool IsValidBindAddress(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var trimmed = value.Trim();
+        if (trimmed == "*")
+        {
+            return true;
+        }
+
+        if (IPAddress.TryParse(trimmed, out _))
+        {
+            return true;
+        }
+
+        return Uri.CheckHostName(trimmed) != UriHostNameType.Unknown;
+    }
+
+    private static string FormatParserOrder(IReadOnlyList<string> parserOrder)
+    {
+        return parserOrder.Count == 0
+            ? string.Join(", ", DefaultParserOrder)
+            : string.Join(", ", parserOrder);
+    }
+
+    private static IReadOnlyList<string> ParseParserOrder(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return DefaultParserOrder;
+        }
+
+        return value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(static name => name.Length > 0)
+            .Distinct(ParserNameComparer)
+            .ToArray();
     }
 
     private string BuildUniqueReceiverId(string prefix)
