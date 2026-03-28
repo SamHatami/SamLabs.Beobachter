@@ -53,7 +53,7 @@
                 Padding="12"
                 CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
-            <Grid ColumnDefinitions="*,Auto,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
                 <TextBox Grid.Column="0"
                          Watermark="Search logger/message/exception/thread..."
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
@@ -65,6 +65,10 @@
                         Margin="8,0,0,0"
                         Content="Add Sample"
                         Command="{Binding GenerateSampleEntriesCommand}" />
+                <Button Grid.Column="3"
+                        Margin="8,0,0,0"
+                        Content="{Binding PauseButtonText}"
+                        Command="{Binding TogglePauseCommand}" />
             </Grid>
         </Border>
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
+using SamLabs.Beobachter.Core.Settings;
 using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Infrastructure.Receivers;
 
@@ -29,8 +30,10 @@ public sealed class IngestionSession : IIngestionSession
     private Task? _consumeTask;
     private IReadOnlyList<ILogReceiver> _receivers = [];
     private bool _started;
+    private bool _isPaused;
     private int _channelCapacity = DefaultChannelCapacity;
     private long _droppedCount;
+    private WorkspaceSettings _workspaceSettings = new();
 
     public IngestionSession(
         ISettingsStore settingsStore,
@@ -48,6 +51,17 @@ public sealed class IngestionSession : IIngestionSession
     public int TotalCount => _store.Count;
 
     public long DroppedCount => Interlocked.Read(ref _droppedCount);
+
+    public bool IsPaused
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _isPaused;
+            }
+        }
+    }
 
     public bool TryPublish(LogEntry entry)
     {
@@ -74,7 +88,9 @@ public sealed class IngestionSession : IIngestionSession
 
         var appSettings = await _settingsStore.LoadAppSettingsAsync(cancellationToken).ConfigureAwait(false);
         _channelCapacity = Math.Max(1, appSettings.ChannelCapacity);
+        _workspaceSettings = await _settingsStore.LoadWorkspaceSettingsAsync(cancellationToken).ConfigureAwait(false);
         InitializeChannel(_channelCapacity);
+        _isPaused = _workspaceSettings.PauseIngest;
 
         _runCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _consumeTask = Task.Run(() => ConsumeLoopAsync(_runCts.Token), CancellationToken.None);
@@ -86,6 +102,24 @@ public sealed class IngestionSession : IIngestionSession
         {
             await receiver.StartAsync(_writer!, _runCts.Token).ConfigureAwait(false);
         }
+    }
+
+    public async ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
+    {
+        bool changed;
+        lock (_gate)
+        {
+            changed = _isPaused != isPaused;
+            _isPaused = isPaused;
+            _workspaceSettings = _workspaceSettings with { PauseIngest = isPaused };
+        }
+
+        if (!changed)
+        {
+            return;
+        }
+
+        await _settingsStore.SaveWorkspaceSettingsAsync(_workspaceSettings, cancellationToken).ConfigureAwait(false);
     }
 
     public async ValueTask StopAsync(CancellationToken cancellationToken = default)
@@ -164,6 +198,16 @@ public sealed class IngestionSession : IIngestionSession
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                if (IsPaused)
+                {
+                    if (!await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+                    {
+                        break;
+                    }
+
+                    continue;
+                }
+
                 while (batch.Count < MaxBatchSize && _reader.TryRead(out var next))
                 {
                     batch.Add(next);

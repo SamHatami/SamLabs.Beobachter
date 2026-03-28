@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -28,6 +29,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _searchText = string.Empty;
 
+    [ObservableProperty]
+    private bool _isPaused;
+
+    [ObservableProperty]
+    private string _pauseButtonText = "Pause";
+
     public MainWindowViewModel() : this(new ThemeService(), new DesignIngestionSession())
     {
     }
@@ -38,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
+        IsPaused = _ingestionSession.IsPaused;
         RebuildVisibleEntries();
         UpdateThemeSummary();
         UpdateStatusSummary();
@@ -99,9 +107,24 @@ public partial class MainWindowViewModel : ViewModelBase
         SearchText = string.Empty;
     }
 
+    [RelayCommand]
+    private async Task TogglePauseAsync()
+    {
+        var nextState = !IsPaused;
+        await _ingestionSession.SetPausedAsync(nextState).ConfigureAwait(false);
+        IsPaused = nextState;
+        Dispatcher.UIThread.Post(UpdateStatusSummary);
+    }
+
     partial void OnSearchTextChanged(string value)
     {
         RebuildVisibleEntries();
+        UpdateStatusSummary();
+    }
+
+    partial void OnIsPausedChanged(bool value)
+    {
+        PauseButtonText = value ? "Resume" : "Pause";
         UpdateStatusSummary();
     }
 
@@ -167,7 +190,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateStatusSummary()
     {
         var dropped = _ingestionSession.DroppedCount;
-        StatusSummary = $"Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
+        var state = IsPaused ? "Paused" : "Running";
+        StatusSummary = $"State: {state}  Total: {_ingestionSession.TotalCount}  Visible: {VisibleEntries.Count}  Dropped: {dropped}";
     }
 
     private LogLevel PickRandomLevel()

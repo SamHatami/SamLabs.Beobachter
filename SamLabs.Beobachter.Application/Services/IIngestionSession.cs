@@ -15,11 +15,15 @@ public interface IIngestionSession : IAsyncDisposable
 
     long DroppedCount { get; }
 
+    bool IsPaused { get; }
+
     bool TryPublish(LogEntry entry);
 
     IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null);
 
     ValueTask StartAsync(CancellationToken cancellationToken = default);
+
+    ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default);
 
     ValueTask StopAsync(CancellationToken cancellationToken = default);
 }

@@ -358,3 +358,26 @@ Impact:
 Follow-ups:
 - Add pause/resume ingestion controls and logger-tree binding to `LoggerNode`.
 - Add richer details pane (properties/exception/source fields) and level toggles.
+
+## 2026-03-28 - Phase 4 Slice 3: Pause/Resume Ingestion State
+What changed:
+- Extended ingestion contract with explicit pause state and control:
+  [IIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IIngestionSession.cs)
+- Implemented pause behavior in session consumer loop and persisted pause flag via workspace settings:
+  [IngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IngestionSession.cs)
+- Updated design-time session stub with pause support:
+  [DesignIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/DesignIngestionSession.cs)
+- Added pause toggle surface in VM and UI:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs),
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+
+Why:
+- Phase 4 required ingest flow state controls rather than a passive always-on pipeline.
+- Persisting pause in `WorkspaceSettings` keeps user intent across restarts.
+
+Impact:
+- Ingestion session now supports `Pause`/`Resume` without tearing down receiver lifecycle.
+- UI status and control state now expose runtime flow state directly.
+
+Follow-ups:
+- Add logger tree filtering and details pane to complete parity-oriented workspace interactions.
