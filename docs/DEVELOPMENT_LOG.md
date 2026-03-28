@@ -1057,3 +1057,29 @@ Impact:
 
 Follow-ups:
 - Move feature ViewModel composition further into DI registration so `MainWindowViewModel` stops constructing child VMs directly.
+
+## 2026-03-28 - MVVM Refactor Phase 6B: Feature-Level DI Composition for Shell VM
+What changed:
+- Expanded application DI registrations for feature-level composition:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+  - added `ILogQueryEvaluator` registration
+  - added child ViewModel registrations (`SourceTreeViewModel`, `QuickFiltersViewModel`, `ReceiverSetupViewModel`, `LogFiltersViewModel`, `LogStreamViewModel`, `EntryDetailsViewModel`, `SessionHealthViewModel`)
+- Updated shell VM constructor to receive child ViewModels and query evaluator through DI:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed child-VM `new` construction from runtime path
+  - assigns and wires injected child VMs
+  - design-time constructor remains explicit and local to design composition only
+- Updated test VM factory to mirror the new explicit constructor shape:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+
+Why:
+- Shell composition should be container-owned at feature/service boundaries, not manually instantiated inside runtime view-model constructors.
+- This keeps dependency ownership explicit while avoiding over-DI of row/item projection objects.
+
+Impact:
+- Runtime `MainWindowViewModel` composition now flows through DI for feature-level children.
+- Query evaluation dependency is explicit and replaceable via DI.
+- Full suite remains green (`84` passing tests).
+
+Follow-ups:
+- `MainToolbarViewModel` still depends on shell by design; if we want it fully DI-managed later, we should extract a toolbar coordination abstraction to break that dependency cycle.

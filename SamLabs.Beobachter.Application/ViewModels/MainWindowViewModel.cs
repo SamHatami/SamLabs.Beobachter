@@ -49,7 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly ISettingsStore _settingsStore;
-    private readonly ILogQueryEvaluator _queryEvaluator = new LogQueryEvaluator();
+    private readonly ILogQueryEvaluator _queryEvaluator;
     private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
     private WorkspaceSettings _workspaceSettings = new();
@@ -92,36 +92,52 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel() : this(
         new ThemeService(),
         new DesignIngestionSession(),
-        new NullClipboardService(),
         new DesignSettingsStore(),
-        new RollingLogStatisticsService())
+        new RollingLogStatisticsService(),
+        new LogQueryEvaluator(),
+        new SourceTreeViewModel(),
+        new QuickFiltersViewModel(),
+        new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
+        new LogFiltersViewModel(),
+        new LogStreamViewModel(),
+        new EntryDetailsViewModel(new NullClipboardService()),
+        new SessionHealthViewModel())
     {
     }
 
     public MainWindowViewModel(
         IThemeService themeService,
         IIngestionSession ingestionSession,
-        IClipboardService clipboardService,
         ISettingsStore settingsStore,
-        ILogStatisticsService statisticsService)
+        ILogStatisticsService statisticsService,
+        ILogQueryEvaluator queryEvaluator,
+        SourceTreeViewModel sources,
+        QuickFiltersViewModel quickFilters,
+        ReceiverSetupViewModel receiverSetup,
+        LogFiltersViewModel filters,
+        LogStreamViewModel stream,
+        EntryDetailsViewModel details,
+        SessionHealthViewModel sessionHealth)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _settingsStore = settingsStore ?? throw new ArgumentNullException(nameof(settingsStore));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
-        IClipboardService resolvedClipboardService = clipboardService ?? throw new ArgumentNullException(nameof(clipboardService));
-        Filters = new LogFiltersViewModel();
+        _queryEvaluator = queryEvaluator ?? throw new ArgumentNullException(nameof(queryEvaluator));
+
+        Sources = sources ?? throw new ArgumentNullException(nameof(sources));
+        QuickFilters = quickFilters ?? throw new ArgumentNullException(nameof(quickFilters));
+        ReceiverSetup = receiverSetup ?? throw new ArgumentNullException(nameof(receiverSetup));
+        Filters = filters ?? throw new ArgumentNullException(nameof(filters));
+        Stream = stream ?? throw new ArgumentNullException(nameof(stream));
+        Details = details ?? throw new ArgumentNullException(nameof(details));
+        SessionHealth = sessionHealth ?? throw new ArgumentNullException(nameof(sessionHealth));
+
         Filters.PropertyChanged += OnFiltersPropertyChanged;
-        Sources = new SourceTreeViewModel();
         Sources.StateChanged += OnSourcesStateChanged;
-        QuickFilters = new QuickFiltersViewModel();
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
-        ReceiverSetup = new ReceiverSetupViewModel(_settingsStore, _ingestionSession);
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
-        Details = new EntryDetailsViewModel(resolvedClipboardService);
-        Stream = new LogStreamViewModel();
         Stream.PropertyChanged += OnStreamPropertyChanged;
-        SessionHealth = new SessionHealthViewModel();
         Toolbar = new MainToolbarViewModel(this);
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;

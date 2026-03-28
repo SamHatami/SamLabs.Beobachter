@@ -1,12 +1,14 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Application.ViewModels;
+using SamLabs.Beobachter.Application.ViewModels.Sources;
+using SamLabs.Beobachter.Application.ViewModels.Status;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Infrastructure.Parsing;
 using SamLabs.Beobachter.Infrastructure.Receivers;
 using SamLabs.Beobachter.Infrastructure.Settings;
-using MainWindowViewModel = SamLabs.Beobachter.Application.ViewModels.MainWindowViewModel;
 
 namespace SamLabs.Beobachter.Application.Composition;
 
@@ -26,6 +28,7 @@ public static class Root
         services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
+        services.AddSingleton<ILogQueryEvaluator, LogQueryEvaluator>();
 
         services.AddSingleton<ILogParser, Log4jXmlParser>();
         services.AddSingleton<ILogParser, JsonLogParser>();
@@ -36,6 +39,15 @@ public static class Root
         services.AddSingleton<ReceiverFactory>();
 
         services.AddSingleton<IIngestionSession, IngestionSession>();
+
+        services.AddSingleton<SourceTreeViewModel>();
+        services.AddSingleton<QuickFiltersViewModel>();
+        services.AddSingleton<ReceiverSetupViewModel>();
+        services.AddSingleton<LogFiltersViewModel>();
+        services.AddSingleton<LogStreamViewModel>();
+        services.AddSingleton<EntryDetailsViewModel>();
+        services.AddSingleton<SessionHealthViewModel>();
+
         services.AddSingleton<MainWindowViewModel>();
     }
 }

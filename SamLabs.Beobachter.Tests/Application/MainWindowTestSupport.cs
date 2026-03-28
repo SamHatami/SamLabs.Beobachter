@@ -2,10 +2,13 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
+using SamLabs.Beobachter.Application.ViewModels.Sources;
+using SamLabs.Beobachter.Application.ViewModels.Status;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Queries;
+using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Core.Settings;
 using Xunit;
 
@@ -29,9 +32,16 @@ internal static class MainWindowTestSupport
         return new MainWindowViewModel(
             resolvedThemeService,
             session,
-            resolvedClipboardService,
             resolvedSettingsStore,
-            resolvedStatisticsService);
+            resolvedStatisticsService,
+            new LogQueryEvaluator(),
+            new SourceTreeViewModel(),
+            new QuickFiltersViewModel(),
+            new ReceiverSetupViewModel(resolvedSettingsStore, session),
+            new LogFiltersViewModel(),
+            new LogStreamViewModel(),
+            new EntryDetailsViewModel(resolvedClipboardService),
+            new SessionHealthViewModel());
     }
 
     public static LogEntry CreateEntry(string logger, LogLevel level, string message)
