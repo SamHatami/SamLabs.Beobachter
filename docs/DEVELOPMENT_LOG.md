@@ -330,3 +330,31 @@ Impact:
 Follow-ups:
 - Bind MainWindow VM to live session snapshots and append events.
 - Add filtering/search summary and visible-list virtualization constraints in VM/view.
+
+## 2026-03-28 - Phase 4 Slice 2: Live Main Window Log Surface
+What changed:
+- Replaced shell placeholder VM with live session-bound VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- VM now:
+  - subscribes to `IIngestionSession` append events
+  - maintains bounded observable visible list (`MaxVisibleEntries`)
+  - supports live text filtering
+  - surfaces session status summary (`Total`, `Visible`, `Dropped`)
+  - provides sample ingest command for immediate validation without external senders
+- Reworked main view to log-workspace layout:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - top status/theme bar
+  - search + actions row
+  - columned log list bound to live entries
+
+Why:
+- Phase 4 requires replacing static shell text with an actual UI surface connected to ingestion/session state.
+- This provides an immediate end-to-end vertical path: publish -> channel -> batch store -> UI update.
+
+Impact:
+- The app now renders and updates a real log list with filtering and telemetry summary.
+- Sample entries can be generated from UI to verify data flow and theming without receiver setup.
+
+Follow-ups:
+- Add pause/resume ingestion controls and logger-tree binding to `LoggerNode`.
+- Add richer details pane (properties/exception/source fields) and level toggles.
