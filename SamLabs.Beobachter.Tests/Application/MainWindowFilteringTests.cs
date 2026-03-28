@@ -1,4 +1,3 @@
-using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
@@ -19,7 +18,7 @@ public sealed class MainWindowFilteringTests
             MainWindowTestSupport.CreateEntry("Inventory.Api.Sync", LogLevel.Error, "Stock mismatch")
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
         Assert.Equal(3, vm.Stream.VisibleEntries.Count);
 
         vm.Filters.SearchText = "gateway";
@@ -74,7 +73,7 @@ public sealed class MainWindowFilteringTests
             }
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
         vm.Filters.ReceiverFilter = "udp-1";
         Assert.Single(vm.Stream.VisibleEntries);
@@ -110,7 +109,7 @@ public sealed class MainWindowFilteringTests
             MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Fatal, "Crashed")
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
         Assert.Equal(4, vm.Stream.VisibleEntries.Count);
 
         vm.QuickFilters.ApplyErrorsAndAboveCommand.Execute(null);
@@ -141,7 +140,7 @@ public sealed class MainWindowFilteringTests
             }
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
         Assert.Equal(2, vm.Stream.VisibleEntries.Count);
 
         vm.QuickFilters.ApplyStructuredOnlyCommand.Execute(null);

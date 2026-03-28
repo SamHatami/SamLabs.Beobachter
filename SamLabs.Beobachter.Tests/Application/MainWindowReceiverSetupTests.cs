@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Input;
-using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Settings;
 using Xunit;
@@ -13,7 +12,7 @@ public sealed class MainWindowReceiverSetupTests
     {
         FakeSettingsStore settings = new();
         FakeIngestionSession session = new([]);
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session, settingsStore: settings);
 
         await MainWindowTestSupport.WaitForReceiverLoadAsync(vm);
 
@@ -44,7 +43,7 @@ public sealed class MainWindowReceiverSetupTests
     {
         FakeSettingsStore settings = new();
         FakeIngestionSession session = new([]);
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session, settingsStore: settings);
 
         await MainWindowTestSupport.WaitForReceiverLoadAsync(vm);
 
@@ -92,7 +91,7 @@ public sealed class MainWindowReceiverSetupTests
         };
 
         FakeIngestionSession session = new([]);
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session, settingsStore: settings);
 
         await ((IAsyncRelayCommand)vm.ReceiverSetup.ReloadReceiverSetupCommand).ExecuteAsync(null);
 

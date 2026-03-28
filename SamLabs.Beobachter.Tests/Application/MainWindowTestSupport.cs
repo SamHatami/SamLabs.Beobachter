@@ -13,6 +13,27 @@ namespace SamLabs.Beobachter.Tests.Application;
 
 internal static class MainWindowTestSupport
 {
+    public static MainWindowViewModel CreateMainWindowViewModel(
+        IIngestionSession session,
+        IClipboardService? clipboardService = null,
+        ISettingsStore? settingsStore = null,
+        IThemeService? themeService = null,
+        ILogStatisticsService? statisticsService = null)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        IThemeService resolvedThemeService = themeService ?? new ThemeService();
+        IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
+        ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
+        ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
+
+        return new MainWindowViewModel(
+            resolvedThemeService,
+            session,
+            resolvedClipboardService,
+            resolvedSettingsStore,
+            resolvedStatisticsService);
+    }
+
     public static LogEntry CreateEntry(string logger, LogLevel level, string message)
     {
         return new LogEntry

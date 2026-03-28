@@ -1029,3 +1029,31 @@ Impact:
 
 Follow-ups:
 - Extract remaining inlined surfaces (`LogFilters`, `LogStream`, `EntryDetails`) with care around `MainWindow` keyboard/auto-scroll behavior currently tied to named controls.
+
+## 2026-03-28 - MVVM Refactor Phase 6A: Runtime Constructor Hardening (No Fallback Service Creation)
+What changed:
+- Tightened `MainWindowViewModel` constructor dependency contract:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - runtime constructor now requires explicit `IThemeService`, `IIngestionSession`, `IClipboardService`, `ISettingsStore`, and `ILogStatisticsService`
+  - removed optional parameters and fallback `new ...` service creation from runtime path
+  - kept a parameterless constructor only for design-time, explicitly marked as design-only
+- Added a shared test factory for explicit VM construction:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+  - centralizes test construction with explicit dependencies
+- Updated MainWindow-oriented tests to use the new support factory:
+  [MainWindowFilteringTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowFilteringTests.cs),
+  [MainWindowSessionAndDetailsTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowSessionAndDetailsTests.cs),
+  [MainWindowReceiverSetupTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowReceiverSetupTests.cs),
+  [MainWindowWorkspaceStateTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowWorkspaceStateTests.cs)
+
+Why:
+- Runtime composition should be container-owned and explicit, not a mix of DI plus hidden service fallbacks inside view-model constructors.
+- This makes dependency ownership clearer and prevents accidental lifetime drift.
+
+Impact:
+- Runtime construction now fails fast if required dependencies are missing.
+- Test setup remains straightforward through one helper while preserving explicit dependency flow.
+- Full suite remains green (`84` passing tests).
+
+Follow-ups:
+- Move feature ViewModel composition further into DI registration so `MainWindowViewModel` stops constructing child VMs directly.

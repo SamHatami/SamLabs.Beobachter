@@ -88,6 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _autoScrollButtonText = "Pin: On";
 
+    [Obsolete("Design-time constructor only. Use the DI constructor for runtime composition.")]
     public MainWindowViewModel() : this(
         new ThemeService(),
         new DesignIngestionSession(),
@@ -100,15 +101,15 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         IThemeService themeService,
         IIngestionSession ingestionSession,
-        IClipboardService? clipboardService = null,
-        ISettingsStore? settingsStore = null,
-        ILogStatisticsService? statisticsService = null)
+        IClipboardService clipboardService,
+        ISettingsStore settingsStore,
+        ILogStatisticsService statisticsService)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
-        _settingsStore = settingsStore ?? new DesignSettingsStore();
-        _statisticsService = statisticsService ?? new RollingLogStatisticsService();
-        IClipboardService resolvedClipboardService = clipboardService ?? new NullClipboardService();
+        _settingsStore = settingsStore ?? throw new ArgumentNullException(nameof(settingsStore));
+        _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
+        IClipboardService resolvedClipboardService = clipboardService ?? throw new ArgumentNullException(nameof(clipboardService));
         Filters = new LogFiltersViewModel();
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources = new SourceTreeViewModel();

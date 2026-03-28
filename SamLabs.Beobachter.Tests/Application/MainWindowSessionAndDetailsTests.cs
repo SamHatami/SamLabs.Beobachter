@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Input;
-using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
@@ -13,7 +12,7 @@ public sealed class MainWindowSessionAndDetailsTests
     public async Task TogglePause_UpdatesSessionState()
     {
         FakeIngestionSession session = new([]);
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
         await ((IAsyncRelayCommand)vm.TogglePauseCommand).ExecuteAsync(null);
         Assert.True(vm.IsPaused);
@@ -28,7 +27,7 @@ public sealed class MainWindowSessionAndDetailsTests
     public async Task ToggleAutoScroll_UpdatesSessionState()
     {
         FakeIngestionSession session = new([]);
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
         await ((IAsyncRelayCommand)vm.ToggleAutoScrollCommand).ExecuteAsync(null);
         Assert.False(vm.IsAutoScrollEnabled);
@@ -44,7 +43,7 @@ public sealed class MainWindowSessionAndDetailsTests
     {
         FakeClipboardService clipboard = new();
         FakeIngestionSession session = new([MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Error, "Oops")]);
-        MainWindowViewModel vm = new(new ThemeService(), session, clipboard);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session, clipboard);
         vm.Stream.SelectedEntry = session.Snapshot().First();
 
         await ((IAsyncRelayCommand)vm.Details.CopySelectedMessageCommand).ExecuteAsync(null);
@@ -77,7 +76,7 @@ public sealed class MainWindowSessionAndDetailsTests
             }
         ]);
 
-        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
         vm.Stream.SelectedEntry = session.Snapshot().First();
 
         Assert.Contains("MessageTemplate: Payment warning for {OrderId}", vm.Details.SelectedDetailsText);
@@ -88,7 +87,7 @@ public sealed class MainWindowSessionAndDetailsTests
     [Fact]
     public void ToggleDensity_UpdatesRowMetrics()
     {
-        MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService());
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(new FakeIngestionSession([]));
 
         Assert.False(vm.Stream.IsCompactDensity);
         Assert.Equal("Density: Comfortable", vm.Stream.DensityButtonText);

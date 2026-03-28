@@ -1,4 +1,3 @@
-using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Settings;
 using Xunit;
@@ -21,7 +20,7 @@ public sealed class MainWindowWorkspaceStateTests
             }
         };
 
-        MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(new FakeIngestionSession([]), settingsStore: settings);
 
         await MainWindowTestSupport.WaitForConditionAsync(() => vm.ReceiverSetup.SelectedReceiverDefinition is not null);
 
@@ -42,7 +41,7 @@ public sealed class MainWindowWorkspaceStateTests
             }
         };
 
-        MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(new FakeIngestionSession([]), settingsStore: settings);
         await MainWindowTestSupport.WaitForConditionAsync(() => vm.ReceiverSetup.ReceiverDefinitions.Count == 2);
 
         vm.Filters.SearchText = "gateway";
@@ -73,7 +72,7 @@ public sealed class MainWindowWorkspaceStateTests
     public async Task UiLayoutState_PersistsColumnWidths()
     {
         FakeSettingsStore settings = new();
-        MainWindowViewModel vm = new(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService(), settings);
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(new FakeIngestionSession([]), settingsStore: settings);
 
         vm.Stream.TimestampColumnWidth = 210;
         vm.Stream.LevelColumnWidth = 130;
