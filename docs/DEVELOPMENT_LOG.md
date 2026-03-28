@@ -907,3 +907,32 @@ Impact:
 
 Follow-ups:
 - Rebind log surface controls directly to `Stream.*` and drop pass-through stream properties during shell cleanup.
+
+## 2026-03-28 - MVVM Refactor Phase 3: Source Tree Extraction
+What changed:
+- Extracted source tree behavior into:
+  [SourceTreeViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/SourceTreeViewModel.cs)
+  - owns logger root and tree item collection
+  - owns logger registration and snapshot rebuild
+  - owns logger enable/disable and "enable all" command
+  - emits state-change event for shell coordination
+- Updated shell VM to compose source tree VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed direct logger-tree root/state ownership
+  - delegated logger registration and enabled checks to `Sources`
+  - replaced shell `EnableAllLoggers` command implementation with pass-through to `Sources`
+  - coordinated source-tree state changes via `Sources.StateChanged`
+- Added focused source-tree tests:
+  [SourceTreeViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/SourceTreeViewModelTests.cs)
+
+Why:
+- Source tree state is a dedicated panel concern and should be isolated from shell responsibilities.
+- This extraction removes another substantial behavior cluster from `MainWindowViewModel`.
+
+Impact:
+- Existing UI behavior remains stable with compatibility pass-throughs.
+- Logger tree registration and toggle state now live behind a dedicated VM boundary.
+- Test suite increased to 82 passing tests.
+
+Follow-ups:
+- Move source panel bindings directly to `Sources.*` and remove shell pass-throughs in final shell cleanup.

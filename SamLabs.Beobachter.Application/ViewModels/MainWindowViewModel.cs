@@ -44,7 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILogQueryEvaluator _queryEvaluator = new LogQueryEvaluator();
     private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
-    private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
     private WorkspaceSettings _workspaceSettings = new();
     private UiLayoutSettings _uiLayoutSettings = new();
     private CancellationTokenSource? _persistStateCts;
@@ -106,6 +105,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IClipboardService resolvedClipboardService = clipboardService ?? new NullClipboardService();
         Filters = new LogFiltersViewModel();
         Filters.PropertyChanged += OnFiltersPropertyChanged;
+        Sources = new SourceTreeViewModel();
+        Sources.StateChanged += OnSourcesStateChanged;
         ReceiverSetup = new ReceiverSetupViewModel(_settingsStore, _ingestionSession);
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
@@ -117,7 +118,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IsPaused = _ingestionSession.IsPaused;
         IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
         _statisticsService.RecordRange(_ingestionSession.Snapshot());
-        RebuildLoggerTreeFromSnapshot();
+        Sources.RebuildFromSnapshot(_ingestionSession.Snapshot());
         RebuildVisibleEntries();
         UpdateThemeSummary();
         UpdateStatusSummary();
@@ -126,7 +127,11 @@ public partial class MainWindowViewModel : ViewModelBase
         _ = LoadWorkspaceStateAsync();
     }
 
-    public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
+    public SourceTreeViewModel Sources { get; }
+
+    public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems => Sources.LoggerTreeItems;
+
+    public IRelayCommand EnableAllLoggersCommand => Sources.EnableAllLoggersCommand;
 
     public ReceiverSetupViewModel ReceiverSetup { get; }
 
@@ -535,19 +540,6 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(UpdateStatusSummary);
     }
 
-    [RelayCommand]
-    private void EnableAllLoggers()
-    {
-        _loggerRoot.SetEnabled(true, recursive: true);
-        foreach (var item in LoggerTreeItems)
-        {
-            item.SyncFromNodeRecursive();
-        }
-
-        RebuildVisibleEntries();
-        UpdateStatusSummary();
-    }
-
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
@@ -707,7 +699,7 @@ public partial class MainWindowViewModel : ViewModelBase
             LogQuery query = BuildCurrentQuery();
             foreach (LogEntry entry in e.AppendedEntries)
             {
-                RegisterLogger(entry.LoggerName);
+                Sources.RegisterLogger(entry.LoggerName);
             }
 
             Stream.AppendEntries(e.AppendedEntries, entry => MatchesFilter(entry, query));
@@ -741,7 +733,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool IsLoggerEnabled(string loggerName)
     {
-        return !_loggerRoot.TryGetPath(loggerName, out var node) || node?.IsEnabled != false;
+        return Sources.IsLoggerEnabled(loggerName);
     }
 
     private bool IsLevelEnabled(LogLevel level)
@@ -749,46 +741,7 @@ public partial class MainWindowViewModel : ViewModelBase
         return Filters.IsLevelEnabled(level);
     }
 
-    private void RebuildLoggerTreeFromSnapshot()
-    {
-        _loggerRoot = LoggerNode.CreateRoot();
-        foreach (var entry in _ingestionSession.Snapshot())
-        {
-            RegisterLogger(entry.LoggerName, refreshTree: false);
-        }
-
-        RebuildLoggerTreeItems();
-    }
-
-    private void RegisterLogger(string loggerName, bool refreshTree = true)
-    {
-        if (string.IsNullOrWhiteSpace(loggerName))
-        {
-            return;
-        }
-
-        if (_loggerRoot.TryGetPath(loggerName, out _))
-        {
-            return;
-        }
-
-        _loggerRoot.GetOrCreatePath(loggerName);
-        if (refreshTree)
-        {
-            RebuildLoggerTreeItems();
-        }
-    }
-
-    private void RebuildLoggerTreeItems()
-    {
-        LoggerTreeItems.Clear();
-        foreach (var child in _loggerRoot.Children.Values.OrderBy(static x => x.Name, StringComparer.Ordinal))
-        {
-            LoggerTreeItems.Add(new LoggerTreeItemViewModel(child, OnLoggerTreeStateChanged));
-        }
-    }
-
-    private void OnLoggerTreeStateChanged()
+    private void OnSourcesStateChanged(object? sender, EventArgs e)
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
