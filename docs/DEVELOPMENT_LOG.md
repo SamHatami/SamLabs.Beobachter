@@ -241,3 +241,30 @@ Impact:
 Follow-ups:
 - Add parser composition for CSV/plain-text and wire receiver-specific parser chains.
 - Add stress/cancellation tests under sustained ingest for receiver loops.
+
+## 2026-03-28 - Phase 3 Slice 6: Parser Composition (XML/CSV/Plain Text)
+What changed:
+- Added parser composition layer:
+  [CompositeLogParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/CompositeLogParser.cs)
+- Added CSV parser and options:
+  [CsvParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/CsvParser.cs),
+  [CsvParserOptions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/CsvParserOptions.cs)
+- Added plain text parser:
+  [PlainTextParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/PlainTextParser.cs)
+- Added coverage tests:
+  [CompositeLogParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/CompositeLogParserTests.cs),
+  [CsvParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/CsvParserTests.cs),
+  [PlainTextParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/PlainTextParserTests.cs)
+
+Why:
+- Receivers must support heterogeneous payloads without duplicating parse-selection logic.
+- CSV/plain-text support was still a known parity gap in phase 3.
+
+Impact:
+- Infrastructure can now chain parsers by priority and stop on first successful parse.
+- File and network receiver paths can share the same parse pipeline abstraction.
+- Test suite increased to 38 passing tests.
+
+Follow-ups:
+- Wire receiver-specific parser chains through typed receiver definitions/settings.
+- Add malformed CSV and quoted multiline payload edge-case tests.
