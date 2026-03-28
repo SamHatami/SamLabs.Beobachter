@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,6 +19,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
+    private readonly IClipboardService _clipboardService;
     private readonly Random _random = new();
     private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
 
@@ -36,14 +38,45 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _pauseButtonText = "Pause";
 
-    public MainWindowViewModel() : this(new ThemeService(), new DesignIngestionSession())
+    [ObservableProperty]
+    private bool _showTrace = true;
+
+    [ObservableProperty]
+    private bool _showDebug = true;
+
+    [ObservableProperty]
+    private bool _showInfo = true;
+
+    [ObservableProperty]
+    private bool _showWarn = true;
+
+    [ObservableProperty]
+    private bool _showError = true;
+
+    [ObservableProperty]
+    private bool _showFatal = true;
+
+    [ObservableProperty]
+    private LogEntry? _selectedEntry;
+
+    [ObservableProperty]
+    private string _selectedDetailsText = "No entry selected.";
+
+    [ObservableProperty]
+    private string _copyStatus = string.Empty;
+
+    public MainWindowViewModel() : this(new ThemeService(), new DesignIngestionSession(), new NullClipboardService())
     {
     }
 
-    public MainWindowViewModel(IThemeService themeService, IIngestionSession ingestionSession)
+    public MainWindowViewModel(
+        IThemeService themeService,
+        IIngestionSession ingestionSession,
+        IClipboardService? clipboardService = null)
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
+        _clipboardService = clipboardService ?? new NullClipboardService();
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
@@ -120,6 +153,54 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(UpdateStatusSummary);
     }
 
+    [RelayCommand]
+    private void ResetLevels()
+    {
+        ShowTrace = true;
+        ShowDebug = true;
+        ShowInfo = true;
+        ShowWarn = true;
+        ShowError = true;
+        ShowFatal = true;
+    }
+
+    [RelayCommand]
+    private void EnableAllLoggers()
+    {
+        _loggerRoot.SetEnabled(true, recursive: true);
+        foreach (var item in LoggerTreeItems)
+        {
+            item.SyncFromNodeRecursive();
+        }
+
+        RebuildVisibleEntries();
+        UpdateStatusSummary();
+    }
+
+    [RelayCommand]
+    private async Task CopySelectedMessageAsync()
+    {
+        if (SelectedEntry is null)
+        {
+            return;
+        }
+
+        await _clipboardService.SetTextAsync(SelectedEntry.Message).ConfigureAwait(false);
+        CopyStatus = "Message copied.";
+    }
+
+    [RelayCommand]
+    private async Task CopySelectedDetailsAsync()
+    {
+        if (SelectedEntry is null)
+        {
+            return;
+        }
+
+        await _clipboardService.SetTextAsync(SelectedDetailsText).ConfigureAwait(false);
+        CopyStatus = "Details copied.";
+    }
+
     partial void OnSearchTextChanged(string value)
     {
         RebuildVisibleEntries();
@@ -131,6 +212,24 @@ public partial class MainWindowViewModel : ViewModelBase
         PauseButtonText = value ? "Resume" : "Pause";
         UpdateStatusSummary();
     }
+
+    partial void OnSelectedEntryChanged(LogEntry? value)
+    {
+        SelectedDetailsText = BuildDetailsText(value);
+        CopyStatus = string.Empty;
+    }
+
+    partial void OnShowTraceChanged(bool value) => OnLevelFilterChanged();
+
+    partial void OnShowDebugChanged(bool value) => OnLevelFilterChanged();
+
+    partial void OnShowInfoChanged(bool value) => OnLevelFilterChanged();
+
+    partial void OnShowWarnChanged(bool value) => OnLevelFilterChanged();
+
+    partial void OnShowErrorChanged(bool value) => OnLevelFilterChanged();
+
+    partial void OnShowFatalChanged(bool value) => OnLevelFilterChanged();
 
     private void OnEntriesAppended(object? sender, LogEntriesAppendedEventArgs e)
     {
@@ -169,6 +268,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool MatchesFilter(LogEntry entry)
     {
+        if (!IsLevelEnabled(entry.Level))
+        {
+            return false;
+        }
+
         if (!IsLoggerEnabled(entry.LoggerName))
         {
             return false;
@@ -195,6 +299,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool IsLoggerEnabled(string loggerName)
     {
         return !_loggerRoot.TryGetPath(loggerName, out var node) || node?.IsEnabled != false;
+    }
+
+    private bool IsLevelEnabled(LogLevel level)
+    {
+        return level switch
+        {
+            LogLevel.Trace => ShowTrace,
+            LogLevel.Debug => ShowDebug,
+            LogLevel.Info => ShowInfo,
+            LogLevel.Warn => ShowWarn,
+            LogLevel.Error => ShowError,
+            LogLevel.Fatal => ShowFatal,
+            _ => true
+        };
     }
 
     private void RebuildLoggerTreeFromSnapshot()
@@ -242,6 +360,12 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
     }
 
+    private void OnLevelFilterChanged()
+    {
+        RebuildVisibleEntries();
+        UpdateStatusSummary();
+    }
+
     private void UpdateThemeSummary()
     {
         ThemeSummary = $"Theme: {_themeService.CurrentMode}";
@@ -266,5 +390,46 @@ public partial class MainWindowViewModel : ViewModelBase
             LogLevel.Fatal
         ];
         return levels[_random.Next(0, levels.Length)];
+    }
+
+    private static string BuildDetailsText(LogEntry? entry)
+    {
+        if (entry is null)
+        {
+            return "No entry selected.";
+        }
+
+        var builder = new StringBuilder();
+        builder.AppendLine($"Timestamp: {entry.Timestamp:O}");
+        builder.AppendLine($"Level: {entry.Level}");
+        builder.AppendLine($"Receiver: {entry.ReceiverId}");
+        builder.AppendLine($"Logger: {entry.LoggerName}");
+        builder.AppendLine($"Thread: {entry.ThreadName}");
+        builder.AppendLine($"Message: {entry.Message}");
+
+        if (!string.IsNullOrWhiteSpace(entry.Exception))
+        {
+            builder.AppendLine();
+            builder.AppendLine("Exception:");
+            builder.AppendLine(entry.Exception);
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.SourceFileName) || entry.SourceFileLineNumber.HasValue)
+        {
+            builder.AppendLine();
+            builder.AppendLine($"Source: {entry.SourceFileName}:{entry.SourceFileLineNumber}");
+        }
+
+        if (entry.Properties.Count > 0)
+        {
+            builder.AppendLine();
+            builder.AppendLine("Properties:");
+            foreach (var pair in entry.Properties.OrderBy(static x => x.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                builder.AppendLine($"- {pair.Key}: {pair.Value}");
+            }
+        }
+
+        return builder.ToString();
     }
 }

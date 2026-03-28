@@ -22,6 +22,7 @@ public static class Root
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
 

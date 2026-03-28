@@ -53,22 +53,52 @@
                 Padding="12"
                 CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
-                <TextBox Grid.Column="0"
-                         Watermark="Search logger/message/exception/thread..."
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Column="1"
-                        Margin="8,0,0,0"
-                        Content="Clear"
-                        Command="{Binding ClearSearchCommand}" />
-                <Button Grid.Column="2"
-                        Margin="8,0,0,0"
-                        Content="Add Sample"
-                        Command="{Binding GenerateSampleEntriesCommand}" />
-                <Button Grid.Column="3"
-                        Margin="8,0,0,0"
-                        Content="{Binding PauseButtonText}"
-                        Command="{Binding TogglePauseCommand}" />
+            <Grid RowDefinitions="Auto,Auto">
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="*,Auto,Auto,Auto">
+                    <TextBox Grid.Column="0"
+                             Watermark="Search logger/message/exception/thread..."
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Column="1"
+                            Margin="8,0,0,0"
+                            Content="Clear"
+                            Command="{Binding ClearSearchCommand}" />
+                    <Button Grid.Column="2"
+                            Margin="8,0,0,0"
+                            Content="Add Sample"
+                            Command="{Binding GenerateSampleEntriesCommand}" />
+                    <Button Grid.Column="3"
+                            Margin="8,0,0,0"
+                            Content="{Binding PauseButtonText}"
+                            Command="{Binding TogglePauseCommand}" />
+                </Grid>
+
+                <WrapPanel Grid.Row="1"
+                           Margin="0,8,0,0">
+                    <CheckBox Content="Trace"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowTrace}" />
+                    <CheckBox Content="Debug"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowDebug}" />
+                    <CheckBox Content="Info"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowInfo}" />
+                    <CheckBox Content="Warn"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowWarn}" />
+                    <CheckBox Content="Error"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowError}" />
+                    <CheckBox Content="Fatal"
+                              Margin="0,0,10,0"
+                              IsChecked="{Binding ShowFatal}" />
+                    <Button Content="Reset Levels"
+                            Margin="0,0,10,0"
+                            Command="{Binding ResetLevelsCommand}" />
+                    <Button Content="Enable All Loggers"
+                            Command="{Binding EnableAllLoggersCommand}" />
+                </WrapPanel>
             </Grid>
         </Border>
 
@@ -103,7 +133,7 @@
                 </Border>
 
                 <Grid Grid.Column="1"
-                      RowDefinitions="Auto,*">
+                      RowDefinitions="Auto,*,Auto">
                     <Grid Grid.Row="0"
                           Margin="4,0,4,6"
                           ColumnDefinitions="180,90,220,*">
@@ -126,7 +156,8 @@
                     </Grid>
 
                     <ListBox Grid.Row="1"
-                             ItemsSource="{Binding VisibleEntries}">
+                             ItemsSource="{Binding VisibleEntries}"
+                             SelectedItem="{Binding SelectedEntry}">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="models:LogEntry">
                                 <Grid Margin="4,1"
@@ -143,6 +174,41 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
+                    <Border Grid.Row="2"
+                            Margin="0,8,0,0"
+                            Padding="8"
+                            CornerRadius="8"
+                            Background="{DynamicResource ShellBackgroundBrush}">
+                        <Grid RowDefinitions="Auto,*,Auto">
+                            <TextBlock Grid.Row="0"
+                                       Margin="0,0,0,6"
+                                       Text="Details"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{Binding SelectedDetailsText}"
+                                           TextWrapping="Wrap" />
+                            </ScrollViewer>
+                            <Grid Grid.Row="2"
+                                  Margin="0,8,0,0"
+                                  ColumnDefinitions="Auto,Auto,*">
+                                <Button Grid.Column="0"
+                                        Content="Copy Message"
+                                        Command="{Binding CopySelectedMessageCommand}" />
+                                <Button Grid.Column="1"
+                                        Margin="8,0,0,0"
+                                        Content="Copy Details"
+                                        Command="{Binding CopySelectedDetailsCommand}" />
+                                <TextBlock Grid.Column="2"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}"
+                                           Text="{Binding CopyStatus}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </Border>

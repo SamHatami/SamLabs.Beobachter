@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\SamLabs.Beobachter.Application\SamLabs.Beobachter.Application.csproj" />
         <ProjectReference Include="..\SamLabs.Beobachter.Core\SamLabs.Beobachter.Core.csproj" />
         <ProjectReference Include="..\SamLabs.Beobachter.Infrastructure\SamLabs.Beobachter.Infrastructure.csproj" />
     </ItemGroup>

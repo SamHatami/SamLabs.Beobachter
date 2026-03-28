@@ -405,3 +405,38 @@ Impact:
 Follow-ups:
 - Add details pane with selected-entry fields and copy actions.
 - Add level toggle controls integrated with existing filter path.
+
+## 2026-03-28 - Phase 4 Slice 5: Details Pane, Level Toggles, and VM Tests
+What changed:
+- Added clipboard abstraction + runtime implementation:
+  [IClipboardService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IClipboardService.cs),
+  [AvaloniaClipboardService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/AvaloniaClipboardService.cs),
+  [NullClipboardService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/NullClipboardService.cs)
+- Wired clipboard service in composition root:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Extended main VM with:
+  - selected entry + formatted details text
+  - copy-message/copy-details commands
+  - level toggles (`Trace`..`Fatal`) in the same filter path as search/logger filters
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Extended UI with:
+  - level toggle toolbar
+  - selected-entry details pane
+  - copy actions and copy-status feedback
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Added app-level VM tests and project reference:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs),
+  [SamLabs.Beobachter.Tests.csproj](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/SamLabs.Beobachter.Tests.csproj)
+
+Why:
+- Phase 4 needed the details/copy workflow and level-based filtering to move from a raw feed viewer to a usable inspection workspace.
+- VM tests are required to lock behavior around state transitions and filter interactions.
+
+Impact:
+- The workspace now supports selected log inspection, clipboard copy flows, and combined filtering by level/logger/text.
+- Automated tests now include main VM behavior (filters, pause toggle, clipboard integration).
+- Test suite increased to 46 passing tests.
+
+Follow-ups:
+- Add explicit auto-scroll/pin-to-bottom behavior controls.
+- Introduce virtualization-aware list strategy for very high entry counts.
