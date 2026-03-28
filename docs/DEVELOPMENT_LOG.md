@@ -1117,3 +1117,24 @@ Impact:
 
 Follow-ups:
 - Extract details panel into its own view (`LogEntryDetailsView`) and then split query/filter surfaces into dedicated views to continue shell simplification.
+
+## 2026-03-28 - MVVM Refactor Phase 7B: Entry Details View Extraction
+What changed:
+- Extracted the inline details panel into a dedicated view:
+  [EntryDetailsView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/EntryDetailsView.axaml),
+  [EntryDetailsView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/EntryDetailsView.axaml.cs)
+- Updated shell layout composition:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - replaced inline details markup with `ContentControl` bound to `Details`
+
+Why:
+- The details panel was still a large inline section in shell markup and made `MainWindow` harder to evolve.
+- `EntryDetailsViewModel` already existed, so this was a low-risk extraction with no logic rewrite.
+
+Impact:
+- Shell markup is smaller and more region-oriented.
+- Details UI is now independently editable without touching shell composition.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Extract query/filter strip into dedicated views (`LogQueryBarView` + advanced filters) to complete shell-first decomposition.

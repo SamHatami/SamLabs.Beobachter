@@ -174,40 +174,9 @@
                     <ContentControl Grid.Row="0"
                                     Content="{Binding Stream}" />
 
-                    <Border Grid.Row="1"
-                            Margin="0,8,0,0"
-                            Padding="8"
-                            CornerRadius="8"
-                            Background="{DynamicResource ShellBackgroundBrush}">
-                        <Grid RowDefinitions="Auto,*,Auto">
-                            <TextBlock Grid.Row="0"
-                                       Margin="0,0,0,6"
-                                       Text="Details"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
-                            <ScrollViewer Grid.Row="1"
-                                          VerticalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding Details.SelectedDetailsText}"
-                                           TextWrapping="Wrap" />
-                            </ScrollViewer>
-                            <Grid Grid.Row="2"
-                                  Margin="0,8,0,0"
-                                  ColumnDefinitions="Auto,Auto,*">
-                                <Button Grid.Column="0"
-                                        Content="Copy Message"
-                                        Command="{Binding Details.CopySelectedMessageCommand}" />
-                                <Button Grid.Column="1"
-                                        Margin="8,0,0,0"
-                                        Content="Copy Details"
-                                        Command="{Binding Details.CopySelectedDetailsCommand}" />
-                                <TextBlock Grid.Column="2"
-                                           Margin="12,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource ShellMutedForegroundBrush}"
-                                           Text="{Binding Details.CopyStatus}" />
-                            </Grid>
-                        </Grid>
-                    </Border>
+                    <ContentControl Grid.Row="1"
+                                    Margin="0,8,0,0"
+                                    Content="{Binding Details}" />
 
                     <ContentControl Grid.Row="2"
                                     Margin="0,8,0,0"
