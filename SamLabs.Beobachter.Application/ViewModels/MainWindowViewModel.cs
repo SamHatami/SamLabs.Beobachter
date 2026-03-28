@@ -49,6 +49,22 @@ public partial class MainWindowViewModel : ViewModelBase
         nameof(ReceiverDefinitionViewModel.PollIntervalMs),
         nameof(ReceiverDefinitionViewModel.ParserOrderText)
     };
+    private static readonly HashSet<string> FilterCriteriaPropertyNames = new(StringComparer.Ordinal)
+    {
+        nameof(LogFiltersViewModel.SearchText),
+        nameof(LogFiltersViewModel.ReceiverFilter),
+        nameof(LogFiltersViewModel.LoggerFilter),
+        nameof(LogFiltersViewModel.ThreadFilter),
+        nameof(LogFiltersViewModel.TenantFilter),
+        nameof(LogFiltersViewModel.TraceIdFilter),
+        nameof(LogFiltersViewModel.MinimumLevelOption),
+        nameof(LogFiltersViewModel.ShowTrace),
+        nameof(LogFiltersViewModel.ShowDebug),
+        nameof(LogFiltersViewModel.ShowInfo),
+        nameof(LogFiltersViewModel.ShowWarn),
+        nameof(LogFiltersViewModel.ShowError),
+        nameof(LogFiltersViewModel.ShowFatal)
+    };
 
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
@@ -80,27 +96,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _topReceiversSummary = "Top receivers (5m): -";
-
-    [ObservableProperty]
-    private string _searchText = string.Empty;
-
-    [ObservableProperty]
-    private string _receiverFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _loggerFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _threadFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _tenantFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _traceIdFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _minimumLevelOption = "Any";
 
     [ObservableProperty]
     private bool _isPaused;
@@ -136,39 +131,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private double _loggerColumnWidth = 220;
 
     [ObservableProperty]
-    private bool _showTrace = true;
-
-    [ObservableProperty]
-    private bool _showDebug = true;
-
-    [ObservableProperty]
-    private bool _showInfo = true;
-
-    [ObservableProperty]
-    private bool _showWarn = true;
-
-    [ObservableProperty]
-    private bool _showError = true;
-
-    [ObservableProperty]
-    private bool _showFatal = true;
-
-    [ObservableProperty]
     private ReceiverDefinitionViewModel? _selectedReceiverDefinition;
 
     [ObservableProperty]
     private string _receiverSetupStatus = string.Empty;
-
-    public IReadOnlyList<string> MinimumLevelOptions { get; } =
-    [
-        "Any",
-        nameof(LogLevel.Trace),
-        nameof(LogLevel.Debug),
-        nameof(LogLevel.Info),
-        nameof(LogLevel.Warn),
-        nameof(LogLevel.Error),
-        nameof(LogLevel.Fatal)
-    ];
 
     public string LogColumnDefinitions =>
         $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
@@ -194,6 +160,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _settingsStore = settingsStore ?? new DesignSettingsStore();
         _statisticsService = statisticsService ?? new RollingLogStatisticsService();
         IClipboardService resolvedClipboardService = clipboardService ?? new NullClipboardService();
+        Filters = new LogFiltersViewModel();
+        Filters.PropertyChanged += OnFiltersPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
         Details.PropertyChanged += OnDetailsPropertyChanged;
 
@@ -216,6 +184,211 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<LoggerTreeItemViewModel> LoggerTreeItems { get; } = [];
 
     public ObservableCollection<ReceiverDefinitionViewModel> ReceiverDefinitions { get; } = [];
+
+    public LogFiltersViewModel Filters { get; }
+
+    public string SearchText
+    {
+        get => Filters.SearchText;
+        set
+        {
+            if (string.Equals(Filters.SearchText, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.SearchText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string ReceiverFilter
+    {
+        get => Filters.ReceiverFilter;
+        set
+        {
+            if (string.Equals(Filters.ReceiverFilter, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.ReceiverFilter = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string LoggerFilter
+    {
+        get => Filters.LoggerFilter;
+        set
+        {
+            if (string.Equals(Filters.LoggerFilter, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.LoggerFilter = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string ThreadFilter
+    {
+        get => Filters.ThreadFilter;
+        set
+        {
+            if (string.Equals(Filters.ThreadFilter, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.ThreadFilter = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string TenantFilter
+    {
+        get => Filters.TenantFilter;
+        set
+        {
+            if (string.Equals(Filters.TenantFilter, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.TenantFilter = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string TraceIdFilter
+    {
+        get => Filters.TraceIdFilter;
+        set
+        {
+            if (string.Equals(Filters.TraceIdFilter, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.TraceIdFilter = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string MinimumLevelOption
+    {
+        get => Filters.MinimumLevelOption;
+        set
+        {
+            if (string.Equals(Filters.MinimumLevelOption, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Filters.MinimumLevelOption = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowTrace
+    {
+        get => Filters.ShowTrace;
+        set
+        {
+            if (Filters.ShowTrace == value)
+            {
+                return;
+            }
+
+            Filters.ShowTrace = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowDebug
+    {
+        get => Filters.ShowDebug;
+        set
+        {
+            if (Filters.ShowDebug == value)
+            {
+                return;
+            }
+
+            Filters.ShowDebug = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowInfo
+    {
+        get => Filters.ShowInfo;
+        set
+        {
+            if (Filters.ShowInfo == value)
+            {
+                return;
+            }
+
+            Filters.ShowInfo = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowWarn
+    {
+        get => Filters.ShowWarn;
+        set
+        {
+            if (Filters.ShowWarn == value)
+            {
+                return;
+            }
+
+            Filters.ShowWarn = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowError
+    {
+        get => Filters.ShowError;
+        set
+        {
+            if (Filters.ShowError == value)
+            {
+                return;
+            }
+
+            Filters.ShowError = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowFatal
+    {
+        get => Filters.ShowFatal;
+        set
+        {
+            if (Filters.ShowFatal == value)
+            {
+                return;
+            }
+
+            Filters.ShowFatal = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public IReadOnlyList<string> MinimumLevelOptions => Filters.MinimumLevelOptions;
+
+    public IRelayCommand ClearSearchCommand => Filters.ClearSearchCommand;
+
+    public IRelayCommand ClearStructuredFiltersCommand => Filters.ClearStructuredFiltersCommand;
+
+    public IRelayCommand ResetLevelsCommand => Filters.ResetLevelsCommand;
 
     public EntryDetailsViewModel Details { get; }
 
@@ -291,23 +464,6 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ClearSearch()
-    {
-        SearchText = string.Empty;
-    }
-
-    [RelayCommand]
-    private void ClearStructuredFilters()
-    {
-        ReceiverFilter = string.Empty;
-        LoggerFilter = string.Empty;
-        ThreadFilter = string.Empty;
-        TenantFilter = string.Empty;
-        TraceIdFilter = string.Empty;
-        MinimumLevelOption = "Any";
-    }
-
-    [RelayCommand]
     private async Task TogglePauseAsync()
     {
         var nextState = !IsPaused;
@@ -349,17 +505,6 @@ public partial class MainWindowViewModel : ViewModelBase
         TimestampColumnWidth = 180;
         LevelColumnWidth = 90;
         LoggerColumnWidth = 220;
-    }
-
-    [RelayCommand]
-    private void ResetLevels()
-    {
-        ShowTrace = true;
-        ShowDebug = true;
-        ShowInfo = true;
-        ShowWarn = true;
-        ShowError = true;
-        ShowFatal = true;
     }
 
     [RelayCommand]
@@ -468,25 +613,6 @@ public partial class MainWindowViewModel : ViewModelBase
         ReceiverSetupStatus = $"Reloaded {ReceiverDefinitions.Count} receiver(s) from settings.";
     }
 
-    partial void OnSearchTextChanged(string value)
-    {
-        RebuildVisibleEntries();
-        UpdateStatusSummary();
-        QueuePersistWorkspaceState();
-    }
-
-    partial void OnReceiverFilterChanged(string value) => OnFieldFilterChanged();
-
-    partial void OnLoggerFilterChanged(string value) => OnFieldFilterChanged();
-
-    partial void OnThreadFilterChanged(string value) => OnFieldFilterChanged();
-
-    partial void OnTenantFilterChanged(string value) => OnFieldFilterChanged();
-
-    partial void OnTraceIdFilterChanged(string value) => OnFieldFilterChanged();
-
-    partial void OnMinimumLevelOptionChanged(string value) => OnFieldFilterChanged();
-
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
@@ -528,17 +654,33 @@ public partial class MainWindowViewModel : ViewModelBase
         QueuePersistWorkspaceState();
     }
 
-    partial void OnShowTraceChanged(bool value) => OnLevelFilterChanged();
+    private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null)
+        {
+            OnPropertyChanged(nameof(SearchText));
+            OnPropertyChanged(nameof(ReceiverFilter));
+            OnPropertyChanged(nameof(LoggerFilter));
+            OnPropertyChanged(nameof(ThreadFilter));
+            OnPropertyChanged(nameof(TenantFilter));
+            OnPropertyChanged(nameof(TraceIdFilter));
+            OnPropertyChanged(nameof(MinimumLevelOption));
+            OnPropertyChanged(nameof(ShowTrace));
+            OnPropertyChanged(nameof(ShowDebug));
+            OnPropertyChanged(nameof(ShowInfo));
+            OnPropertyChanged(nameof(ShowWarn));
+            OnPropertyChanged(nameof(ShowError));
+            OnPropertyChanged(nameof(ShowFatal));
+            OnFiltersChanged();
+            return;
+        }
 
-    partial void OnShowDebugChanged(bool value) => OnLevelFilterChanged();
-
-    partial void OnShowInfoChanged(bool value) => OnLevelFilterChanged();
-
-    partial void OnShowWarnChanged(bool value) => OnLevelFilterChanged();
-
-    partial void OnShowErrorChanged(bool value) => OnLevelFilterChanged();
-
-    partial void OnShowFatalChanged(bool value) => OnLevelFilterChanged();
+        if (FilterCriteriaPropertyNames.Contains(e.PropertyName))
+        {
+            OnPropertyChanged(e.PropertyName);
+            OnFiltersChanged();
+        }
+    }
 
     private void OnReceiverDefinitionPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -637,16 +779,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool IsLevelEnabled(LogLevel level)
     {
-        return level switch
-        {
-            LogLevel.Trace => ShowTrace,
-            LogLevel.Debug => ShowDebug,
-            LogLevel.Info => ShowInfo,
-            LogLevel.Warn => ShowWarn,
-            LogLevel.Error => ShowError,
-            LogLevel.Fatal => ShowFatal,
-            _ => true
-        };
+        return Filters.IsLevelEnabled(level);
     }
 
     private void RebuildLoggerTreeFromSnapshot()
@@ -694,14 +827,7 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
     }
 
-    private void OnLevelFilterChanged()
-    {
-        RebuildVisibleEntries();
-        UpdateStatusSummary();
-        QueuePersistWorkspaceState();
-    }
-
-    private void OnFieldFilterChanged()
+    private void OnFiltersChanged()
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
@@ -710,49 +836,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private LogQuery BuildCurrentQuery()
     {
-        var propertyFilters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var tenant = NormalizeFilter(TenantFilter);
-        if (tenant is not null)
-        {
-            propertyFilters["tenant"] = tenant;
-        }
-
-        var traceId = NormalizeFilter(TraceIdFilter);
-        if (traceId is not null)
-        {
-            propertyFilters["traceId"] = traceId;
-        }
-
-        return new LogQuery
-        {
-            MinimumLevel = ParseMinimumLevel(MinimumLevelOption),
-            TextContains = NormalizeFilter(SearchText),
-            ReceiverId = NormalizeFilter(ReceiverFilter),
-            LoggerContains = NormalizeFilter(LoggerFilter),
-            ThreadContains = NormalizeFilter(ThreadFilter),
-            PropertyContains = propertyFilters
-        };
-    }
-
-    private static LogLevel? ParseMinimumLevel(string? option)
-    {
-        if (string.IsNullOrWhiteSpace(option) ||
-            option.Equals("Any", StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        return Enum.TryParse<LogLevel>(option, ignoreCase: true, out var parsed) ? parsed : null;
-    }
-
-    private static string? NormalizeFilter(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        return value.Trim();
+        return Filters.BuildQuery();
     }
 
     private void AdjustColumnWidths(double delta)
@@ -1212,14 +1296,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private WorkspaceSettings BuildWorkspaceSettingsSnapshot()
     {
-        var enabledLevels = new List<string>(6);
-        if (ShowTrace) enabledLevels.Add(nameof(LogLevel.Trace));
-        if (ShowDebug) enabledLevels.Add(nameof(LogLevel.Debug));
-        if (ShowInfo) enabledLevels.Add(nameof(LogLevel.Info));
-        if (ShowWarn) enabledLevels.Add(nameof(LogLevel.Warn));
-        if (ShowError) enabledLevels.Add(nameof(LogLevel.Error));
-        if (ShowFatal) enabledLevels.Add(nameof(LogLevel.Fatal));
-
         return _workspaceSettings with
         {
             SearchText = SearchText,
@@ -1231,7 +1307,7 @@ public partial class MainWindowViewModel : ViewModelBase
             MinimumLevelOption = MinimumLevelOption,
             CompactDensity = IsCompactDensity,
             SelectedReceiverId = SelectedReceiverDefinition?.Id ?? string.Empty,
-            EnabledLevels = enabledLevels,
+            EnabledLevels = Filters.GetEnabledLevels(),
             AutoScroll = IsAutoScrollEnabled,
             PauseIngest = IsPaused
         };

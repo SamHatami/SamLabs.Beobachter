@@ -823,3 +823,31 @@ Impact:
 
 Follow-ups:
 - Rebind details area and keyboard handlers directly to `Details` in a later shell-cleanup phase and remove pass-throughs.
+
+## 2026-03-28 - MVVM Refactor Phase 1B: Filters Extraction
+What changed:
+- Extracted filter state/query construction into:
+  [LogFiltersViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/LogFiltersViewModel.cs)
+  - owns text/structured/min-level filters
+  - owns level toggles and filter-reset commands
+  - owns `LogQuery` projection and enabled-level snapshot behavior
+- Updated shell VM to compose filters VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - added `Filters` child VM
+  - removed direct filter/level state fields and related command handlers
+  - delegated query and level evaluation to `Filters`
+  - added temporary pass-through properties/commands to preserve current bindings while migration continues
+- Added focused child-VM tests:
+  [LogFiltersViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/LogFiltersViewModelTests.cs)
+
+Why:
+- Filtering is a bounded UI/domain projection surface and should be owned by a dedicated VM rather than the shell.
+- This extraction isolates query-related state transitions before stream/source-tree extraction.
+
+Impact:
+- Visible filter behavior in the current UI remains unchanged.
+- Shell now coordinates filter changes via child-VM events instead of property partial methods.
+- Test suite increased to 71 passing tests.
+
+Follow-ups:
+- Move XAML bindings from shell filter pass-throughs to direct `Filters.*` bindings and remove wrapper properties in shell cleanup phase.
