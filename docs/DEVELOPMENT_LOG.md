@@ -200,3 +200,44 @@ Impact:
 Follow-ups:
 - Implement `TcpReceiver` with equivalent lifecycle guarantees.
 - Implement file-tail receiver and shared parser dispatch for XML/CSV/plain text.
+
+## 2026-03-28 - Phase 3 Slice 4: TCP Receiver + XML Framing
+What changed:
+- Added TCP receiver options and implementation:
+  [TcpReceiverOptions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/TcpReceiverOptions.cs),
+  [TcpReceiver.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/TcpReceiver.cs)
+- Added shared XML event framing utility for stream-based receivers:
+  [XmlEventFrameExtractor.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/XmlEventFrameExtractor.cs)
+- Added integration-style TCP tests:
+  [TcpReceiverTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Receivers/TcpReceiverTests.cs)
+
+Why:
+- TCP streams carry concatenated payloads; receiver must frame complete XML events before parser invocation.
+- Framing logic is now reusable between TCP and file-tail ingestion to avoid divergent behavior.
+
+Impact:
+- `TcpReceiver` now accepts connections, reads stream payloads, extracts complete log events, parses, and writes to `ChannelWriter<LogEntry>`.
+- Lifecycle and multi-event behavior are covered by tests.
+
+Follow-ups:
+- Extend framing strategy later if we need additional payload formats on TCP (for example line-delimited plain text).
+
+## 2026-03-28 - Phase 3 Slice 5: File Tail Receiver
+What changed:
+- Added file-tail receiver options and implementation:
+  [FileTailReceiverOptions.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/FileTailReceiverOptions.cs),
+  [FileTailReceiver.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Receivers/FileTailReceiver.cs)
+- Added file-tail integration tests:
+  [FileTailReceiverTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Receivers/FileTailReceiverTests.cs)
+
+Why:
+- File ingestion is one of the MVP parity receiver paths and needs the same channel-based flow as network receivers.
+- Tail loop includes truncation handling and bounded in-memory buffer to stay robust when files rotate or payloads are partial.
+
+Impact:
+- Infrastructure now includes `Udp`, `Tcp`, and `FileTail` receivers feeding normalized `LogEntry` objects into channels.
+- Receiver test coverage now verifies all three ingest modes.
+
+Follow-ups:
+- Add parser composition for CSV/plain-text and wire receiver-specific parser chains.
+- Add stress/cancellation tests under sustained ingest for receiver loops.
