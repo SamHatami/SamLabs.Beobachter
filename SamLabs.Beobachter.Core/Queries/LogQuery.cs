@@ -10,7 +10,14 @@ public sealed record class LogQuery
 
     public string? LoggerPrefix { get; init; }
 
+    public string? LoggerContains { get; init; }
+
     public string? ReceiverId { get; init; }
+
+    public string? ThreadContains { get; init; }
+
+    public IReadOnlyDictionary<string, string> PropertyContains { get; init; } =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     public DateTimeOffset? FromUtc { get; init; }
 

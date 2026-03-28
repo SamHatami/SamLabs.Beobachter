@@ -60,7 +60,7 @@
                 Padding="12"
                 CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
-            <Grid RowDefinitions="Auto,Auto,Auto">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto">
                 <Grid Grid.Row="0"
                       ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
                     <TextBox x:Name="SearchTextBox"
@@ -90,6 +90,63 @@
                 </Grid>
 
                 <WrapPanel Grid.Row="1"
+                           Margin="0,8,0,0"
+                           ItemHeight="56">
+                    <StackPanel Width="140"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Receiver"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="udp-1"
+                                 Text="{Binding ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="200"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Logger"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="Orders.Api"
+                                 Text="{Binding LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="140"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Thread"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="worker-7"
+                                 Text="{Binding ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="130"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Tenant"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="alpha"
+                                 Text="{Binding TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="130"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Trace Id"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="abcd1234"
+                                 Text="{Binding TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Width="120"
+                                Margin="0,0,8,0"
+                                Spacing="2">
+                        <TextBlock Text="Min Level"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <ComboBox ItemsSource="{Binding MinimumLevelOptions}"
+                                  SelectedItem="{Binding MinimumLevelOption}" />
+                    </StackPanel>
+                    <Button Content="Clear Fields"
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,8,0"
+                            Command="{Binding ClearStructuredFiltersCommand}" />
+                </WrapPanel>
+
+                <WrapPanel Grid.Row="2"
                            Margin="0,8,0,0">
                     <CheckBox Content="Trace"
                               Margin="0,0,10,0"
@@ -116,7 +173,7 @@
                             Command="{Binding EnableAllLoggersCommand}" />
                 </WrapPanel>
 
-                <Expander Grid.Row="2"
+                <Expander Grid.Row="3"
                           Margin="0,10,0,0"
                           Header="Receiver Setup"
                           IsExpanded="False">

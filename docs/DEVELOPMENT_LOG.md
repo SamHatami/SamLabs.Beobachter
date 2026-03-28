@@ -614,3 +614,35 @@ Impact:
 
 Follow-ups:
 - Add query helpers for common structured keys (for example `tenant`, `traceId`, `spanId`) on top of the preserved payload.
+
+## 2026-03-28 - Phase 4 Slice 11: Structured Filter/Query Pass
+What changed:
+- Extended query object in Core for structured filtering:
+  [LogQuery.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Queries/LogQuery.cs)
+  - added `LoggerContains`, `ThreadContains`, and `PropertyContains`
+- Extended query evaluator behavior:
+  [LogQueryEvaluator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Services/LogQueryEvaluator.cs)
+  - free-text fallback now checks message, logger, exception, thread, and property keys/values
+  - structured filters now support receiver/logger/thread/field matches and minimum level
+- Updated main workspace VM to use query-object composition for filtering:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - added field filters (`Receiver`, `Logger`, `Thread`, `Tenant`, `TraceId`)
+  - added minimum-level selector and clear-fields command
+  - moved filtering to a single `BuildCurrentQuery` path
+- Updated main view with a structured filter bar:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+- Added tests:
+  [LogQueryEvaluatorTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Core/LogQueryEvaluatorTests.cs),
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- As filter axes grew, ad hoc checks in the VM were becoming brittle and harder to reason about.
+- `LogQuery` now acts as a clear query object boundary between UI intent and match semantics.
+
+Impact:
+- Operators can now narrow logs by receiver/logger/thread and key structured fields without losing free-text search.
+- Filter logic is centralized, testable, and easier to extend.
+- Test suite increased to 59 passing tests.
+
+Follow-ups:
+- Add an advanced filter mode for arbitrary property key/value entries beyond `tenant` and `traceId`.

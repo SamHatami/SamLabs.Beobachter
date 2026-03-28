@@ -12,6 +12,8 @@ using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
+using SamLabs.Beobachter.Core.Queries;
+using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Core.Settings;
 
 namespace SamLabs.Beobachter.ViewModels;
@@ -24,6 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IIngestionSession _ingestionSession;
     private readonly IClipboardService _clipboardService;
     private readonly ISettingsStore _settingsStore;
+    private readonly ILogQueryEvaluator _queryEvaluator = new LogQueryEvaluator();
     private readonly Random _random = new();
     private LoggerNode _loggerRoot = LoggerNode.CreateRoot();
 
@@ -35,6 +38,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _searchText = string.Empty;
+
+    [ObservableProperty]
+    private string _receiverFilter = string.Empty;
+
+    [ObservableProperty]
+    private string _loggerFilter = string.Empty;
+
+    [ObservableProperty]
+    private string _threadFilter = string.Empty;
+
+    [ObservableProperty]
+    private string _tenantFilter = string.Empty;
+
+    [ObservableProperty]
+    private string _traceIdFilter = string.Empty;
+
+    [ObservableProperty]
+    private string _minimumLevelOption = "Any";
 
     [ObservableProperty]
     private bool _isPaused;
@@ -92,6 +113,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _receiverSetupStatus = string.Empty;
+
+    public IReadOnlyList<string> MinimumLevelOptions { get; } =
+    [
+        "Any",
+        nameof(LogLevel.Trace),
+        nameof(LogLevel.Debug),
+        nameof(LogLevel.Info),
+        nameof(LogLevel.Warn),
+        nameof(LogLevel.Error),
+        nameof(LogLevel.Fatal)
+    ];
 
     public MainWindowViewModel() : this(
         new ThemeService(),
@@ -181,6 +213,17 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ClearSearch()
     {
         SearchText = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ClearStructuredFilters()
+    {
+        ReceiverFilter = string.Empty;
+        LoggerFilter = string.Empty;
+        ThreadFilter = string.Empty;
+        TenantFilter = string.Empty;
+        TraceIdFilter = string.Empty;
+        MinimumLevelOption = "Any";
     }
 
     [RelayCommand]
@@ -333,6 +376,18 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateStatusSummary();
     }
 
+    partial void OnReceiverFilterChanged(string value) => OnFieldFilterChanged();
+
+    partial void OnLoggerFilterChanged(string value) => OnFieldFilterChanged();
+
+    partial void OnThreadFilterChanged(string value) => OnFieldFilterChanged();
+
+    partial void OnTenantFilterChanged(string value) => OnFieldFilterChanged();
+
+    partial void OnTraceIdFilterChanged(string value) => OnFieldFilterChanged();
+
+    partial void OnMinimumLevelOptionChanged(string value) => OnFieldFilterChanged();
+
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
@@ -372,10 +427,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Dispatcher.UIThread.Post(() =>
         {
+            var query = BuildCurrentQuery();
             foreach (var entry in e.AppendedEntries)
             {
                 RegisterLogger(entry.LoggerName);
-                if (!MatchesFilter(entry))
+                if (!MatchesFilter(entry, query))
                 {
                     continue;
                 }
@@ -394,7 +450,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void RebuildVisibleEntries()
     {
         var snapshot = _ingestionSession.Snapshot();
-        var filtered = snapshot.Where(MatchesFilter).TakeLast(MaxVisibleEntries).ToArray();
+        var query = BuildCurrentQuery();
+        var filtered = snapshot.Where(entry => MatchesFilter(entry, query)).TakeLast(MaxVisibleEntries).ToArray();
 
         VisibleEntries.Clear();
         foreach (var entry in filtered)
@@ -403,7 +460,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private bool MatchesFilter(LogEntry entry)
+    private bool MatchesFilter(LogEntry entry, LogQuery query)
     {
         if (!IsLevelEnabled(entry.Level))
         {
@@ -415,22 +472,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            return true;
-        }
-
-        var term = SearchText.Trim();
-        return Contains(entry.LoggerName, term) ||
-               Contains(entry.Message, term) ||
-               Contains(entry.Exception, term) ||
-               Contains(entry.ThreadName, term);
-    }
-
-    private static bool Contains(string? text, string term)
-    {
-        return !string.IsNullOrWhiteSpace(text) &&
-               text.Contains(term, StringComparison.OrdinalIgnoreCase);
+        return _queryEvaluator.Matches(entry, query);
     }
 
     private bool IsLoggerEnabled(string loggerName)
@@ -501,6 +543,59 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
+    }
+
+    private void OnFieldFilterChanged()
+    {
+        RebuildVisibleEntries();
+        UpdateStatusSummary();
+    }
+
+    private LogQuery BuildCurrentQuery()
+    {
+        var propertyFilters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var tenant = NormalizeFilter(TenantFilter);
+        if (tenant is not null)
+        {
+            propertyFilters["tenant"] = tenant;
+        }
+
+        var traceId = NormalizeFilter(TraceIdFilter);
+        if (traceId is not null)
+        {
+            propertyFilters["traceId"] = traceId;
+        }
+
+        return new LogQuery
+        {
+            MinimumLevel = ParseMinimumLevel(MinimumLevelOption),
+            TextContains = NormalizeFilter(SearchText),
+            ReceiverId = NormalizeFilter(ReceiverFilter),
+            LoggerContains = NormalizeFilter(LoggerFilter),
+            ThreadContains = NormalizeFilter(ThreadFilter),
+            PropertyContains = propertyFilters
+        };
+    }
+
+    private static LogLevel? ParseMinimumLevel(string? option)
+    {
+        if (string.IsNullOrWhiteSpace(option) ||
+            option.Equals("Any", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return Enum.TryParse<LogLevel>(option, ignoreCase: true, out var parsed) ? parsed : null;
+    }
+
+    private static string? NormalizeFilter(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Trim();
     }
 
     private void UpdateThemeSummary()
