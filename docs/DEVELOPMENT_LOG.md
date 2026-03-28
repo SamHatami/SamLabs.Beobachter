@@ -302,3 +302,31 @@ Impact:
 Follow-ups:
 - Integrate settings store and receiver factory into App composition/session lifecycle.
 - Add migration shim only if legacy settings import is required.
+
+## 2026-03-28 - Phase 4 Slice 1: Ingestion Session + App Wiring
+What changed:
+- Added app-level ingestion session contract and implementations:
+  [IIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IIngestionSession.cs),
+  [IngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IngestionSession.cs),
+  [DesignIngestionSession.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/DesignIngestionSession.cs)
+- `IngestionSession` now owns:
+  - bounded `Channel<LogEntry>` ingestion (`DropOldest`)
+  - dropped-count telemetry counter
+  - batch consumer loop into `InMemoryLogStore`
+  - receiver startup/shutdown via typed settings + `ReceiverFactory`
+- Wired App DI composition for parsing/receiver/settings/session services:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Wired startup/shutdown lifecycle to start/stop ingestion session:
+  [App.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/App.axaml.cs)
+
+Why:
+- Phase 4 requires a single app-level composition point that owns ingestion flow and batches data before UI binding.
+- Session lifecycle must be explicit and independent from individual view models.
+
+Impact:
+- App runtime now has a concrete channel-based ingestion session and receiver lifecycle host.
+- Store append events are now available as a stable UI update surface.
+
+Follow-ups:
+- Bind MainWindow VM to live session snapshots and append events.
+- Add filtering/search summary and visible-list virtualization constraints in VM/view.

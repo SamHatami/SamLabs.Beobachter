@@ -27,9 +27,18 @@ public partial class App : Avalonia.Application
             var themeService = _services.GetRequiredService<IThemeService>();
             themeService.SetTheme(AppThemeMode.System);
 
+            var ingestionSession = _services.GetRequiredService<IIngestionSession>();
+            ingestionSession.StartAsync().GetAwaiter().GetResult();
+
             desktop.MainWindow = new MainWindow
             {
                 DataContext = _services.GetRequiredService<MainWindowViewModel>(),
+            };
+
+            desktop.Exit += (_, _) =>
+            {
+                ingestionSession.StopAsync().GetAwaiter().GetResult();
+                ingestionSession.DisposeAsync().GetAwaiter().GetResult();
             };
         }
 
