@@ -967,3 +967,40 @@ Impact:
 
 Follow-ups:
 - If desired, split remaining shell-only concerns (top bar status/theme controls) into dedicated toolbar/status child VMs.
+
+## 2026-03-28 - MVVM Refactor Phase 5A: UI Surface Composition (Toolbar, Quick Filters, Session Health)
+What changed:
+- Added three new child ViewModels aligned with the refactor skeleton:
+  [MainToolbarViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Toolbar/MainToolbarViewModel.cs),
+  [QuickFiltersViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Sources/QuickFiltersViewModel.cs),
+  [SessionHealthViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Status/SessionHealthViewModel.cs)
+- Added matching views for ViewLocator composition:
+  [MainToolbarView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/Toolbar/MainToolbarView.axaml),
+  [QuickFiltersView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/Sources/QuickFiltersView.axaml),
+  [SessionHealthView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/Status/SessionHealthView.axaml)
+- Updated shell VM composition/orchestration:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - composed `Toolbar`, `QuickFilters`, and `SessionHealth`
+  - added quick-filter criteria handling (`Errors and above`, `Structured only`) in filtering path
+  - added quick-filter count projection from ingestion snapshot
+  - added session-health summary projection (active receivers, buffered entries, structured events, dropped packets)
+- Updated shell view composition:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - replaced top inline header block with `ContentControl` bound to `Toolbar`
+  - added `QuickFilters` panel below source tree
+  - added `SessionHealth` panel below details area
+  - removed duplicated pause/auto-scroll/density buttons from filter/action row (now in toolbar)
+- Extended filtering tests for the new quick-filter behaviors:
+  [MainWindowFilteringTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowFilteringTests.cs)
+
+Why:
+- The skeleton refactor calls for explicit UI surface composition through child VMs/views and ViewLocator, instead of one large inlined window surface.
+- Introducing these surfaces now keeps shell coordination explicit while enabling further feature moves in smaller slices.
+
+Impact:
+- Main window now uses ViewLocator-based composition for toolbar, quick filters, and session health surfaces.
+- Quick filters are functional and participate in the same rebuild pipeline as existing filters.
+- Test suite increased to `84` passing tests.
+
+Follow-ups:
+- Move remaining inlined sections (filters, source tree, receiver setup, stream, details) into separate view files to complete the skeleton layout migration.

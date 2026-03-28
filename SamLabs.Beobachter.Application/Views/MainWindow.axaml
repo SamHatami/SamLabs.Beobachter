@@ -25,43 +25,9 @@
 
     <Grid RowDefinitions="Auto,Auto,*"
           Background="{DynamicResource ShellBackgroundBrush}">
-        <Border Grid.Row="0"
-                Margin="16,16,16,8"
-                Padding="14"
-                CornerRadius="10"
-                Background="{DynamicResource ShellPanelBrush}">
-            <DockPanel LastChildFill="False">
-                <StackPanel DockPanel.Dock="Left"
-                            Spacing="2">
-                    <TextBlock Text="SamLabs.Beobachter"
-                               FontSize="18"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellForegroundBrush}" />
-                    <TextBlock Text="{Binding ThemeSummary}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <TextBlock Text="{Binding StatusSummary}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <TextBlock Text="{Binding StatsSummary1Minute}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <TextBlock Text="{Binding StatsSummary5Minutes}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <TextBlock Text="{Binding TopLoggersSummary}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <TextBlock Text="{Binding TopReceiversSummary}"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                </StackPanel>
-                <StackPanel DockPanel.Dock="Right"
-                            Orientation="Horizontal"
-                            Spacing="8">
-                    <Button Content="System"
-                            Command="{Binding UseSystemThemeCommand}" />
-                    <Button Content="Light"
-                            Command="{Binding UseLightThemeCommand}" />
-                    <Button Content="Dark"
-                            Command="{Binding UseDarkThemeCommand}" />
-                </StackPanel>
-            </DockPanel>
-        </Border>
+        <ContentControl Grid.Row="0"
+                        Margin="16,16,16,8"
+                        Content="{Binding Toolbar}" />
 
         <Border Grid.Row="1"
                 Margin="16,0,16,8"
@@ -70,7 +36,7 @@
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid RowDefinitions="Auto,Auto,Auto,Auto">
                 <Grid Grid.Row="0"
-                      ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                      ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto">
                     <TextBox x:Name="SearchTextBox"
                              Grid.Column="0"
                              Watermark="Search logger/message/exception/thread..."
@@ -85,25 +51,13 @@
                             Command="{Binding GenerateSampleEntriesCommand}" />
                     <Button Grid.Column="3"
                             Margin="8,0,0,0"
-                            Content="{Binding PauseButtonText}"
-                            Command="{Binding TogglePauseCommand}" />
-                    <Button Grid.Column="4"
-                            Margin="8,0,0,0"
-                            Content="{Binding AutoScrollButtonText}"
-                            Command="{Binding ToggleAutoScrollCommand}" />
-                    <Button Grid.Column="5"
-                            Margin="8,0,0,0"
-                            Content="{Binding Stream.DensityButtonText}"
-                            Command="{Binding Stream.ToggleDensityCommand}" />
-                    <Button Grid.Column="6"
-                            Margin="8,0,0,0"
                             Content="Col -"
                             Command="{Binding Stream.DecreaseColumnWidthsCommand}" />
-                    <Button Grid.Column="7"
+                    <Button Grid.Column="4"
                             Margin="8,0,0,0"
                             Content="Col +"
                             Command="{Binding Stream.IncreaseColumnWidthsCommand}" />
-                    <Button Grid.Column="8"
+                    <Button Grid.Column="5"
                             Margin="8,0,0,0"
                             Content="Col Reset"
                             Command="{Binding Stream.ResetColumnWidthsCommand}" />
@@ -322,7 +276,7 @@
                         CornerRadius="8"
                         Padding="8"
                         Background="{DynamicResource ShellBackgroundBrush}">
-                    <Grid RowDefinitions="Auto,*">
+                    <Grid RowDefinitions="Auto,*,Auto">
                         <TextBlock Grid.Row="0"
                                    Margin="2,0,2,6"
                                    Text="Loggers"
@@ -338,11 +292,14 @@
                                 </TreeDataTemplate>
                             </TreeView.ItemTemplate>
                         </TreeView>
+                        <ContentControl Grid.Row="2"
+                                        Margin="0,8,0,0"
+                                        Content="{Binding QuickFilters}" />
                     </Grid>
                 </Border>
 
                 <Grid Grid.Column="1"
-                      RowDefinitions="Auto,*,Auto">
+                      RowDefinitions="Auto,*,Auto,Auto">
                     <Grid Grid.Row="0"
                           Margin="4,0,4,6">
                         <Grid.ColumnDefinitions>
@@ -444,6 +401,10 @@
                             </Grid>
                         </Grid>
                     </Border>
+
+                    <ContentControl Grid.Row="3"
+                                    Margin="0,8,0,0"
+                                    Content="{Binding SessionHealth}" />
                 </Grid>
             </Grid>
         </Border>

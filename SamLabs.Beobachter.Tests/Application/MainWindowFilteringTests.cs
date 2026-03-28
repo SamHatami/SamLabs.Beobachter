@@ -97,4 +97,55 @@ public sealed class MainWindowFilteringTests
         vm.Filters.ClearStructuredFiltersCommand.Execute(null);
         Assert.Equal(2, vm.Stream.VisibleEntries.Count);
     }
+
+    [Fact]
+    public void QuickFilters_ErrorsAndAbove_FiltersVisibleEntries()
+    {
+        FakeIngestionSession session =
+        new(
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "Accepted"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Warn, "Slow call"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Error, "Failed"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Fatal, "Crashed")
+        ]);
+
+        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        Assert.Equal(4, vm.Stream.VisibleEntries.Count);
+
+        vm.QuickFilters.ApplyErrorsAndAboveCommand.Execute(null);
+        Assert.Equal(2, vm.Stream.VisibleEntries.Count);
+        Assert.All(vm.Stream.VisibleEntries, x => Assert.True(x.Level is LogLevel.Error or LogLevel.Fatal));
+    }
+
+    [Fact]
+    public void QuickFilters_StructuredOnly_FiltersVisibleEntries()
+    {
+        FakeIngestionSession session =
+        new(
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "Simple line"),
+            new LogEntry
+            {
+                Timestamp = DateTimeOffset.UtcNow,
+                Level = LogLevel.Info,
+                ReceiverId = "udp-1",
+                LoggerName = "Orders.Api",
+                RootLoggerName = "Orders.Api",
+                Message = "Structured line",
+                MessageTemplate = "Structured line {OrderId}",
+                Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["OrderId"] = "991"
+                }
+            }
+        ]);
+
+        MainWindowViewModel vm = new(new ThemeService(), session, new FakeClipboardService());
+        Assert.Equal(2, vm.Stream.VisibleEntries.Count);
+
+        vm.QuickFilters.ApplyStructuredOnlyCommand.Execute(null);
+        Assert.Single(vm.Stream.VisibleEntries);
+        Assert.Equal("Structured line", vm.Stream.VisibleEntries[0].Message);
+    }
 }

@@ -9,6 +9,9 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
+using SamLabs.Beobachter.Application.ViewModels.Sources;
+using SamLabs.Beobachter.Application.ViewModels.Status;
+using SamLabs.Beobachter.Application.ViewModels.Toolbar;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
@@ -35,6 +38,12 @@ public partial class MainWindowViewModel : ViewModelBase
         nameof(LogFiltersViewModel.ShowWarn),
         nameof(LogFiltersViewModel.ShowError),
         nameof(LogFiltersViewModel.ShowFatal)
+    };
+
+    private static readonly HashSet<string> QuickFilterCriteriaPropertyNames = new(StringComparer.Ordinal)
+    {
+        nameof(QuickFiltersViewModel.IsErrorsAndAboveEnabled),
+        nameof(QuickFiltersViewModel.IsStructuredOnlyEnabled)
     };
 
     private readonly IThemeService _themeService;
@@ -104,11 +113,15 @@ public partial class MainWindowViewModel : ViewModelBase
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources = new SourceTreeViewModel();
         Sources.StateChanged += OnSourcesStateChanged;
+        QuickFilters = new QuickFiltersViewModel();
+        QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
         ReceiverSetup = new ReceiverSetupViewModel(_settingsStore, _ingestionSession);
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Details = new EntryDetailsViewModel(resolvedClipboardService);
         Stream = new LogStreamViewModel();
         Stream.PropertyChanged += OnStreamPropertyChanged;
+        SessionHealth = new SessionHealthViewModel();
+        Toolbar = new MainToolbarViewModel(this);
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IsPaused = _ingestionSession.IsPaused;
@@ -119,11 +132,17 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateThemeSummary();
         UpdateStatusSummary();
         UpdateStatisticsSummary();
+        UpdateQuickFiltersSnapshot();
+        UpdateSessionHealthSummary();
         _ = LoadReceiverSetupAsync();
         _ = LoadWorkspaceStateAsync();
     }
 
+    public MainToolbarViewModel Toolbar { get; }
+
     public SourceTreeViewModel Sources { get; }
+
+    public QuickFiltersViewModel QuickFilters { get; }
 
     public ReceiverSetupViewModel ReceiverSetup { get; }
 
@@ -132,6 +151,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public LogStreamViewModel Stream { get; }
 
     public EntryDetailsViewModel Details { get; }
+
+    public SessionHealthViewModel SessionHealth { get; }
 
     [RelayCommand]
     private void UseSystemTheme()
@@ -226,6 +247,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             QueuePersistWorkspaceState();
         }
+
+        UpdateSessionHealthSummary();
     }
 
     private void OnStreamPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -282,6 +305,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
             UpdateStatusSummary();
             UpdateStatisticsSummary();
+            UpdateQuickFiltersSnapshot();
+            UpdateSessionHealthSummary();
         });
     }
 
@@ -304,6 +329,17 @@ public partial class MainWindowViewModel : ViewModelBase
             return false;
         }
 
+        if (QuickFilters.IsErrorsAndAboveEnabled &&
+            entry.Level is not LogLevel.Error and not LogLevel.Fatal)
+        {
+            return false;
+        }
+
+        if (QuickFilters.IsStructuredOnlyEnabled && !HasStructuredData(entry))
+        {
+            return false;
+        }
+
         return _queryEvaluator.Matches(entry, query);
     }
 
@@ -321,6 +357,15 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         RebuildVisibleEntries();
         UpdateStatusSummary();
+    }
+
+    private void OnQuickFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is null || QuickFilterCriteriaPropertyNames.Contains(e.PropertyName))
+        {
+            RebuildVisibleEntries();
+            UpdateStatusSummary();
+        }
     }
 
     private void OnFiltersChanged()
@@ -351,6 +396,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var state = IsPaused ? "Paused" : "Running";
         var pin = IsAutoScrollEnabled ? "On" : "Off";
         StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {Stream.VisibleEntries.Count}  Dropped: {dropped}";
+        UpdateSessionHealthSummary();
     }
 
     private void UpdateStatisticsSummary()
@@ -371,6 +417,29 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var summary = string.Join(", ", entries.Select(static x => $"{x.Name} ({x.Count})"));
         return $"{label}: {summary}";
+    }
+
+    private static bool HasStructuredData(LogEntry entry)
+    {
+        return entry.Properties.Count > 0 ||
+               !string.IsNullOrWhiteSpace(entry.StructuredPayloadJson) ||
+               !string.IsNullOrWhiteSpace(entry.MessageTemplate);
+    }
+
+    private void UpdateQuickFiltersSnapshot()
+    {
+        IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
+        QuickFilters.ErrorsAndAboveCount = snapshot.Count(static entry => entry.Level is LogLevel.Error or LogLevel.Fatal);
+        QuickFilters.StructuredOnlyCount = snapshot.Count(HasStructuredData);
+    }
+
+    private void UpdateSessionHealthSummary()
+    {
+        var activeReceivers = ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
+        SessionHealth.ActiveReceiversText = $"Active receivers: {activeReceivers:N0}";
+        SessionHealth.BufferedEntriesText = $"Buffered entries: {_ingestionSession.TotalCount:N0}";
+        SessionHealth.StructuredEventsText = $"Structured events: {QuickFilters.StructuredOnlyCount:N0}";
+        SessionHealth.DroppedPacketsText = $"Dropped packets: {_ingestionSession.DroppedCount:N0}";
     }
 
     private LogLevel PickRandomLevel()
@@ -394,10 +463,15 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
         {
             ApplyPendingReceiverSelection();
+            UpdateSessionHealthSummary();
             return;
         }
 
-        await Dispatcher.UIThread.InvokeAsync(ApplyPendingReceiverSelection);
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            ApplyPendingReceiverSelection();
+            UpdateSessionHealthSummary();
+        });
     }
 
     private void ApplyPendingReceiverSelection()
