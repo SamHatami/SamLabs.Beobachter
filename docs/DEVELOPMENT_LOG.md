@@ -586,3 +586,31 @@ Impact:
 
 Follow-ups:
 - Add optional parser-specific settings for strict vs permissive JSON field-name matching.
+
+## 2026-03-28 - Phase 4 Slice 10: Structured Payload Preservation in Domain/UI
+What changed:
+- Extended core log model for structured logging fidelity:
+  [LogEntry.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Core/Models/LogEntry.cs)
+  - added `MessageTemplate`
+  - added `StructuredPayloadJson`
+- Updated structured JSON parser to populate new fields:
+  [JsonLogParser.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Infrastructure/Parsing/JsonLogParser.cs)
+  - reads template fields (for example `@mt`)
+  - preserves original structured JSON payload text
+- Updated details-pane formatter to expose structured metadata:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Added tests for parser/domain and UI details rendering:
+  [JsonLogParserTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Infrastructure/Parsing/JsonLogParserTests.cs),
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- String-only message rendering loses key structured context (templates + full JSON body) needed for root-cause analysis and downstream statistics work.
+- Preserving structured payload in the domain model keeps options open for future typed field indexing without parser rewrites.
+
+Impact:
+- Structured logs now retain template and raw JSON payload in `LogEntry`.
+- Details pane includes structured payload content for inspection/copy workflows.
+- Test suite increased to 56 passing tests.
+
+Follow-ups:
+- Add query helpers for common structured keys (for example `tenant`, `traceId`, `spanId`) on top of the preserved payload.

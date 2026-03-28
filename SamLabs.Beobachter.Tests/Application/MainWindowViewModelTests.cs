@@ -91,6 +91,38 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
+    public void SelectedEntry_WithStructuredPayload_ShowsTemplateAndPayloadInDetails()
+    {
+        var session = new FakeIngestionSession(
+        [
+            new LogEntry
+            {
+                Timestamp = DateTimeOffset.UtcNow,
+                Level = LogLevel.Warn,
+                ReceiverId = "json",
+                LoggerName = "Orders.Api",
+                RootLoggerName = "Orders.Api",
+                Message = "Payment warning",
+                MessageTemplate = "Payment warning for {OrderId}",
+                StructuredPayloadJson = "{\"OrderId\":123,\"Tenant\":\"alpha\"}",
+                Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["OrderId"] = "123"
+                }
+            }
+        ]);
+
+        var vm = new MainWindowViewModel(new ThemeService(), session, new FakeClipboardService())
+        {
+            SelectedEntry = session.Snapshot().First()
+        };
+
+        Assert.Contains("MessageTemplate: Payment warning for {OrderId}", vm.SelectedDetailsText);
+        Assert.Contains("StructuredPayload:", vm.SelectedDetailsText);
+        Assert.Contains("\"OrderId\":123", vm.SelectedDetailsText);
+    }
+
+    [Fact]
     public void ToggleDensity_UpdatesRowMetrics()
     {
         var vm = new MainWindowViewModel(new ThemeService(), new FakeIngestionSession([]), new FakeClipboardService());

@@ -54,6 +54,7 @@ public sealed class JsonLogParserTests
               "@t": "2026-03-28T13:45:00.0000000Z",
               "@l": "Error",
               "@m": "Failed to capture payment",
+              "@mt": "Failed to capture payment for order {OrderId}",
               "@x": "System.InvalidOperationException: payment already captured",
               "SourceContext": "Billing.Worker",
               "OrderId": 123,
@@ -71,9 +72,11 @@ public sealed class JsonLogParserTests
         Assert.Equal(LogLevel.Error, entry!.Level);
         Assert.Equal("Billing.Worker", entry.LoggerName);
         Assert.Equal("Failed to capture payment", entry.Message);
+        Assert.Equal("Failed to capture payment for order {OrderId}", entry.MessageTemplate);
         Assert.Equal("System.InvalidOperationException: payment already captured", entry.Exception);
         Assert.Equal("123", entry.Properties["OrderId"]);
         Assert.Equal("42.7", entry.Properties["ElapsedMs"]);
+        Assert.False(string.IsNullOrWhiteSpace(entry.StructuredPayloadJson));
     }
 
     [Fact]
@@ -96,6 +99,7 @@ public sealed class JsonLogParserTests
         Assert.NotNull(entry);
         Assert.Equal(LogLevel.Error, entry!.Level);
         Assert.Equal(60001, entry.RawLevelValue);
+        Assert.False(string.IsNullOrWhiteSpace(entry.StructuredPayloadJson));
     }
 
     [Fact]

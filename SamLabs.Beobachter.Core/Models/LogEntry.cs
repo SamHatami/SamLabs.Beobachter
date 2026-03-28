@@ -18,6 +18,8 @@ public sealed record class LogEntry
 
     public string Message { get; init; } = string.Empty;
 
+    public string? MessageTemplate { get; init; }
+
     public string ThreadName { get; init; } = string.Empty;
 
     public string? HostName { get; init; }
@@ -35,6 +37,8 @@ public sealed record class LogEntry
     public string? RawLevelName { get; init; }
 
     public int? RawLevelValue { get; init; }
+
+    public string? StructuredPayloadJson { get; init; }
 
     public IReadOnlyDictionary<string, string> Properties { get; init; } =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

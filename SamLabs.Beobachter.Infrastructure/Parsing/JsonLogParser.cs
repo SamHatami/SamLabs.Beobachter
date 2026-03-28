@@ -12,7 +12,8 @@ public sealed class JsonLogParser : ILogParser
     private static readonly string[] TimestampKeys = ["@t", "timestamp", "time", "ts"];
     private static readonly string[] LevelKeys = ["@l", "level", "logLevel", "severity"];
     private static readonly string[] LoggerKeys = ["logger", "loggerName", "SourceContext", "category", "name"];
-    private static readonly string[] MessageKeys = ["message", "@m", "@mt", "renderedMessage"];
+    private static readonly string[] MessageKeys = ["message", "@m", "renderedMessage", "@mt"];
+    private static readonly string[] MessageTemplateKeys = ["@mt", "messageTemplate", "template"];
     private static readonly string[] ThreadKeys = ["thread", "threadName", "threadId"];
     private static readonly string[] ExceptionKeys = ["exception", "@x"];
     private static readonly string[] SequenceKeys = ["sequence", "eventSequenceNumber", "seq"];
@@ -62,6 +63,7 @@ public sealed class JsonLogParser : ILogParser
             var level = ParseLevel(root, out var rawLevelName, out var rawLevelValue);
             var loggerName = ReadString(root, LoggerKeys) ?? sourceContext.DefaultLoggerName;
             var message = ReadString(root, MessageKeys) ?? root.GetRawText();
+            var messageTemplate = ReadString(root, MessageTemplateKeys);
             var threadName = ReadString(root, ThreadKeys) ?? string.Empty;
             var exception = ReadString(root, ExceptionKeys);
             var sequence = ParseLong(root, SequenceKeys);
@@ -80,11 +82,13 @@ public sealed class JsonLogParser : ILogParser
                 LoggerName = loggerName,
                 RootLoggerName = loggerName,
                 Message = message,
+                MessageTemplate = messageTemplate,
                 ThreadName = threadName,
                 HostName = hostName,
                 Exception = exception,
                 RawLevelName = rawLevelName,
                 RawLevelValue = rawLevelValue,
+                StructuredPayloadJson = root.GetRawText(),
                 Properties = properties
             };
 

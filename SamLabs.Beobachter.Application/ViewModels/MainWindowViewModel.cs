@@ -559,6 +559,10 @@ public partial class MainWindowViewModel : ViewModelBase
         builder.AppendLine($"Logger: {entry.LoggerName}");
         builder.AppendLine($"Thread: {entry.ThreadName}");
         builder.AppendLine($"Message: {entry.Message}");
+        if (!string.IsNullOrWhiteSpace(entry.MessageTemplate))
+        {
+            builder.AppendLine($"MessageTemplate: {entry.MessageTemplate}");
+        }
 
         if (!string.IsNullOrWhiteSpace(entry.Exception))
         {
@@ -581,6 +585,13 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 builder.AppendLine($"- {pair.Key}: {pair.Value}");
             }
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.StructuredPayloadJson))
+        {
+            builder.AppendLine();
+            builder.AppendLine("StructuredPayload:");
+            builder.AppendLine(entry.StructuredPayloadJson);
         }
 
         return builder.ToString();
