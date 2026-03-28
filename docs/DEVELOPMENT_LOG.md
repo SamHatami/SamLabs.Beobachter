@@ -773,3 +773,26 @@ Impact:
 
 Follow-ups:
 - Add inline validation visibility tests at the view layer if UI test coverage is introduced for setup workflows.
+
+## 2026-03-28 - MVVM Refactor Phase 0: Baseline Test Segmentation
+What changed:
+- Split the monolithic `MainWindowViewModel` test class into focused files:
+  [MainWindowFilteringTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowFilteringTests.cs),
+  [MainWindowSessionAndDetailsTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowSessionAndDetailsTests.cs),
+  [MainWindowReceiverSetupTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowReceiverSetupTests.cs),
+  [MainWindowWorkspaceStateTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowWorkspaceStateTests.cs)
+- Added shared test support and doubles:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+- Removed the previous single-file test container:
+  [MainWindowViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowViewModelTests.cs)
+
+Why:
+- The upcoming shell decomposition will move responsibilities into child ViewModels; keeping one large test class would make the migration brittle.
+- Segmenting by behavior surface makes it possible to move tests with each extracted VM while preserving expected behavior.
+
+Impact:
+- No runtime behavior changed.
+- App-level VM tests now align with planned feature boundaries (filters, session/details, receiver setup, workspace state).
+
+Follow-ups:
+- During each extraction phase, move the matching tests from shell-oriented names to feature VM-specific test classes.
