@@ -39,18 +39,11 @@
                             Spacing="0"
                             Margin="4,0,0,0"
                             VerticalAlignment="Center">
-                    <Button Classes="titlebar-button"
-                            Click="OnAppSettingsClick"
-                            ToolTip.Tip="Application Settings">
-                        <i:Icon Value="fa-solid fa-bars"
-                                FontSize="13" />
-                    </Button>
-
                     <svg:Svg Width="20"
                              Height="20"
                              Stretch="Uniform"
                              Margin="4,0,0,0"
-                             Path="avares://SamLabs.Beobachter.Application/Assets/SamLabsLogo.svg" />
+                             Path="avares://SamLabs.Beobachter.Application/Assets/SamLabsLogo.svg"/>
 
                     <TextBlock Text="SamLabs.Beobachter"
                                FontSize="12"
@@ -58,6 +51,13 @@
                                Margin="8,-2,0,0"
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource ShellForegroundBrush}" />
+                    <Button Classes="titlebar-button"
+                            Click="OnAppSettingsClick"
+                            ToolTip.Tip="Application Settings">
+                        <i:Icon Value="fa-solid fa-bars"
+                                FontSize="13" />
+                    </Button>
+                    
                 </StackPanel>
 
                 <StackPanel Grid.Column="2"

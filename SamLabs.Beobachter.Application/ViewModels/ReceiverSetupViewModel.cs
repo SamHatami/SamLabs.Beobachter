@@ -444,6 +444,43 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             }
         }
 
+        // Check for duplicate protocol+port combinations among network receivers.
+        Dictionary<(string Kind, int Port), List<ReceiverDefinitionViewModel>> portBindings = new();
+        foreach (ReceiverDefinitionViewModel receiver in ReceiverDefinitions)
+        {
+            if (receiver.Kind is not (ReceiverKinds.Udp or ReceiverKinds.Tcp) || !IsValidPort(receiver.Port))
+            {
+                continue;
+            }
+
+            var key = (receiver.Kind, receiver.Port);
+            if (!portBindings.TryGetValue(key, out List<ReceiverDefinitionViewModel>? list))
+            {
+                list = [];
+                portBindings[key] = list;
+            }
+
+            list.Add(receiver);
+        }
+
+        foreach (KeyValuePair<(string Kind, int Port), List<ReceiverDefinitionViewModel>> entry in portBindings)
+        {
+            if (entry.Value.Count <= 1)
+            {
+                continue;
+            }
+
+            foreach (ReceiverDefinitionViewModel receiver in entry.Value)
+            {
+                if (receiver.PortValidationError.Length == 0)
+                {
+                    receiver.PortValidationError = $"Port {entry.Key.Port} is already used by another {entry.Key.Kind} receiver.";
+                }
+            }
+
+            RegisterError($"Multiple {entry.Key.Kind} receivers are bound to port {entry.Key.Port}.");
+        }
+
         error = firstError ?? string.Empty;
         return isValid;
     }
