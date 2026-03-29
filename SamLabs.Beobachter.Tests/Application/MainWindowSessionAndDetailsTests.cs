@@ -79,6 +79,12 @@ public sealed class MainWindowSessionAndDetailsTests
         MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
         vm.Stream.SelectedEntry = session.Snapshot().First();
 
+        Assert.Equal("WARN", vm.Details.HeaderLevelText);
+        Assert.Equal("Payment warning", vm.Details.HeaderMessage);
+        Assert.True(vm.Details.HasPayload);
+        Assert.True(vm.Details.HasAttributes);
+        Assert.Single(vm.Details.Attributes);
+        Assert.Contains(Environment.NewLine, vm.Details.PayloadText);
         Assert.Contains("MessageTemplate: Payment warning for {OrderId}", vm.Details.SelectedDetailsText);
         Assert.Contains("StructuredPayload:", vm.Details.SelectedDetailsText);
         Assert.Contains("\"OrderId\":123", vm.Details.SelectedDetailsText);

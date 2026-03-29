@@ -1589,3 +1589,36 @@ Follow-ups:
 - Slice 4: add icons, badges, and formalized panel/spacing tokens.
 - Revisit source display naming later if we want service-friendly aliases rather than exact logger/source names in the left rail.
 
+## 2026-03-29 - UI Rebuild Slice 3: Structured Details Pane
+What changed:
+- Reworked details projection in:
+  [EntryDetailsViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/EntryDetailsViewModel.cs)
+  so the details pane now exposes structured header, attributes, payload, and exception state instead of only one prebuilt text blob.
+- Added attribute row model:
+  [EntryDetailPropertyViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/EntryDetailPropertyViewModel.cs)
+- Rebuilt the details surface in:
+  [EntryDetailsView.axaml](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/EntryDetailsView.axaml)
+  with:
+  - header badge, timestamp, message, and context lines
+  - small header copy actions
+  - attributes table
+  - JSON/Raw payload toggle with formatted JSON view
+  - collapsible exception section
+- Extended details-focused tests in:
+  [EntryDetailsViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Application/EntryDetailsViewModelTests.cs),
+  [MainWindowSessionAndDetailsTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Application/MainWindowSessionAndDetailsTests.cs)
+
+Why:
+- The previous pane forced all detail inspection through one text blob, which made the UI harder to scan and pushed structure into copied text rather than into the view itself.
+- Slice 3 goal is to preserve existing copy/export behavior while making the on-screen inspection experience match the target mockup more closely.
+
+Impact:
+- Selected entries now surface structured metadata directly to bindings.
+- Copy/export behavior remains intact through `SelectedDetailsText`, while the visible pane is now sectioned and easier to inspect.
+- Core and Infrastructure builds succeeded in the new master-based worktree after reusing existing restore metadata.
+- Application build is still blocked by the same project-reference/MSBuild environment issue that previously failed without surfacing compiler/XAML diagnostics.
+
+Follow-ups:
+- Slice 4: add icons, badge styling, spacing tokens, and severity chips in the stream.
+- Once app build verification is unblocked, rerun the full test suite from the master-based worktree.
+
