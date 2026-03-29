@@ -101,9 +101,9 @@
                             Content="{Binding WorkspaceSidebar}" />
 
             <GridSplitter Grid.Column="1"
-                          Width="1"
+                          Classes="shell-grid-splitter"
                           ResizeBehavior="PreviousAndNext"
-                          Background="{DynamicResource ShellPanelBorderBrush}" />
+                          />
 
             <!-- Center: stream search + log stream -->
             <Grid Grid.Column="2"
@@ -116,9 +116,9 @@
             </Grid>
 
             <GridSplitter Grid.Column="3"
-                          Width="1"
+                          Classes="shell-grid-splitter"
                           ResizeBehavior="PreviousAndNext"
-                          Background="{DynamicResource ShellPanelBorderBrush}" />
+                          />
 
             <!-- Right: entry details -->
             <ContentControl Grid.Column="4"

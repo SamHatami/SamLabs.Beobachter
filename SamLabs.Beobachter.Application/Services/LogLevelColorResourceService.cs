@@ -1,5 +1,6 @@
 using System;
 using Avalonia.Media;
+using Avalonia.Threading;
 using SamLabs.Beobachter.Core.Settings;
 using AvaloniaApp = Avalonia.Application;
 
@@ -11,31 +12,47 @@ public sealed class LogLevelColorResourceService
     {
         ArgumentNullException.ThrowIfNull(overrides);
 
-        TrySetBrush("RowTraceBrush", overrides.Trace.Row);
-        TrySetBrush("RowDebugBrush", overrides.Debug.Row);
-        TrySetBrush("RowInfoBrush", overrides.Info.Row);
-        TrySetBrush("RowWarnBrush", overrides.Warn.Row);
-        TrySetBrush("RowErrorBrush", overrides.Error.Row);
-        TrySetBrush("RowFatalBrush", overrides.Fatal.Row);
+        if (AvaloniaApp.Current is not { } app)
+        {
+            return;
+        }
 
-        TrySetBrush("BadgeTraceBrush", overrides.Trace.Badge);
-        TrySetBrush("BadgeDebugBrush", overrides.Debug.Badge);
-        TrySetBrush("BadgeInfoBrush", overrides.Info.Badge);
-        TrySetBrush("BadgeWarnBrush", overrides.Warn.Badge);
-        TrySetBrush("BadgeErrorBrush", overrides.Error.Badge);
-        TrySetBrush("BadgeFatalBrush", overrides.Fatal.Badge);
+        void Apply()
+        {
+            TrySetBrush(app, "RowTraceBrush", overrides.Trace.Row);
+            TrySetBrush(app, "RowDebugBrush", overrides.Debug.Row);
+            TrySetBrush(app, "RowInfoBrush", overrides.Info.Row);
+            TrySetBrush(app, "RowWarnBrush", overrides.Warn.Row);
+            TrySetBrush(app, "RowErrorBrush", overrides.Error.Row);
+            TrySetBrush(app, "RowFatalBrush", overrides.Fatal.Row);
 
-        TrySetBrush("MessageTraceBrush", overrides.Trace.Message);
-        TrySetBrush("MessageDebugBrush", overrides.Debug.Message);
-        TrySetBrush("MessageInfoBrush", overrides.Info.Message);
-        TrySetBrush("MessageWarnBrush", overrides.Warn.Message);
-        TrySetBrush("MessageErrorBrush", overrides.Error.Message);
-        TrySetBrush("MessageFatalBrush", overrides.Fatal.Message);
+            TrySetBrush(app, "BadgeTraceBrush", overrides.Trace.Badge);
+            TrySetBrush(app, "BadgeDebugBrush", overrides.Debug.Badge);
+            TrySetBrush(app, "BadgeInfoBrush", overrides.Info.Badge);
+            TrySetBrush(app, "BadgeWarnBrush", overrides.Warn.Badge);
+            TrySetBrush(app, "BadgeErrorBrush", overrides.Error.Badge);
+            TrySetBrush(app, "BadgeFatalBrush", overrides.Fatal.Badge);
+
+            TrySetBrush(app, "MessageTraceBrush", overrides.Trace.Message);
+            TrySetBrush(app, "MessageDebugBrush", overrides.Debug.Message);
+            TrySetBrush(app, "MessageInfoBrush", overrides.Info.Message);
+            TrySetBrush(app, "MessageWarnBrush", overrides.Warn.Message);
+            TrySetBrush(app, "MessageErrorBrush", overrides.Error.Message);
+            TrySetBrush(app, "MessageFatalBrush", overrides.Fatal.Message);
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            Apply();
+            return;
+        }
+
+        Dispatcher.UIThread.Post(Apply);
     }
 
-    private static void TrySetBrush(string resourceKey, string? colorText)
+    private static void TrySetBrush(AvaloniaApp app, string resourceKey, string? colorText)
     {
-        if (string.IsNullOrWhiteSpace(colorText) || AvaloniaApp.Current is null)
+        if (string.IsNullOrWhiteSpace(colorText))
         {
             return;
         }
@@ -45,6 +62,6 @@ public sealed class LogLevelColorResourceService
             return;
         }
 
-        AvaloniaApp.Current.Resources[resourceKey] = new SolidColorBrush(parsedColor);
+        app.Resources[resourceKey] = new SolidColorBrush(parsedColor);
     }
 }

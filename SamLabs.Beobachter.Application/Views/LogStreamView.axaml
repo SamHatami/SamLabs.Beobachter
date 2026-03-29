@@ -41,18 +41,23 @@
                                       SharedSizeGroup="LogActionsColumn" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
                            Margin="0,0,10,0"
                            Text="Timestamp"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="1"
-                           Margin="0,0,10,0"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
                            Text="Level"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="2"
-                           Margin="0,0,10,0"
+                           VerticalAlignment="Center"
+                           Margin="15,0,10,0"
                            Text="Source"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="3"
+                           Margin="20,0,0,0"
+                           VerticalAlignment="Center"
                            Text="Message"
                            Classes="section-caption" />
                 <StackPanel Grid.Column="4"
@@ -67,7 +72,7 @@
                                   ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
                                   IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"
                                   Command="{Binding ToggleAutoScrollCommand}"
-                                  i:Attached.Icon="fa-solid fa-thumbtack" />
+                                  i:Attached.Icon="fa-solid fa-angles-down" />
                 </StackPanel>
             </Grid>
         </Border>

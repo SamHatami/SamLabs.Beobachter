@@ -21,7 +21,8 @@
     <SolidColorBrush x:Key="ShellButtonStrongBorderBrush" Color="#FF356C64" />
 
     <SolidColorBrush x:Key="ShellExpanderHeaderBrush" Color="#FFF3F0EA" />
-    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBrush" Color="#FFEAE5DD" />
+    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBrush" Color="#FFE6EFEC" />
+    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBorderBrush" Color="#FFA7C1BB" />
 
     <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF8F8F5" />
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFBE4F4B" />

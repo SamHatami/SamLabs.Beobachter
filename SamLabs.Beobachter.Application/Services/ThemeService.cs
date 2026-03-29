@@ -1,4 +1,5 @@
 using Avalonia.Styling;
+using Avalonia.Threading;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Services;
 using AvaloniaApp = Avalonia.Application;
@@ -13,16 +14,24 @@ public sealed class ThemeService : IThemeService
     {
         CurrentMode = mode;
 
-        if (AvaloniaApp.Current is null)
+        if (AvaloniaApp.Current is not { } app)
         {
             return;
         }
 
-        AvaloniaApp.Current.RequestedThemeVariant = mode switch
+        ThemeVariant variant = mode switch
         {
             AppThemeMode.Light => ThemeVariant.Light,
             AppThemeMode.Dark => ThemeVariant.Dark,
             _ => ThemeVariant.Default
         };
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            app.RequestedThemeVariant = variant;
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() => app.RequestedThemeVariant = variant);
     }
 }
