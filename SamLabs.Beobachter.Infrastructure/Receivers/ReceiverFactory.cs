@@ -28,7 +28,8 @@ public sealed class ReceiverFactory
                     BindAddress = receiver.BindAddress,
                     Port = receiver.Port,
                     DefaultLoggerName = receiver.DefaultLoggerName,
-                    HostName = receiver.HostName
+                    HostName = receiver.HostName,
+                    FramingMode = receiver.FramingMode
                 },
                 parser));
         }
@@ -46,7 +47,8 @@ public sealed class ReceiverFactory
                     Backlog = receiver.Backlog,
                     ReceiveBufferSize = receiver.ReceiveBufferSize,
                     DefaultLoggerName = receiver.DefaultLoggerName,
-                    HostName = receiver.HostName
+                    HostName = receiver.HostName,
+                    FramingMode = receiver.FramingMode
                 },
                 parser));
         }
@@ -69,7 +71,8 @@ public sealed class ReceiverFactory
                     StartAtEnd = receiver.StartAtEnd,
                     DefaultLoggerName = receiver.DefaultLoggerName,
                     HostName = receiver.HostName,
-                    MaxBufferedCharacters = receiver.MaxBufferedCharacters
+                    MaxBufferedCharacters = receiver.MaxBufferedCharacters,
+                    FramingMode = receiver.FramingMode
                 },
                 parser));
         }

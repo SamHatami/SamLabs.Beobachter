@@ -1,3 +1,5 @@
+using SamLabs.Beobachter.Core.Settings;
+
 namespace SamLabs.Beobachter.Infrastructure.Receivers;
 
 public sealed record class FileTailReceiverOptions
@@ -17,4 +19,6 @@ public sealed record class FileTailReceiverOptions
     public string? HostName { get; init; }
 
     public int MaxBufferedCharacters { get; init; } = 1_000_000;
+
+    public ReceiverFramingMode FramingMode { get; init; } = ReceiverFramingMode.XmlEvent;
 }

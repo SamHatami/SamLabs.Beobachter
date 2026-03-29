@@ -75,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isPaused;
 
     [ObservableProperty]
-    private string _pauseButtonText = "Pause";
+    private string _pauseButtonText = "Pause Processing";
 
     [ObservableProperty]
     private bool _isAutoScrollEnabled = true;
@@ -209,7 +209,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnIsPausedChanged(bool value)
     {
-        PauseButtonText = value ? "Resume" : "Pause";
+        PauseButtonText = value ? "Resume Processing" : "Pause Processing";
         UpdateShellStatusPresentation();
     }
 
@@ -338,7 +338,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void UpdateShellStatusPresentation()
     {
-        int activeReceivers = ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
+        IReadOnlyList<ReceiverRuntimeState> runtimeStates = _ingestionSession.GetReceiverRuntimeStates();
+        int activeReceivers = runtimeStates.Count > 0
+            ? runtimeStates.Count(static x => x.State == ReceiverRunState.Running)
+            : ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
         ShellStatusPresentation presentation = _shellStatusFormatter.Build(
             IsPaused,
             IsAutoScrollEnabled,

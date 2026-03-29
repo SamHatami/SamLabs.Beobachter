@@ -22,6 +22,7 @@ public sealed class IngestionSession : IIngestionSession
     private readonly ISettingsStore _settingsStore;
     private readonly ReceiverFactory _receiverFactory;
     private readonly object _gate = new();
+    private readonly ReceiverRuntimeStateRegistry _receiverRuntimeStateRegistry = new();
 
     private Channel<LogEntry>? _channel;
     private ChannelReader<LogEntry>? _reader;
@@ -85,16 +86,22 @@ public sealed class IngestionSession : IIngestionSession
         return _store.Snapshot(query);
     }
 
-    public async ValueTask StartAsync(CancellationToken cancellationToken = default)
+    public IReadOnlyList<ReceiverRuntimeState> GetReceiverRuntimeStates()
+    {
+        return _receiverRuntimeStateRegistry.Snapshot();
+    }
+
+    public async ValueTask<IReadOnlyList<ReceiverStartupResult>> StartAsync(CancellationToken cancellationToken = default)
     {
         lock (_gate)
         {
             if (_started)
             {
-                return;
+                return [];
             }
 
             _started = true;
+            _receiverRuntimeStateRegistry.Clear();
         }
 
         var appSettings = await _settingsStore.LoadAppSettingsAsync(cancellationToken).ConfigureAwait(false);
@@ -107,12 +114,26 @@ public sealed class IngestionSession : IIngestionSession
         _consumeTask = Task.Run(() => ConsumeLoopAsync(_runCts.Token), CancellationToken.None);
 
         var receiverDefinitions = await _settingsStore.LoadReceiverDefinitionsAsync(cancellationToken).ConfigureAwait(false);
-        _receivers = _receiverFactory.CreateReceivers(receiverDefinitions);
+        var createdReceivers = _receiverFactory.CreateReceivers(receiverDefinitions);
+        _receiverRuntimeStateRegistry.ReplaceEntries(createdReceivers);
+        var startedReceivers = new List<ILogReceiver>(createdReceivers.Count);
+        var startupResults = await ReceiverLifecycleRunner.StartReceiversIndependentlyAsync(
+            createdReceivers,
+            startedReceivers,
+            _writer!,
+            _runCts.Token,
+            cancellationToken,
+            _receiverRuntimeStateRegistry).ConfigureAwait(false);
 
-        foreach (var receiver in _receivers)
+        lock (_gate)
         {
-            await receiver.StartAsync(_writer!, _runCts.Token).ConfigureAwait(false);
+            if (_started)
+            {
+                _receivers = startedReceivers;
+            }
         }
+
+        return startupResults;
     }
 
     public async ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
@@ -150,7 +171,7 @@ public sealed class IngestionSession : IIngestionSession
         await _settingsStore.SaveWorkspaceSettingsAsync(_workspaceSettings, cancellationToken).ConfigureAwait(false);
     }
 
-    public async ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<ReceiverReloadResult> ReloadReceiversAsync(CancellationToken cancellationToken = default)
     {
         IReadOnlyList<ILogReceiver> currentReceivers;
         ChannelWriter<LogEntry>? writer;
@@ -168,25 +189,36 @@ public sealed class IngestionSession : IIngestionSession
 
         if (!shouldReload || writer is null)
         {
-            return;
+            return new ReceiverReloadResult();
         }
 
+        _receiverRuntimeStateRegistry.MarkStopped(currentReceivers);
         await StopReceiversAsync(currentReceivers, cancellationToken).ConfigureAwait(false);
 
         var receiverDefinitions = await _settingsStore.LoadReceiverDefinitionsAsync(cancellationToken).ConfigureAwait(false);
         var reloaded = _receiverFactory.CreateReceivers(receiverDefinitions);
-        foreach (var receiver in reloaded)
-        {
-            await receiver.StartAsync(writer, receiverToken).ConfigureAwait(false);
-        }
+        _receiverRuntimeStateRegistry.ReplaceEntries(reloaded);
+        var startedReceivers = new List<ILogReceiver>(reloaded.Count);
+        var startupResults = await ReceiverLifecycleRunner.StartReceiversIndependentlyAsync(
+            reloaded,
+            startedReceivers,
+            writer,
+            receiverToken,
+            cancellationToken,
+            _receiverRuntimeStateRegistry).ConfigureAwait(false);
 
         lock (_gate)
         {
             if (_started)
             {
-                _receivers = reloaded;
+                _receivers = startedReceivers;
             }
         }
+
+        return new ReceiverReloadResult
+        {
+            ReceiverStartupResults = startupResults
+        };
     }
 
     public async ValueTask StopAsync(CancellationToken cancellationToken = default)
@@ -214,6 +246,7 @@ public sealed class IngestionSession : IIngestionSession
         _writer = null;
         _channel = null;
         _receivers = [];
+        _receiverRuntimeStateRegistry.MarkStopped(receivers);
 
         writer?.TryComplete();
         runCts?.Cancel();
@@ -243,7 +276,8 @@ public sealed class IngestionSession : IIngestionSession
 
     private async Task ConsumeLoopAsync(CancellationToken cancellationToken)
     {
-        if (_reader is null)
+        ChannelReader<LogEntry>? reader = _reader;
+        if (reader is null)
         {
             return;
         }
@@ -257,6 +291,7 @@ public sealed class IngestionSession : IIngestionSession
             {
                 if (IsPaused)
                 {
+                    // Pause only blocks channel draining; receivers continue writing to the bounded channel.
                     if (!await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
                     {
                         break;
@@ -265,7 +300,7 @@ public sealed class IngestionSession : IIngestionSession
                     continue;
                 }
 
-                while (batch.Count < MaxBatchSize && _reader.TryRead(out var next))
+                while (batch.Count < MaxBatchSize && reader.TryRead(out var next))
                 {
                     batch.Add(next);
                 }
@@ -289,7 +324,7 @@ public sealed class IngestionSession : IIngestionSession
         }
         finally
         {
-            while (_reader.TryRead(out var trailing))
+            while (reader.TryRead(out var trailing))
             {
                 batch.Add(trailing);
                 if (batch.Count >= MaxBatchSize)
@@ -317,7 +352,7 @@ public sealed class IngestionSession : IIngestionSession
 
         _channel = channel;
         _reader = channel.Reader;
-        _writer = new DropCountingWriter(channel.Writer, channel.Reader, capacity, IncrementDroppedCounter);
+        _writer = new DropCountingLogEntryWriter(channel.Writer, channel.Reader, capacity, IncrementDroppedCounter);
     }
 
     private void IncrementDroppedCounter()
@@ -347,53 +382,4 @@ public sealed class IngestionSession : IIngestionSession
         }
     }
 
-    private sealed class DropCountingWriter : ChannelWriter<LogEntry>
-    {
-        private readonly ChannelWriter<LogEntry> _inner;
-        private readonly ChannelReader<LogEntry> _reader;
-        private readonly int _capacity;
-        private readonly Action _onPotentialDrop;
-
-        public DropCountingWriter(
-            ChannelWriter<LogEntry> inner,
-            ChannelReader<LogEntry> reader,
-            int capacity,
-            Action onPotentialDrop)
-        {
-            _inner = inner;
-            _reader = reader;
-            _capacity = capacity;
-            _onPotentialDrop = onPotentialDrop;
-        }
-
-        public override bool TryComplete(Exception? error = null)
-        {
-            return _inner.TryComplete(error);
-        }
-
-        public override bool TryWrite(LogEntry item)
-        {
-            CapturePotentialDrop();
-            return _inner.TryWrite(item);
-        }
-
-        public override ValueTask WriteAsync(LogEntry item, CancellationToken cancellationToken = default)
-        {
-            CapturePotentialDrop();
-            return _inner.WriteAsync(item, cancellationToken);
-        }
-
-        public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default)
-        {
-            return _inner.WaitToWriteAsync(cancellationToken);
-        }
-
-        private void CapturePotentialDrop()
-        {
-            if (_reader.CanCount && _reader.Count >= _capacity)
-            {
-                _onPotentialDrop();
-            }
-        }
-    }
 }

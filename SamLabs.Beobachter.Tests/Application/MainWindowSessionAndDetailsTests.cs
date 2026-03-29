@@ -103,4 +103,19 @@ public sealed class MainWindowSessionAndDetailsTests
         Assert.Equal("Density: Comfortable", vm.Stream.DensityButtonText);
         Assert.Equal(12, vm.Stream.LogRowFontSize);
     }
+
+    [Fact]
+    public void ShellStatus_UsesRuntimeRunningReceiverCount_WhenAvailable()
+    {
+        FakeIngestionSession session = new([]);
+        session.ReceiverRuntimeStates =
+        [
+            new ReceiverRuntimeState { ReceiverId = "udp-a", DisplayName = "UDP A", State = ReceiverRunState.Running },
+            new ReceiverRuntimeState { ReceiverId = "tcp-b", DisplayName = "TCP B", State = ReceiverRunState.Faulted, LastError = "bind failed" }
+        ];
+
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
+
+        Assert.Equal("Active receivers: 1", vm.SessionHealth.ActiveReceiversText);
+    }
 }

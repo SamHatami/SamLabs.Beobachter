@@ -55,9 +55,22 @@ internal sealed class DesignIngestionSession : IIngestionSession
         return _entries.ToArray();
     }
 
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    public IReadOnlyList<ReceiverRuntimeState> GetReceiverRuntimeStates()
     {
-        return ValueTask.CompletedTask;
+        return
+        [
+            new ReceiverRuntimeState
+            {
+                ReceiverId = "design",
+                DisplayName = "Design Receiver",
+                State = ReceiverRunState.Running
+            }
+        ];
+    }
+
+    public ValueTask<IReadOnlyList<ReceiverStartupResult>> StartAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult<IReadOnlyList<ReceiverStartupResult>>([]);
     }
 
     public ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
@@ -72,9 +85,9 @@ internal sealed class DesignIngestionSession : IIngestionSession
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+    public ValueTask<ReceiverReloadResult> ReloadReceiversAsync(CancellationToken cancellationToken = default)
     {
-        return ValueTask.CompletedTask;
+        return ValueTask.FromResult(new ReceiverReloadResult());
     }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)

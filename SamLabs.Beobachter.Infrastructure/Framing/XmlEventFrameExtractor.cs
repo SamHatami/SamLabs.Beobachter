@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace SamLabs.Beobachter.Infrastructure.Parsing;
+namespace SamLabs.Beobachter.Infrastructure.Framing;
 
 internal static class XmlEventFrameExtractor
 {

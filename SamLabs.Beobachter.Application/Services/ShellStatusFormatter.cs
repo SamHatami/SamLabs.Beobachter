@@ -19,7 +19,7 @@ public sealed class ShellStatusFormatter : IShellStatusFormatter
     {
         ArgumentNullException.ThrowIfNull(statisticsSnapshot);
 
-        string state = isPaused ? "Paused" : "Running";
+        string state = isPaused ? "Processing Paused" : "Running";
         string pin = isAutoScrollEnabled ? "On" : "Off";
 
         string statusSummary = $"State: {state}  Pin: {pin}  Total: {totalCount}  Visible: {visibleCount}  Dropped: {droppedCount}";

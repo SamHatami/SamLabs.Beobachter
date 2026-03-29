@@ -124,6 +124,10 @@ internal sealed class FakeIngestionSession : IIngestionSession
 
     public int ReloadReceiversCalls { get; private set; }
 
+    public ReceiverReloadResult ReloadResult { get; set; } = new();
+
+    public IReadOnlyList<ReceiverRuntimeState> ReceiverRuntimeStates { get; set; } = [];
+
     public bool TryPublish(LogEntry entry)
     {
         _entries.Add(entry);
@@ -136,9 +140,14 @@ internal sealed class FakeIngestionSession : IIngestionSession
         return _entries.ToArray();
     }
 
-    public ValueTask StartAsync(CancellationToken cancellationToken = default)
+    public IReadOnlyList<ReceiverRuntimeState> GetReceiverRuntimeStates()
     {
-        return ValueTask.CompletedTask;
+        return ReceiverRuntimeStates;
+    }
+
+    public ValueTask<IReadOnlyList<ReceiverStartupResult>> StartAsync(CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult<IReadOnlyList<ReceiverStartupResult>>([]);
     }
 
     public ValueTask SetPausedAsync(bool isPaused, CancellationToken cancellationToken = default)
@@ -153,10 +162,10 @@ internal sealed class FakeIngestionSession : IIngestionSession
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask ReloadReceiversAsync(CancellationToken cancellationToken = default)
+    public ValueTask<ReceiverReloadResult> ReloadReceiversAsync(CancellationToken cancellationToken = default)
     {
         ReloadReceiversCalls++;
-        return ValueTask.CompletedTask;
+        return ValueTask.FromResult(ReloadResult);
     }
 
     public ValueTask StopAsync(CancellationToken cancellationToken = default)
@@ -183,11 +192,15 @@ internal sealed class FakeClipboardService : IClipboardService
 
 internal sealed class FakeSettingsStore : ISettingsStore
 {
+    public AppSettings AppSettings { get; set; } = new();
+
     public ReceiverDefinitions ReceiverDefinitions { get; set; } = new();
 
     public WorkspaceSettings WorkspaceSettings { get; set; } = new();
 
     public UiLayoutSettings UiLayoutSettings { get; set; } = new();
+
+    public AppSettings? LastSavedAppSettings { get; private set; }
 
     public ReceiverDefinitions? LastSavedReceiverDefinitions { get; private set; }
 
@@ -197,7 +210,7 @@ internal sealed class FakeSettingsStore : ISettingsStore
 
     public ValueTask<AppSettings> LoadAppSettingsAsync(CancellationToken cancellationToken = default)
     {
-        return ValueTask.FromResult(new AppSettings());
+        return ValueTask.FromResult(AppSettings);
     }
 
     public ValueTask<ReceiverDefinitions> LoadReceiverDefinitionsAsync(CancellationToken cancellationToken = default)
@@ -217,6 +230,8 @@ internal sealed class FakeSettingsStore : ISettingsStore
 
     public ValueTask SaveAppSettingsAsync(AppSettings settings, CancellationToken cancellationToken = default)
     {
+        AppSettings = settings;
+        LastSavedAppSettings = settings;
         return ValueTask.CompletedTask;
     }
 

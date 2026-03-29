@@ -22,6 +22,7 @@ public sealed record class WorkspaceSettings
 
     public bool AutoScroll { get; init; } = true;
 
+    // Persists consumer pause state (processing freeze); receiver transports continue running.
     public bool PauseIngest { get; init; }
 
     public IReadOnlyList<string> EnabledLevels { get; init; } =

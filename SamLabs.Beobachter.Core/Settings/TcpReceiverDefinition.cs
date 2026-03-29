@@ -1,12 +1,12 @@
-using SamLabs.Beobachter.Core.Settings;
+namespace SamLabs.Beobachter.Core.Settings;
 
-namespace SamLabs.Beobachter.Infrastructure.Receivers;
-
-public sealed record class TcpReceiverOptions
+public sealed record class TcpReceiverDefinition
 {
-    public required string Id { get; init; }
+    public string Id { get; init; } = "tcp-default";
 
-    public required string DisplayName { get; init; }
+    public string DisplayName { get; init; } = "TCP Receiver";
+
+    public bool Enabled { get; init; } = true;
 
     public string BindAddress { get; init; } = "0.0.0.0";
 
@@ -21,4 +21,6 @@ public sealed record class TcpReceiverOptions
     public string? HostName { get; init; }
 
     public ReceiverFramingMode FramingMode { get; init; } = ReceiverFramingMode.XmlEvent;
+
+    public IReadOnlyList<string> ParserOrder { get; init; } = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
 }

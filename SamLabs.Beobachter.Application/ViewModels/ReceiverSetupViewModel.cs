@@ -10,12 +10,14 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Core.Interfaces;
+using SamLabs.Beobachter.Core.Models;
 using SamLabs.Beobachter.Core.Settings;
 
 namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class ReceiverSetupViewModel : ViewModelBase
 {
+    private const string BindAddressValidationMessage = "Bind address must be a literal IPv4 or IPv6 address (for example 0.0.0.0 or ::1).";
     private static readonly StringComparer ParserNameComparer = StringComparer.OrdinalIgnoreCase;
     private static readonly string[] DefaultParserOrder =
     [
@@ -153,16 +155,20 @@ public partial class ReceiverSetupViewModel : ViewModelBase
 
         ReceiverDefinitions mapped = MapToReceiverDefinitions();
         await _settingsStore.SaveReceiverDefinitionsAsync(mapped);
-        await _ingestionSession.ReloadReceiversAsync();
-        ReceiverSetupStatus = $"Saved {ReceiverDefinitions.Count} receiver(s) and reloaded listeners.";
+        ReceiverReloadResult reloadResult = await _ingestionSession.ReloadReceiversAsync();
+        ReceiverSetupStatus = BuildReloadStatusMessage(
+            $"Saved {ReceiverDefinitions.Count} receiver(s).",
+            reloadResult);
     }
 
     [RelayCommand]
     private async Task ReloadReceiverSetupAsync()
     {
         await LoadReceiverDefinitionsAsync();
-        await _ingestionSession.ReloadReceiversAsync();
-        ReceiverSetupStatus = $"Reloaded {ReceiverDefinitions.Count} receiver(s) from settings.";
+        ReceiverReloadResult reloadResult = await _ingestionSession.ReloadReceiversAsync();
+        ReceiverSetupStatus = BuildReloadStatusMessage(
+            $"Reloaded {ReceiverDefinitions.Count} receiver(s) from settings.",
+            reloadResult);
     }
 
     private void OnReceiverDefinitionPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -354,8 +360,8 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             {
                 if (!IsValidBindAddress(receiver.BindAddress))
                 {
-                    receiver.BindAddressValidationError = $"Bind address '{receiver.BindAddress}' is invalid.";
-                    RegisterError($"{label} bind address '{receiver.BindAddress}' is invalid.");
+                    receiver.BindAddressValidationError = BindAddressValidationMessage;
+                    RegisterError($"{label}: {BindAddressValidationMessage}");
                 }
             }
 
@@ -420,18 +426,21 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             return false;
         }
 
-        var trimmed = value.Trim();
-        if (trimmed == "*")
+        return IPAddress.TryParse(value.Trim(), out _);
+    }
+
+    private static string BuildReloadStatusMessage(
+        string operationPrefix,
+        ReceiverReloadResult reloadResult)
+    {
+        if (reloadResult.FailedCount == 0)
         {
-            return true;
+            return $"{operationPrefix} Started {reloadResult.SuccessfulCount} receiver(s).";
         }
 
-        if (IPAddress.TryParse(trimmed, out _))
-        {
-            return true;
-        }
-
-        return Uri.CheckHostName(trimmed) != UriHostNameType.Unknown;
+        ReceiverStartupResult firstFailure = reloadResult.ReceiverStartupResults.First(static x => !x.Succeeded);
+        return $"{operationPrefix} Started {reloadResult.SuccessfulCount} receiver(s), {reloadResult.FailedCount} failed. " +
+               $"First failure: {firstFailure.DisplayName} ({firstFailure.ReceiverId}) - {firstFailure.ErrorMessage}";
     }
 
     private static string FormatParserOrder(IReadOnlyList<string> parserOrder)

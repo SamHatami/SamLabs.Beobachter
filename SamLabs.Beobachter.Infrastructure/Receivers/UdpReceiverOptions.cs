@@ -1,3 +1,5 @@
+using SamLabs.Beobachter.Core.Settings;
+
 namespace SamLabs.Beobachter.Infrastructure.Receivers;
 
 public sealed record class UdpReceiverOptions
@@ -13,4 +15,6 @@ public sealed record class UdpReceiverOptions
     public string DefaultLoggerName { get; init; } = "UdpReceiver";
 
     public string? HostName { get; init; }
+
+    public ReceiverFramingMode FramingMode { get; init; } = ReceiverFramingMode.Datagram;
 }

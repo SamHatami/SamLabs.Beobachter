@@ -27,7 +27,6 @@
         <Border Grid.Row="1"
                 Margin="16,0,16,8"
                 Padding="12"
-                CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid RowDefinitions="Auto,Auto">
                 <views:LogQueryBarView x:Name="LogQueryBar"
@@ -39,7 +38,6 @@
         <Border Grid.Row="2"
                 Margin="16,0,16,8"
                 Padding="8"
-                CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid ColumnDefinitions="260,*,360"
                   ColumnSpacing="8">

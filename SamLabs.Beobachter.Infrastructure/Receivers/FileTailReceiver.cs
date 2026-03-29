@@ -2,7 +2,8 @@ using System.Text;
 using System.Threading.Channels;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
-using SamLabs.Beobachter.Infrastructure.Parsing;
+using SamLabs.Beobachter.Core.Settings;
+using SamLabs.Beobachter.Infrastructure.Framing;
 
 namespace SamLabs.Beobachter.Infrastructure.Receivers;
 
@@ -104,7 +105,8 @@ public sealed class FileTailReceiver : ILogReceiver
 
     private async Task TailLoopAsync(CancellationToken cancellationToken)
     {
-        var payloadBuffer = new StringBuilder();
+        ILogPayloadFramer framer = LogPayloadFramerFactory.Create(_options.FramingMode, ReceiverFramingMode.XmlEvent);
+        var pendingCharacterCount = 0;
         var filePosition = ResolveInitialPosition();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -132,7 +134,8 @@ public sealed class FileTailReceiver : ILogReceiver
                 if (filePosition > fileStream.Length)
                 {
                     filePosition = 0;
-                    payloadBuffer.Clear();
+                    pendingCharacterCount = 0;
+                    framer.Reset();
                 }
 
                 fileStream.Position = filePosition;
@@ -146,12 +149,14 @@ public sealed class FileTailReceiver : ILogReceiver
                     continue;
                 }
 
-                payloadBuffer.Append(chunk);
-                await DrainParsedEventsAsync(payloadBuffer, writer, cancellationToken).ConfigureAwait(false);
+                pendingCharacterCount += chunk.Length;
+                framer.Push(Encoding.UTF8.GetBytes(chunk));
+                await DrainParsedFramesAsync(framer, writer, cancellationToken).ConfigureAwait(false);
 
-                if (payloadBuffer.Length > _options.MaxBufferedCharacters)
+                if (pendingCharacterCount > _options.MaxBufferedCharacters)
                 {
-                    payloadBuffer.Clear();
+                    pendingCharacterCount = 0;
+                    framer.Reset();
                 }
             }
             catch (FileNotFoundException)
@@ -173,14 +178,13 @@ public sealed class FileTailReceiver : ILogReceiver
         }
     }
 
-    private async Task DrainParsedEventsAsync(
-        StringBuilder payloadBuffer,
+    private async Task DrainParsedFramesAsync(
+        ILogPayloadFramer framer,
         ChannelWriter<LogEntry> writer,
         CancellationToken cancellationToken)
     {
-        while (XmlEventFrameExtractor.TryExtractNext(payloadBuffer, out var xmlEvent))
+        while (framer.TryReadFrame(out ReadOnlyMemory<byte> payload))
         {
-            var payload = Encoding.UTF8.GetBytes(xmlEvent);
             if (!_parser.TryParse(payload, _sourceContext, out var entry) || entry is null)
             {
                 continue;

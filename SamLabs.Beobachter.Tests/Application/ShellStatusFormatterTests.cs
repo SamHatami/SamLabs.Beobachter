@@ -35,7 +35,7 @@ public sealed class ShellStatusFormatterTests
         string expectedStatsSummary1Minute = string.Format(CultureInfo.CurrentCulture, "1m: {0:F1} logs/s | {1:F1} err/s", 12.4, 1.1);
         string expectedStatsSummary5Minutes = string.Format(CultureInfo.CurrentCulture, "5m: {0:F1} logs/s | {1:F1} err/s", 8.8, 0.6);
 
-        Assert.Equal("State: Paused  Pin: Off  Total: 144  Visible: 77  Dropped: 3", presentation.StatusSummary);
+        Assert.Equal("State: Processing Paused  Pin: Off  Total: 144  Visible: 77  Dropped: 3", presentation.StatusSummary);
         Assert.Equal(expectedStatsSummary1Minute, presentation.StatsSummary1Minute);
         Assert.Equal(expectedStatsSummary5Minutes, presentation.StatsSummary5Minutes);
         Assert.Equal("Top loggers (5m): Orders.Api (17)", presentation.TopLoggersSummary);

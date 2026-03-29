@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Channels;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
-using SamLabs.Beobachter.Infrastructure.Parsing;
+using SamLabs.Beobachter.Core.Settings;
+using SamLabs.Beobachter.Infrastructure.Framing;
 
 namespace SamLabs.Beobachter.Infrastructure.Receivers;
 
@@ -186,7 +186,7 @@ public sealed class TcpReceiver : ILogReceiver
             using var stream = client.GetStream();
             var receiveBufferSize = Math.Max(256, _options.ReceiveBufferSize);
             var receiveBuffer = new byte[receiveBufferSize];
-            var payloadBuffer = new StringBuilder(receiveBufferSize * 2);
+            ILogPayloadFramer framer = LogPayloadFramerFactory.Create(_options.FramingMode, ReceiverFramingMode.XmlEvent);
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -197,11 +197,11 @@ public sealed class TcpReceiver : ILogReceiver
                     break;
                 }
 
-                payloadBuffer.Append(Encoding.UTF8.GetString(receiveBuffer, 0, readBytes));
-                await DrainParsedEventsAsync(payloadBuffer, writer, cancellationToken).ConfigureAwait(false);
+                framer.Push(receiveBuffer.AsMemory(0, readBytes));
+                await DrainParsedFramesAsync(framer, writer, cancellationToken).ConfigureAwait(false);
             }
 
-            await DrainParsedEventsAsync(payloadBuffer, writer, cancellationToken).ConfigureAwait(false);
+            await DrainParsedFramesAsync(framer, writer, cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -225,14 +225,13 @@ public sealed class TcpReceiver : ILogReceiver
         }
     }
 
-    private async Task DrainParsedEventsAsync(
-        StringBuilder payloadBuffer,
+    private async Task DrainParsedFramesAsync(
+        ILogPayloadFramer framer,
         ChannelWriter<LogEntry> writer,
         CancellationToken cancellationToken)
     {
-        while (XmlEventFrameExtractor.TryExtractNext(payloadBuffer, out var xmlEvent))
+        while (framer.TryReadFrame(out ReadOnlyMemory<byte> payload))
         {
-            var payload = Encoding.UTF8.GetBytes(xmlEvent);
             if (!_parser.TryParse(payload, _sourceContext, out var entry) || entry is null)
             {
                 continue;

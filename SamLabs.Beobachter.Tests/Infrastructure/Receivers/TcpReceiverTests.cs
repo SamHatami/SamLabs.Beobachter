@@ -83,6 +83,52 @@ public sealed class TcpReceiverTests
         await receiver.StopAsync();
     }
 
+    [Fact]
+    public async Task StartAsync_HandlesXmlEventSplitAcrossWrites()
+    {
+        var port = GetFreeTcpPort();
+        var options = new TcpReceiverOptions
+        {
+            Id = "tcp-receiver-split",
+            DisplayName = "TCP Receiver Split",
+            BindAddress = IPAddress.Loopback.ToString(),
+            Port = port,
+            DefaultLoggerName = "TcpDefault"
+        };
+
+        await using var receiver = new TcpReceiver(options, new Log4jXmlParser());
+        var channel = Channel.CreateBounded<LogEntry>(new BoundedChannelOptions(8));
+        await receiver.StartAsync(channel.Writer, CancellationToken.None);
+
+        const string xml = """
+            <log4j:event logger="Orders.Api" timestamp="1184286222308" level="INFO" thread="12"
+                         xmlns:log4j="http://jakarta.apache.org/log4j/">
+              <log4j:message>Split payload</log4j:message>
+            </log4j:event>
+            """;
+
+        using var client = new TcpClient();
+        await client.ConnectAsync(IPAddress.Loopback, port);
+        using NetworkStream stream = client.GetStream();
+
+        int splitIndex = xml.Length / 2;
+        byte[] head = Encoding.UTF8.GetBytes(xml[..splitIndex]);
+        byte[] tail = Encoding.UTF8.GetBytes(xml[splitIndex..]);
+
+        await stream.WriteAsync(head);
+        await stream.FlushAsync();
+        await AssertNoEntryWithinAsync(channel.Reader, TimeSpan.FromMilliseconds(150));
+
+        await stream.WriteAsync(tail);
+        await stream.FlushAsync();
+
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        LogEntry entry = await channel.Reader.ReadAsync(timeout.Token);
+        Assert.Equal("tcp-receiver-split", entry.ReceiverId);
+        Assert.Equal("Split payload", entry.Message);
+        Assert.Equal(LogLevel.Info, entry.Level);
+    }
+
     private static int GetFreeTcpPort()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
@@ -90,5 +136,14 @@ public sealed class TcpReceiverTests
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
+    }
+
+    private static async Task AssertNoEntryWithinAsync(ChannelReader<LogEntry> reader, TimeSpan timeout)
+    {
+        using CancellationTokenSource cts = new(timeout);
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        {
+            await reader.ReadAsync(cts.Token);
+        });
     }
 }

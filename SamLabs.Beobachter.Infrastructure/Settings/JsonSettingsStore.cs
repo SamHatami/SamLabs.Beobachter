@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using System.Linq;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Settings;
 
@@ -22,11 +23,18 @@ public sealed class JsonSettingsStore : ISettingsStore
 
     public ValueTask<ReceiverDefinitions> LoadReceiverDefinitionsAsync(CancellationToken cancellationToken = default)
     {
-        return LoadAsync(
+        return LoadReceiverDefinitionsCoreAsync(cancellationToken);
+    }
+
+    private async ValueTask<ReceiverDefinitions> LoadReceiverDefinitionsCoreAsync(CancellationToken cancellationToken)
+    {
+        ReceiverDefinitions loaded = await LoadAsync(
             "receivers.settings.json",
             new ReceiverDefinitions(),
             SettingsJsonContext.Default.ReceiverDefinitions,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
+
+        return NormalizeFramingModes(loaded);
     }
 
     public ValueTask<WorkspaceSettings> LoadWorkspaceSettingsAsync(CancellationToken cancellationToken = default)
@@ -128,5 +136,42 @@ public sealed class JsonSettingsStore : ISettingsStore
     private string GetPath(string fileName)
     {
         return Path.Combine(_rootDirectory, fileName);
+    }
+
+    private static ReceiverDefinitions NormalizeFramingModes(ReceiverDefinitions definitions)
+    {
+        UdpReceiverDefinition[] udp = definitions.UdpReceivers
+            .Select(static x => x with
+            {
+                FramingMode = x.FramingMode == ReceiverFramingMode.Unknown
+                    ? ReceiverFramingMode.Datagram
+                    : x.FramingMode
+            })
+            .ToArray();
+
+        TcpReceiverDefinition[] tcp = definitions.TcpReceivers
+            .Select(static x => x with
+            {
+                FramingMode = x.FramingMode == ReceiverFramingMode.Unknown
+                    ? ReceiverFramingMode.XmlEvent
+                    : x.FramingMode
+            })
+            .ToArray();
+
+        FileTailReceiverDefinition[] file = definitions.FileTailReceivers
+            .Select(static x => x with
+            {
+                FramingMode = x.FramingMode == ReceiverFramingMode.Unknown
+                    ? ReceiverFramingMode.XmlEvent
+                    : x.FramingMode
+            })
+            .ToArray();
+
+        return definitions with
+        {
+            UdpReceivers = udp,
+            TcpReceivers = tcp,
+            FileTailReceivers = file
+        };
     }
 }
