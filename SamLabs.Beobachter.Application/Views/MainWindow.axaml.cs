@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 using SamLabs.Beobachter.Application.ViewModels;
 
 namespace SamLabs.Beobachter.Application.Views;
@@ -29,7 +31,10 @@ public partial class MainWindow : Window
 
         if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.F)
         {
-            LogQueryBar.FocusSearchBox();
+            TopBarView? topBarView = TopBarHost.GetVisualDescendants()
+                .OfType<TopBarView>()
+                .FirstOrDefault();
+            topBarView?.FocusSearchBox();
             e.Handled = true;
             return;
         }

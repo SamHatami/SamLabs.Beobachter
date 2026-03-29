@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.TopBarView"
+             x:DataType="viewModels:TopBarViewModel">
+    <Border Padding="12,8"
+            Background="{DynamicResource ShellPanelBrush}">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        VerticalAlignment="Center">
+                <TextBlock Text="Beobachter"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                <TextBlock Text="{Binding StatusSummary}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+            </StackPanel>
+
+            <TextBox x:Name="SearchTextBox"
+                     Grid.Column="1"
+                     Margin="16,0"
+                     Watermark="Search logs (e.g. error:timeout AND service:payment)"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        VerticalAlignment="Center">
+                <Button Content="Clear"
+                        Padding="8,4"
+                        Command="{Binding ClearSearchCommand}" />
+                <Border Width="1"
+                        Margin="4,2"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.3" />
+                <Button Content="{Binding PauseButtonText}"
+                        Padding="8,4"
+                        Command="{Binding TogglePauseCommand}" />
+                <Button Content="{Binding AutoScrollButtonText}"
+                        Padding="8,4"
+                        Command="{Binding ToggleAutoScrollCommand}" />
+                <Border Width="1"
+                        Margin="4,2"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.3" />
+                <DropDownButton Content="{Binding ThemeSummary}"
+                                Padding="8,4">
+                    <DropDownButton.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="System"
+                                      Command="{Binding UseSystemThemeCommand}" />
+                            <MenuItem Header="Light"
+                                      Command="{Binding UseLightThemeCommand}" />
+                            <MenuItem Header="Dark"
+                                      Command="{Binding UseDarkThemeCommand}" />
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

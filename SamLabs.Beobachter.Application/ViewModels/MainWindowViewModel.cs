@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels.Sources;
 using SamLabs.Beobachter.Application.ViewModels.Status;
-using SamLabs.Beobachter.Application.ViewModels.Toolbar;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
@@ -45,19 +44,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IShellStatusFormatter _shellStatusFormatter;
     private readonly ISampleLogEntryGenerator _sampleLogEntryGenerator;
-    private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
     private readonly IWorkspaceStartupOrchestrator _workspaceStartupOrchestrator;
     private readonly ILogStreamProjectionService _logStreamProjectionService;
     private readonly ILogStatisticsService _statisticsService;
     private bool _isApplyingWorkspaceState;
-
-    [ObservableProperty]
-    private string _themeSummary = string.Empty;
-
-    [ObservableProperty]
-    private string _statusSummary = string.Empty;
+    private bool _isSyncingSearchText;
 
     [ObservableProperty]
     private string _statsSummary1Minute = "1m: 0 logs/s | 0 err/s";
@@ -71,27 +64,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _topReceiversSummary = "Top receivers (5m): -";
 
-    [ObservableProperty]
-    private bool _isPaused;
-
-    [ObservableProperty]
-    private string _pauseButtonText = "Pause Processing";
-
-    [ObservableProperty]
-    private bool _isAutoScrollEnabled = true;
-
-    [ObservableProperty]
-    private string _autoScrollButtonText = "Pin: On";
-
     public MainWindowViewModel(
         IShellStatusFormatter shellStatusFormatter,
         ISampleLogEntryGenerator sampleLogEntryGenerator,
-        IThemeService themeService,
         IIngestionSession ingestionSession,
         IWorkspaceStateCoordinator workspaceStateCoordinator,
         IWorkspaceStartupOrchestrator workspaceStartupOrchestrator,
         ILogStreamProjectionService logStreamProjectionService,
         ILogStatisticsService statisticsService,
+        TopBarViewModel topBar,
         SourceTreeViewModel sources,
         QuickFiltersViewModel quickFilters,
         ReceiverSetupViewModel receiverSetup,
@@ -103,13 +84,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _shellStatusFormatter = shellStatusFormatter ?? throw new ArgumentNullException(nameof(shellStatusFormatter));
         _sampleLogEntryGenerator = sampleLogEntryGenerator ?? throw new ArgumentNullException(nameof(sampleLogEntryGenerator));
-        _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
         _workspaceStartupOrchestrator = workspaceStartupOrchestrator ?? throw new ArgumentNullException(nameof(workspaceStartupOrchestrator));
         _logStreamProjectionService = logStreamProjectionService ?? throw new ArgumentNullException(nameof(logStreamProjectionService));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
 
+        TopBar = topBar ?? throw new ArgumentNullException(nameof(topBar));
         Sources = sources ?? throw new ArgumentNullException(nameof(sources));
         QuickFilters = quickFilters ?? throw new ArgumentNullException(nameof(quickFilters));
         ReceiverSetup = receiverSetup ?? throw new ArgumentNullException(nameof(receiverSetup));
@@ -119,27 +100,26 @@ public partial class MainWindowViewModel : ViewModelBase
         Details = details ?? throw new ArgumentNullException(nameof(details));
         SessionHealth = sessionHealth ?? throw new ArgumentNullException(nameof(sessionHealth));
 
+        TopBar.SearchTextChanged += OnTopBarSearchTextChanged;
+        TopBar.PauseToggled += OnTopBarPauseToggled;
+        TopBar.AutoScrollToggled += OnTopBarAutoScrollToggled;
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources.StateChanged += OnSourcesStateChanged;
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Stream.PropertyChanged += OnStreamPropertyChanged;
-        Toolbar = new MainToolbarViewModel(this);
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
-        IsPaused = _ingestionSession.IsPaused;
-        IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
-        Stream.IsAutoScrollEnabled = IsAutoScrollEnabled;
+        Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
         _statisticsService.RecordRange(_ingestionSession.Snapshot());
         Sources.RebuildFromSnapshot(_ingestionSession.Snapshot());
         RebuildVisibleEntries();
         UpdateQuickFiltersSnapshot();
-        UpdateThemeSummary();
         UpdateShellStatusPresentation();
         _ = InitializeWorkspaceAsync();
     }
 
-    public MainToolbarViewModel Toolbar { get; }
+    public TopBarViewModel TopBar { get; }
 
     public WorkspaceSidebarViewModel WorkspaceSidebar { get; }
 
@@ -158,27 +138,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public SessionHealthViewModel SessionHealth { get; }
 
     [RelayCommand]
-    private void UseSystemTheme()
-    {
-        _themeService.SetTheme(AppThemeMode.System);
-        UpdateThemeSummary();
-    }
-
-    [RelayCommand]
-    private void UseLightTheme()
-    {
-        _themeService.SetTheme(AppThemeMode.Light);
-        UpdateThemeSummary();
-    }
-
-    [RelayCommand]
-    private void UseDarkTheme()
-    {
-        _themeService.SetTheme(AppThemeMode.Dark);
-        UpdateThemeSummary();
-    }
-
-    [RelayCommand]
     private void GenerateSampleEntries()
     {
         IReadOnlyList<LogEntry> sampleEntries = _sampleLogEntryGenerator.CreateBatch(_ingestionSession.TotalCount + 1, 12);
@@ -190,41 +149,53 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateShellStatusPresentation();
     }
 
-    [RelayCommand]
-    private async Task TogglePauseAsync()
+    private void OnTopBarSearchTextChanged(object? sender, EventArgs e)
     {
-        var nextState = !IsPaused;
-        await _ingestionSession.SetPausedAsync(nextState).ConfigureAwait(false);
-        IsPaused = nextState;
+        if (_isSyncingSearchText)
+        {
+            return;
+        }
+
+        _isSyncingSearchText = true;
+        try
+        {
+            Filters.SearchText = TopBar.SearchText;
+        }
+        finally
+        {
+            _isSyncingSearchText = false;
+        }
+    }
+
+    private void OnTopBarPauseToggled(object? sender, EventArgs e)
+    {
         Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
     }
 
-    [RelayCommand]
-    private async Task ToggleAutoScrollAsync()
+    private void OnTopBarAutoScrollToggled(object? sender, EventArgs e)
     {
-        var nextState = !IsAutoScrollEnabled;
-        await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
-        IsAutoScrollEnabled = nextState;
+        Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
         Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
-    }
-
-    partial void OnIsPausedChanged(bool value)
-    {
-        PauseButtonText = value ? "Resume Processing" : "Pause Processing";
-        UpdateShellStatusPresentation();
-    }
-
-    partial void OnIsAutoScrollEnabledChanged(bool value)
-    {
-        AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
-        Stream.IsAutoScrollEnabled = value;
-        UpdateShellStatusPresentation();
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is null || FilterCriteriaPropertyNames.Contains(e.PropertyName))
         {
+            if (string.Equals(e.PropertyName, nameof(LogFiltersViewModel.SearchText), StringComparison.Ordinal) &&
+                !_isSyncingSearchText)
+            {
+                _isSyncingSearchText = true;
+                try
+                {
+                    TopBar.SearchText = Filters.SearchText;
+                }
+                finally
+                {
+                    _isSyncingSearchText = false;
+                }
+            }
+
             OnFiltersChanged();
         }
     }
@@ -255,25 +226,10 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsCompactDensity), StringComparison.Ordinal))
-        {
-            QueuePersistWorkspaceState();
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.TimestampColumnWidth), StringComparison.Ordinal))
-        {
-            QueuePersistWorkspaceState();
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LevelColumnWidth), StringComparison.Ordinal))
-        {
-            QueuePersistWorkspaceState();
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.LoggerColumnWidth), StringComparison.Ordinal))
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsCompactDensity), StringComparison.Ordinal) ||
+            string.Equals(e.PropertyName, nameof(LogStreamViewModel.TimestampColumnWidth), StringComparison.Ordinal) ||
+            string.Equals(e.PropertyName, nameof(LogStreamViewModel.LevelColumnWidth), StringComparison.Ordinal) ||
+            string.Equals(e.PropertyName, nameof(LogStreamViewModel.LoggerColumnWidth), StringComparison.Ordinal))
         {
             QueuePersistWorkspaceState();
         }
@@ -319,16 +275,6 @@ public partial class MainWindowViewModel : ViewModelBase
         QueuePersistWorkspaceState();
     }
 
-    private static double ClampColumnWidth(double value, double min, double max)
-    {
-        return Math.Clamp(value, min, max);
-    }
-
-    private void UpdateThemeSummary()
-    {
-        ThemeSummary = $"Theme: {_themeService.CurrentMode}";
-    }
-
     private void UpdateQuickFiltersSnapshot()
     {
         IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
@@ -344,8 +290,8 @@ public partial class MainWindowViewModel : ViewModelBase
             ? runtimeStates.Count(static x => x.State == ReceiverRunState.Running)
             : ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
         ShellStatusPresentation presentation = _shellStatusFormatter.Build(
-            IsPaused,
-            IsAutoScrollEnabled,
+            TopBar.IsPaused,
+            TopBar.IsAutoScrollEnabled,
             _ingestionSession.TotalCount,
             Stream.VisibleEntries.Count,
             _ingestionSession.DroppedCount,
@@ -353,7 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase
             QuickFilters.StructuredOnlyCount,
             _statisticsService.GetSnapshot());
 
-        StatusSummary = presentation.StatusSummary;
+        TopBar.StatusSummary = presentation.StatusSummary;
         StatsSummary1Minute = presentation.StatsSummary1Minute;
         StatsSummary5Minutes = presentation.StatsSummary5Minutes;
         TopLoggersSummary = presentation.TopLoggersSummary;
@@ -379,6 +325,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             Filters.SearchText = workspace.SearchText;
+            TopBar.SearchText = workspace.SearchText;
             Filters.ReceiverFilter = workspace.ReceiverFilter;
             Filters.LoggerFilter = workspace.LoggerFilter;
             Filters.ThreadFilter = workspace.ThreadFilter;
@@ -386,9 +333,9 @@ public partial class MainWindowViewModel : ViewModelBase
             Filters.TraceIdFilter = workspace.TraceIdFilter;
             Filters.MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
             Stream.IsCompactDensity = workspace.CompactDensity;
-            Stream.TimestampColumnWidth = ClampColumnWidth(layout.TimestampColumnWidth, 100, 420);
-            Stream.LevelColumnWidth = ClampColumnWidth(layout.LevelColumnWidth, 70, 200);
-            Stream.LoggerColumnWidth = ClampColumnWidth(layout.LoggerColumnWidth, 120, 520);
+            Stream.TimestampColumnWidth = Math.Clamp(layout.TimestampColumnWidth, 100, 420);
+            Stream.LevelColumnWidth = Math.Clamp(layout.LevelColumnWidth, 70, 200);
+            Stream.LoggerColumnWidth = Math.Clamp(layout.LoggerColumnWidth, 120, 520);
 
             var enabled = new HashSet<string>(workspace.EnabledLevels, StringComparer.OrdinalIgnoreCase);
             Filters.ShowTrace = enabled.Contains(nameof(LogLevel.Trace));
@@ -426,8 +373,8 @@ public partial class MainWindowViewModel : ViewModelBase
             Stream.IsCompactDensity,
             ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
             Filters.GetEnabledLevels(),
-            IsAutoScrollEnabled,
-            IsPaused,
+            TopBar.IsAutoScrollEnabled,
+            TopBar.IsPaused,
             Stream.TimestampColumnWidth,
             Stream.LevelColumnWidth,
             Stream.LoggerColumnWidth);

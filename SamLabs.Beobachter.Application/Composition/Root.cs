@@ -45,14 +45,15 @@ public static class Root
 
         services.AddSingleton<IIngestionSession, IngestionSession>();
 
+        services.AddSingleton<TopBarViewModel>();
         services.AddSingleton<SourceTreeViewModel>();
         services.AddSingleton<QuickFiltersViewModel>();
         services.AddSingleton<ReceiverSetupViewModel>();
-        services.AddSingleton<WorkspaceSidebarViewModel>();
         services.AddSingleton<LogFiltersViewModel>();
         services.AddSingleton<LogStreamViewModel>();
         services.AddSingleton<EntryDetailsViewModel>();
         services.AddSingleton<SessionHealthViewModel>();
+        services.AddSingleton<WorkspaceSidebarViewModel>();
 
         services.AddSingleton<MainWindowViewModel>();
     }

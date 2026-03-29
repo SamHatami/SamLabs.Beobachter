@@ -6,54 +6,56 @@
         xmlns:designViewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels.Design"
         xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
         mc:Ignorable="d"
-        d:DesignWidth="1200"
-        d:DesignHeight="760"
+        d:DesignWidth="1280"
+        d:DesignHeight="800"
         x:Class="SamLabs.Beobachter.Application.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="SamLabs.Beobachter"
+        Title="Beobachter"
         KeyDown="OnWindowKeyDown">
 
     <Design.DataContext>
         <designViewModels:MainWindowDesignViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto"
+    <Grid RowDefinitions="Auto,*,Auto"
           Background="{DynamicResource ShellBackgroundBrush}">
-        <ContentControl Grid.Row="0"
-                        Margin="16,16,16,8"
-                        Content="{Binding Toolbar}" />
 
-        <Border Grid.Row="1"
-                Margin="16,0,16,8"
-                Padding="12"
-                Background="{DynamicResource ShellPanelBrush}">
-            <Grid RowDefinitions="Auto,Auto">
-                <views:LogQueryBarView x:Name="LogQueryBar"
-                                       Grid.Row="0" />
-                <views:AdvancedLogFiltersView Grid.Row="1" />
-            </Grid>
-        </Border>
+        <!-- Row 0: Top Bar -->
+        <ContentControl x:Name="TopBarHost"
+                        Grid.Row="0"
+                        Content="{Binding TopBar}" />
 
-        <Border Grid.Row="2"
-                Margin="16,0,16,8"
-                Padding="8"
-                Background="{DynamicResource ShellPanelBrush}">
-            <Grid ColumnDefinitions="260,*,360"
-                  ColumnSpacing="8">
-                <ContentControl Grid.Column="0"
-                                Content="{Binding WorkspaceSidebar}" />
+        <!-- Row 1: Workspace (sidebar | splitter | stream | splitter | details) -->
+        <Grid Grid.Row="1"
+              Margin="0,1,0,0"
+              ColumnDefinitions="240,Auto,*,Auto,340">
 
-                <ContentControl Grid.Column="1"
-                                Content="{Binding Stream}" />
+            <!-- Left sidebar: filters + sources -->
+            <ContentControl Grid.Column="0"
+                            Content="{Binding WorkspaceSidebar}" />
 
-                <ContentControl Grid.Column="2"
-                                Content="{Binding Details}" />
-            </Grid>
-        </Border>
+            <GridSplitter Grid.Column="1"
+                          Width="4"
+                          ResizeBehavior="PreviousAndNext"
+                          Background="{DynamicResource ShellBackgroundBrush}" />
 
-        <ContentControl Grid.Row="3"
-                        Margin="16,0,16,16"
+            <!-- Center: log stream -->
+            <ContentControl Grid.Column="2"
+                            Content="{Binding Stream}" />
+
+            <GridSplitter Grid.Column="3"
+                          Width="4"
+                          ResizeBehavior="PreviousAndNext"
+                          Background="{DynamicResource ShellBackgroundBrush}" />
+
+            <!-- Right: entry details -->
+            <ContentControl Grid.Column="4"
+                            Content="{Binding Details}" />
+        </Grid>
+
+        <!-- Row 2: Bottom Status Strip -->
+        <ContentControl Grid.Row="2"
                         Content="{Binding SessionHealth}" />
     </Grid>
 </Window>

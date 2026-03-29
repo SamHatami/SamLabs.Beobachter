@@ -1479,3 +1479,59 @@ Impact:
 
 Follow-ups:
 - As part of upcoming full view redesign, keep new viewmodels on the same pattern: `[ObservableProperty]`, `[RelayCommand]`, and `[NotifyPropertyChangedFor]` for derived values.
+## 2026-03-29 - UI Rebuild Slice 1: Shell Layout + Toolbar Dissolution
+What changed:
+- Deleted `MainToolbarViewModel` and its view (`MainToolbarView.axaml` / `.axaml.cs`):
+  hollow pass-through VM that wrapped shell properties and commands without owning any behavior.
+- Deleted `LogQueryBarView.axaml` / `.axaml.cs`:
+  search box was mixed with sample generation and column controls.
+- Deleted `AdvancedLogFiltersView.axaml` / `.axaml.cs`:
+  filter strip is now absorbed into the sidebar.
+- Added `TopBarViewModel.cs`:
+  owns search text, pause/resume, auto-scroll, theme switching.
+  Emits events (`SearchTextChanged`, `PauseToggled`, `AutoScrollToggled`) for shell coordination.
+- Added `TopBarView.axaml` / `.axaml.cs`:
+  mockup-style horizontal bar: app title + status summary, search box, clear/pause/pin buttons, theme dropdown menu.
+- Rebuilt `MainWindow.axaml`:
+  new 3-row layout: top bar, `GridSplitter` 3-column workspace (sidebar 240px | stream * | details 340px), bottom status strip.
+- Rebuilt `MainWindow.axaml.cs`:
+  keyboard shortcuts updated to find `TopBarView` via visual tree for `Ctrl+F`.
+- Thinned `MainWindowViewModel.cs`:
+  removed `IThemeService` direct dependency, removed `IsPaused` / `IsAutoScrollEnabled` / `PauseButtonText` / `AutoScrollButtonText` / `ThemeSummary` / `StatusSummary` observable properties and their commands.
+  Added `TopBar` child VM. Added bidirectional search text sync between `TopBar.SearchText` and `Filters.SearchText`.
+- Updated `WorkspaceSidebarView.axaml`:
+  now contains log level checkboxes, structured filter fields (receiver/logger/thread/tenant/trace/min-level), source tree, quick filters, and receiver setup expander in one scrollable panel.
+- Updated `WorkspaceSidebarViewModel.cs`:
+  added `LogFiltersViewModel` as fourth constructor parameter for sidebar filter bindings.
+- Updated `Root.cs`:
+  registered `TopBarViewModel`, removed toolbar, passes `LogFiltersViewModel` to `WorkspaceSidebarViewModel`.
+- Updated `MainWindowDesignViewModel.cs`:
+  matches new shell constructor shape.
+- Updated `LogStreamView.axaml`:
+  density toggle and column controls now live in a compact row at the top of the stream panel.
+- Updated test support and test files:
+  `MainWindowTestSupport.cs`, `MainWindowSessionAndDetailsTests.cs`, `MainWindowWorkspaceStateTests.cs` updated for new constructor and `TopBar`-based pause/autoscroll access.
+
+Why:
+- The current shell mixed too many concerns: `MainWindowViewModel` owned theme, pause, autoscroll, status formatting, sample generation, workspace init, projection, and selection syncing.
+- `MainToolbarViewModel` was a hollow wrapper that passed commands through to the shell without owning anything.
+- Search, column controls, and sample generation were grouped together in the query bar for no coherent reason.
+- The filter strip and sidebar were split across two separate visual regions.
+- The layout did not match the target mockup structure.
+
+Impact:
+- Shell layout now matches the three-region workspace model: sidebar | stream | details.
+- `MainWindowViewModel` lost ~10 observable properties and ~6 commands.
+- `TopBarViewModel` is a real owner of its concerns, not a pass-through.
+- Filters are consolidated in the sidebar instead of split across top strip and left panel.
+- `GridSplitter` enables user-resizable panes.
+- Theme switching moved from three permanent buttons to a dropdown menu.
+- Density and column controls moved from the global query bar to the stream panel header where they belong.
+
+Follow-ups:
+- Slice 2: Rebuild filter sidebar with counts, collapsible sections, and filter presets.
+- Slice 3: Rebuild details pane with structured sections (attributes, exception, raw payload).
+- Slice 4: Add FontAwesome icons, formalize spacing/badge/panel styles.
+- Move receiver setup from sidebar expander to dedicated settings dialog.
+- Add sample generation to a dev/debug menu or remove from main surface.
+

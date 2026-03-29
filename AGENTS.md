@@ -466,3 +466,72 @@ When making design decisions, prefer:
 - modern .NET patterns over legacy desktop habits
 - explicit boundaries over “shared utility” sprawl
 - readability over dense or overly magical abstractions
+
+## Shell Composition Conventions (added 2026-03-29)
+
+The workspace shell follows a three-region layout:
+
+```
+┌─────────────────────────────────────────────────┐
+│ TopBar (search, status, pause, theme)           │
+├──────────┬──────────────────┬───────────────────┤
+│ Sidebar  │ Log Stream       │ Details Pane      │
+│ (filters,│ (results, density│ (selected entry,  │
+│  sources,│  controls)       │  attributes,      │
+│  setup)  │                  │  payload)          │
+├──────────┴──────────────────┴───────────────────┤
+│ Status Bar (receivers, buffered, dropped, rate)  │
+└─────────────────────────────────────────────────┘
+```
+
+### Shell VM responsibilities
+
+`MainWindowViewModel` is the shell coordinator. It should:
+
+- compose child VMs (TopBar, Sidebar, Stream, Details, SessionHealth)
+- wire child-VM events to coordination actions (e.g. filter changed → rebuild visible entries)
+- own workspace state persistence triggers
+- own sample generation (temporary, will move to debug menu)
+
+It should **not**:
+
+- own theme switching, pause/resume, or auto-scroll state directly (those belong to `TopBarViewModel`)
+- own status text formatting (delegated to `IShellStatusFormatter`)
+- own filter state (delegated to `LogFiltersViewModel`)
+- own stream projection logic (delegated to `ILogStreamProjectionService`)
+- contain pass-through properties that just mirror a child VM's state
+
+### TopBar VM responsibilities
+
+`TopBarViewModel` owns:
+
+- search text (synced bidirectionally with `LogFiltersViewModel` via shell events)
+- pause/resume control
+- auto-scroll control
+- theme switching
+- status summary display text
+
+It emits events for state changes so the shell can coordinate without polling or pass-through.
+
+### Sidebar composition
+
+`WorkspaceSidebarViewModel` composes:
+
+- `LogFiltersViewModel` (level checkboxes, structured field filters)
+- `SourceTreeViewModel` (logger tree with enable/disable)
+- `QuickFiltersViewModel` (preset quick-filter buttons)
+- `ReceiverSetupViewModel` (in collapsible expander, planned to move to settings dialog)
+
+### What should NOT be in the shell
+
+- No pass-through VMs: if a child VM's state needs to be exposed to the view, bind directly to the child VM, do not create wrapper properties on the shell.
+- No hollow VMs: every VM should own at least one piece of state or behavior. If it only delegates, it should not exist.
+- No mixed-concern toolbar: search, column controls, sample generation, and theme buttons should not be grouped together. Each belongs to its owning surface.
+
+### Layout rules
+
+- Use `Grid` with `GridSplitter` for the main workspace columns, not `SplitView`.
+- Sidebar, stream, and details panes should be independently resizable.
+- Bottom status strip should be a thin horizontal bar, not a card or panel.
+- Theme switching should be in a dropdown/flyout, not permanent buttons.
+- Density and column controls belong on the stream panel header, not in the global toolbar.

@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace SamLabs.Beobachter.Application.Views;
 
-public partial class LogQueryBarView : UserControl
+public partial class TopBarView : UserControl
 {
-    public LogQueryBarView()
+    public TopBarView()
     {
         InitializeComponent();
     }

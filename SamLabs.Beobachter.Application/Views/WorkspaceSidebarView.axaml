@@ -3,21 +3,118 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.WorkspaceSidebarView"
              x:DataType="viewModels:WorkspaceSidebarViewModel">
-    <Border CornerRadius="8"
-            Padding="8"
-            Background="{DynamicResource ShellBackgroundBrush}">
-        <Grid RowDefinitions="*,Auto,Auto">
-            <ContentControl Grid.Row="0"
-                            Content="{Binding Sources}" />
-            <ContentControl Grid.Row="1"
-                            Margin="0,8,0,0"
-                            Content="{Binding QuickFilters}" />
-            <Expander Grid.Row="2"
-                      Margin="0,8,0,0"
-                      Header="Receiver Setup"
-                      IsExpanded="False">
-                <ContentControl Content="{Binding ReceiverSetup}" />
-            </Expander>
-        </Grid>
+    <Border Padding="8"
+            Background="{DynamicResource ShellPanelBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12">
+
+                <!-- Log Level Filters -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="LOG LEVEL"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <CheckBox Content="Error"
+                              IsChecked="{Binding Filters.ShowError}" />
+                    <CheckBox Content="Warn"
+                              IsChecked="{Binding Filters.ShowWarn}" />
+                    <CheckBox Content="Info"
+                              IsChecked="{Binding Filters.ShowInfo}" />
+                    <CheckBox Content="Debug"
+                              IsChecked="{Binding Filters.ShowDebug}" />
+                    <CheckBox Content="Trace"
+                              IsChecked="{Binding Filters.ShowTrace}" />
+                    <CheckBox Content="Fatal"
+                              IsChecked="{Binding Filters.ShowFatal}" />
+                    <Button Content="Reset Levels"
+                            Padding="6,2"
+                            HorizontalAlignment="Left"
+                            Command="{Binding Filters.ResetLevelsCommand}" />
+                </StackPanel>
+
+                <Border Height="1"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.2" />
+
+                <!-- Source / Logger Tree -->
+                <ContentControl Content="{Binding Sources}" />
+
+                <Border Height="1"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.2" />
+
+                <!-- Structured Filters -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="FILTERS"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Receiver"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="udp-1"
+                                 Text="{Binding Filters.ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Logger"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="Orders.Api"
+                                 Text="{Binding Filters.LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Thread"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="worker-7"
+                                 Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Tenant"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="alpha"
+                                 Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Trace Id"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <TextBox Watermark="abcd1234"
+                                 Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Min Level"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
+                                  SelectedItem="{Binding Filters.MinimumLevelOption}"
+                                  HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                    <Button Content="Clear Filters"
+                            Padding="6,2"
+                            HorizontalAlignment="Left"
+                            Command="{Binding Filters.ClearStructuredFiltersCommand}" />
+                </StackPanel>
+
+                <Border Height="1"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.2" />
+
+                <!-- Quick Filters -->
+                <ContentControl Content="{Binding QuickFilters}" />
+
+                <Border Height="1"
+                        Background="{DynamicResource ShellMutedForegroundBrush}"
+                        Opacity="0.2" />
+
+                <!-- Receiver Setup (collapsible) -->
+                <Expander Header="Receiver Setup"
+                          IsExpanded="False">
+                    <ContentControl Content="{Binding ReceiverSetup}" />
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
     </Border>
 </UserControl>

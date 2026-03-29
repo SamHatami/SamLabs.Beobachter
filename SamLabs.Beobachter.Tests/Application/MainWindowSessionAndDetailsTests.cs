@@ -14,12 +14,12 @@ public sealed class MainWindowSessionAndDetailsTests
         FakeIngestionSession session = new([]);
         MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
-        await ((IAsyncRelayCommand)vm.TogglePauseCommand).ExecuteAsync(null);
-        Assert.True(vm.IsPaused);
+        await ((IAsyncRelayCommand)vm.TopBar.TogglePauseCommand).ExecuteAsync(null);
+        Assert.True(vm.TopBar.IsPaused);
         Assert.True(session.IsPaused);
 
-        await ((IAsyncRelayCommand)vm.TogglePauseCommand).ExecuteAsync(null);
-        Assert.False(vm.IsPaused);
+        await ((IAsyncRelayCommand)vm.TopBar.TogglePauseCommand).ExecuteAsync(null);
+        Assert.False(vm.TopBar.IsPaused);
         Assert.False(session.IsPaused);
     }
 
@@ -29,12 +29,12 @@ public sealed class MainWindowSessionAndDetailsTests
         FakeIngestionSession session = new([]);
         MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
-        await ((IAsyncRelayCommand)vm.ToggleAutoScrollCommand).ExecuteAsync(null);
-        Assert.False(vm.IsAutoScrollEnabled);
+        await ((IAsyncRelayCommand)vm.TopBar.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.False(vm.TopBar.IsAutoScrollEnabled);
         Assert.False(session.IsAutoScrollEnabled);
 
-        await ((IAsyncRelayCommand)vm.ToggleAutoScrollCommand).ExecuteAsync(null);
-        Assert.True(vm.IsAutoScrollEnabled);
+        await ((IAsyncRelayCommand)vm.TopBar.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.True(vm.TopBar.IsAutoScrollEnabled);
         Assert.True(session.IsAutoScrollEnabled);
     }
 
