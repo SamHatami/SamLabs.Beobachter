@@ -1,40 +1,52 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <LinearGradientBrush x:Key="ShellBackgroundBrush"
-                         StartPoint="0,0"
-                         EndPoint="1,1">
-        <GradientStop Color="#FF0A1222" Offset="0" />
-        <GradientStop Color="#FF101A2F" Offset="1" />
-    </LinearGradientBrush>
-    <SolidColorBrush x:Key="ShellPanelBrush" Color="#D9162134" />
-    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#AA31445D" />
-    <SolidColorBrush x:Key="ShellChromeBrush" Color="#CC1B2740" />
-    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#99405570" />
-    <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE5E7EB" />
-    <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FF9CA3AF" />
-    <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF14B8A6" />
-    <SolidColorBrush x:Key="ShellAccentForegroundBrush" Color="#FF081018" />
-    <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF9FAFB" />
-    <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFF87171" />
-    <SolidColorBrush x:Key="RowTraceBrush" Color="#1A0EA5E9" />
-    <SolidColorBrush x:Key="RowDebugBrush" Color="#1A6366F1" />
-    <SolidColorBrush x:Key="RowInfoBrush" Color="#149CA3AF" />
-    <SolidColorBrush x:Key="RowWarnBrush" Color="#33F59E0B" />
-    <SolidColorBrush x:Key="RowErrorBrush" Color="#33EF4444" />
-    <SolidColorBrush x:Key="RowFatalBrush" Color="#4DB91C1C" />
+    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF151716" />
+    <SolidColorBrush x:Key="ShellPanelBrush" Color="#FF1B1E1D" />
+    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#FF303634" />
+    <SolidColorBrush x:Key="ShellChromeBrush" Color="#FF242927" />
+    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#FF3B423F" />
+    <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE4E3DE" />
+    <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FFA7A59D" />
+
+    <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF63A697" />
+    <SolidColorBrush x:Key="ShellAccentForegroundBrush" Color="#FF0F1916" />
+
+    <SolidColorBrush x:Key="ShellButtonBrush" Color="#FF2A2F2D" />
+    <SolidColorBrush x:Key="ShellButtonBorderBrush" Color="#FF434A47" />
+    <SolidColorBrush x:Key="ShellButtonHoverBrush" Color="#FF323836" />
+    <SolidColorBrush x:Key="ShellButtonHoverBorderBrush" Color="#FF5C8F84" />
+    <SolidColorBrush x:Key="ShellButtonPressedBrush" Color="#FF232826" />
+    <SolidColorBrush x:Key="ShellButtonPressedBorderBrush" Color="#FF5A7C74" />
+    <SolidColorBrush x:Key="ShellButtonStrongBrush" Color="#FF63A697" />
+    <SolidColorBrush x:Key="ShellButtonStrongBorderBrush" Color="#FF7AB8AA" />
+
+    <SolidColorBrush x:Key="ShellExpanderHeaderBrush" Color="#FF2A2F2D" />
+    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBrush" Color="#FF343937" />
+
+    <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF6F5F0" />
+    <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFF19993" />
+
+    <SolidColorBrush x:Key="RowTraceBrush" Color="#146E97A2" />
+    <SolidColorBrush x:Key="RowDebugBrush" Color="#14818DB8" />
+    <SolidColorBrush x:Key="RowInfoBrush" Color="#1488A1A8" />
+    <SolidColorBrush x:Key="RowWarnBrush" Color="#24B6945D" />
+    <SolidColorBrush x:Key="RowErrorBrush" Color="#249E6F6A" />
+    <SolidColorBrush x:Key="RowFatalBrush" Color="#30835D59" />
     <SolidColorBrush x:Key="RowFallbackBrush" Color="#00000000" />
-    <SolidColorBrush x:Key="BadgeTraceBrush" Color="#FF0EA5E9" />
-    <SolidColorBrush x:Key="BadgeDebugBrush" Color="#FF6366F1" />
-    <SolidColorBrush x:Key="BadgeInfoBrush" Color="#FF2563EB" />
-    <SolidColorBrush x:Key="BadgeWarnBrush" Color="#FFD97706" />
-    <SolidColorBrush x:Key="BadgeErrorBrush" Color="#FFDC2626" />
-    <SolidColorBrush x:Key="BadgeFatalBrush" Color="#FF7F1D1D" />
-    <SolidColorBrush x:Key="BadgeFallbackBrush" Color="#FF475569" />
-    <SolidColorBrush x:Key="MessageTraceBrush" Color="#FF38BDF8" />
-    <SolidColorBrush x:Key="MessageDebugBrush" Color="#FFA5B4FC" />
-    <SolidColorBrush x:Key="MessageInfoBrush" Color="#FF93C5FD" />
-    <SolidColorBrush x:Key="MessageWarnBrush" Color="#FFFCD34D" />
-    <SolidColorBrush x:Key="MessageErrorBrush" Color="#FFFCA5A5" />
-    <SolidColorBrush x:Key="MessageFatalBrush" Color="#FFF87171" />
-    <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FFE5E7EB" />
+
+    <SolidColorBrush x:Key="BadgeTraceBrush" Color="#FF6F9BA7" />
+    <SolidColorBrush x:Key="BadgeDebugBrush" Color="#FF8692BC" />
+    <SolidColorBrush x:Key="BadgeInfoBrush" Color="#FF7B98A8" />
+    <SolidColorBrush x:Key="BadgeWarnBrush" Color="#FFB59363" />
+    <SolidColorBrush x:Key="BadgeErrorBrush" Color="#FFB57A75" />
+    <SolidColorBrush x:Key="BadgeFatalBrush" Color="#FF936764" />
+    <SolidColorBrush x:Key="BadgeFallbackBrush" Color="#FF68716C" />
+
+    <SolidColorBrush x:Key="MessageTraceBrush" Color="#FFA8C1C8" />
+    <SolidColorBrush x:Key="MessageDebugBrush" Color="#FFB7BEDB" />
+    <SolidColorBrush x:Key="MessageInfoBrush" Color="#FFB7C9CF" />
+    <SolidColorBrush x:Key="MessageWarnBrush" Color="#FFD1BA8D" />
+    <SolidColorBrush x:Key="MessageErrorBrush" Color="#FFD8AAA5" />
+    <SolidColorBrush x:Key="MessageFatalBrush" Color="#FFC99691" />
+    <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FFE4E3DE" />
 </ResourceDictionary>

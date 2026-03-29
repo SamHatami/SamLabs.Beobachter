@@ -1,13 +1,13 @@
-name: Alpha Release
+name: Release On Tag
 
 on:
   push:
     tags:
-      - 'v*-alpha.*'
+      - 'v*'
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (for example v0.1.0-alpha.1)'
+        description: 'Tag to release (for example v0.1.0 or v0.1.0-alpha.1)'
         required: true
         type: string
 
@@ -44,32 +44,29 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
 
-      - name: Publish editor
+      - name: Publish app
         shell: pwsh
         run: |
-          dotnet publish SamLabs.Armatura.Editor/SamLabs.Armatura.Editor.csproj `
-            -c Release `
-            -r win-x64 `
-            --self-contained true `
-            /p:PublishSingleFile=true `
-            /p:IncludeNativeLibrariesForSelfExtract=true
+          dotnet publish SamLabs.Beobachter.Application/SamLabs.Beobachter.Application.csproj `
+            -p:PublishProfile=win-x64-singlefile-fdd `
+            -o .publish/win-x64
 
       - name: Create archive
         id: archive
         shell: pwsh
         run: |
           $tag = '${{ steps.tag.outputs.value }}'
-          $publishDir = 'SamLabs.Armatura.Editor/bin/Release/net10.0/win-x64/publish'
-          $archiveName = "armatura-editor-$tag-win-x64.zip"
+          $publishDir = '.publish/win-x64'
+          $archiveName = "beobachter-$tag-win-x64.zip"
           Compress-Archive -Path "$publishDir/*" -DestinationPath $archiveName -Force
           "path=$archiveName" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-      - name: Create prerelease
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.value }}
-          prerelease: true
+          prerelease: ${{ contains(steps.tag.outputs.value, '-') }}
           files: ${{ steps.archive.outputs.path }}
           generate_release_notes: true

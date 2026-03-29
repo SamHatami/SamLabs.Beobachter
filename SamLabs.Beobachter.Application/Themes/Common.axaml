@@ -243,6 +243,23 @@
 
     <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader">
         <Setter Property="Padding" Value="10,0,2,0" />
+        <Setter Property="Background" Value="{DynamicResource ShellExpanderHeaderBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader:checked">
+        <Setter Property="Background" Value="{DynamicResource ShellExpanderHeaderBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShellExpanderHeaderHoverBrush}" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader:pressed">
+        <Setter Property="Background" Value="{DynamicResource ShellExpanderHeaderHoverBrush}" />
     </Style>
 
     <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
