@@ -27,6 +27,7 @@ internal static class MainWindowTestSupport
         IThemeService resolvedThemeService = themeService ?? new ThemeService();
         IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
+        IWorkspaceStateCoordinator workspaceStateCoordinator = new WorkspaceStateCoordinator(resolvedSettingsStore);
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
@@ -36,7 +37,7 @@ internal static class MainWindowTestSupport
         return new MainWindowViewModel(
             resolvedThemeService,
             session,
-            resolvedSettingsStore,
+            workspaceStateCoordinator,
             resolvedStatisticsService,
             new LogQueryEvaluator(),
             sources,

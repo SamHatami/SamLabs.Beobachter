@@ -1281,3 +1281,32 @@ Impact:
 
 Follow-ups:
 - Continue reducing `MainWindowViewModel` responsibility by extracting workspace/state coordination logic into dedicated services in small phases.
+
+## 2026-03-29 - MVVM Refactor Phase 9A: Workspace State Coordination Service Extraction
+What changed:
+- Added dedicated workspace state coordination service:
+  [IWorkspaceStateCoordinator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IWorkspaceStateCoordinator.cs),
+  [WorkspaceStateCoordinator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/WorkspaceStateCoordinator.cs),
+  [WorkspaceStateSnapshot.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/WorkspaceStateSnapshot.cs),
+  [WorkspaceStateUpdate.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/WorkspaceStateUpdate.cs)
+- Registered coordinator in DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Simplified shell VM workspace persistence responsibilities:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed direct `ISettingsStore` workspace load/save usage from shell VM
+  - removed shell-owned debounce/cancellation save plumbing
+  - moved save queue to coordinator via `WorkspaceStateUpdate`
+- Updated test support constructor wiring:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+
+Why:
+- Workspace load/debounce-save policy is application coordination logic, not shell presentation state.
+- This extraction reduces `MainWindowViewModel` ownership scope while preserving existing behavior.
+
+Impact:
+- Shell VM now maps UI state to coordinator input instead of owning settings persistence workflow.
+- Workspace and UI layout persistence behavior remains debounced and asynchronous.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Extract status text/statistics/session summary formatting from `MainWindowViewModel` into a dedicated shell status presenter.

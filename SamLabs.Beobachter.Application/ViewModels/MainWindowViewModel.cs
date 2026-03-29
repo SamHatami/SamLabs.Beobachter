@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
@@ -48,13 +47,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
-    private readonly ISettingsStore _settingsStore;
+    private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
     private readonly ILogQueryEvaluator _queryEvaluator;
     private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
-    private WorkspaceSettings _workspaceSettings = new();
-    private UiLayoutSettings _uiLayoutSettings = new();
-    private CancellationTokenSource? _persistStateCts;
     private string? _pendingSelectedReceiverId;
     private bool _isApplyingWorkspaceState;
 
@@ -92,7 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel() : this(
         new ThemeService(),
         new DesignIngestionSession(),
-        new DesignSettingsStore(),
+        new WorkspaceStateCoordinator(new DesignSettingsStore()),
         new RollingLogStatisticsService(),
         new LogQueryEvaluator(),
         new SourceTreeViewModel(),
@@ -112,7 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         IThemeService themeService,
         IIngestionSession ingestionSession,
-        ISettingsStore settingsStore,
+        IWorkspaceStateCoordinator workspaceStateCoordinator,
         ILogStatisticsService statisticsService,
         ILogQueryEvaluator queryEvaluator,
         SourceTreeViewModel sources,
@@ -126,7 +122,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
-        _settingsStore = settingsStore ?? throw new ArgumentNullException(nameof(settingsStore));
+        _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
         _queryEvaluator = queryEvaluator ?? throw new ArgumentNullException(nameof(queryEvaluator));
 
@@ -515,8 +511,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task LoadWorkspaceStateAsync()
     {
-        var workspace = await _settingsStore.LoadWorkspaceSettingsAsync().ConfigureAwait(false);
-        var layout = await _settingsStore.LoadUiLayoutSettingsAsync().ConfigureAwait(false);
+        WorkspaceStateSnapshot snapshot = await _workspaceStateCoordinator.LoadAsync().ConfigureAwait(false);
+        WorkspaceSettings workspace = snapshot.WorkspaceSettings;
+        UiLayoutSettings layout = snapshot.UiLayoutSettings;
 
         if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
         {
@@ -529,8 +526,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ApplyWorkspaceState(WorkspaceSettings workspace, UiLayoutSettings layout)
     {
-        _workspaceSettings = workspace;
-        _uiLayoutSettings = layout;
         _pendingSelectedReceiverId = workspace.SelectedReceiverId;
         _isApplyingWorkspaceState = true;
 
@@ -574,55 +569,23 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        _persistStateCts?.Cancel();
-        _persistStateCts = new CancellationTokenSource();
-        _ = PersistWorkspaceStateAsync(_persistStateCts.Token);
-    }
+        WorkspaceStateUpdate update = new(
+            Filters.SearchText,
+            Filters.ReceiverFilter,
+            Filters.LoggerFilter,
+            Filters.ThreadFilter,
+            Filters.TenantFilter,
+            Filters.TraceIdFilter,
+            Filters.MinimumLevelOption,
+            Stream.IsCompactDensity,
+            ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
+            Filters.GetEnabledLevels(),
+            IsAutoScrollEnabled,
+            IsPaused,
+            Stream.TimestampColumnWidth,
+            Stream.LevelColumnWidth,
+            Stream.LoggerColumnWidth);
 
-    private async Task PersistWorkspaceStateAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Task.Delay(250, cancellationToken).ConfigureAwait(false);
-            var workspace = BuildWorkspaceSettingsSnapshot();
-            var layout = BuildUiLayoutSettingsSnapshot();
-            await _settingsStore.SaveWorkspaceSettingsAsync(workspace, cancellationToken).ConfigureAwait(false);
-            await _settingsStore.SaveUiLayoutSettingsAsync(layout, cancellationToken).ConfigureAwait(false);
-            _workspaceSettings = workspace;
-            _uiLayoutSettings = layout;
-        }
-        catch (OperationCanceledException)
-        {
-            // Debounce cancellation path.
-        }
-    }
-
-    private WorkspaceSettings BuildWorkspaceSettingsSnapshot()
-    {
-        return _workspaceSettings with
-        {
-            SearchText = Filters.SearchText,
-            ReceiverFilter = Filters.ReceiverFilter,
-            LoggerFilter = Filters.LoggerFilter,
-            ThreadFilter = Filters.ThreadFilter,
-            TenantFilter = Filters.TenantFilter,
-            TraceIdFilter = Filters.TraceIdFilter,
-            MinimumLevelOption = Filters.MinimumLevelOption,
-            CompactDensity = Stream.IsCompactDensity,
-            SelectedReceiverId = ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
-            EnabledLevels = Filters.GetEnabledLevels(),
-            AutoScroll = IsAutoScrollEnabled,
-            PauseIngest = IsPaused
-        };
-    }
-
-    private UiLayoutSettings BuildUiLayoutSettingsSnapshot()
-    {
-        return _uiLayoutSettings with
-        {
-            TimestampColumnWidth = Stream.TimestampColumnWidth,
-            LevelColumnWidth = Stream.LevelColumnWidth,
-            LoggerColumnWidth = Stream.LoggerColumnWidth
-        };
+        _workspaceStateCoordinator.QueuePersist(update);
     }
 }
