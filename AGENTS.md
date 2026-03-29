@@ -171,6 +171,8 @@ Never route the primary log-entry stream through UI messengers, view events, or 
 - Keep viewmodels free of Avalonia control types whenever practical
 - Prefer command binding, data binding, and behaviors over code-behind event handlers
 - Avoid direct view-to-viewmodel reach-through from code-behind
+- Do not add design-time constructors (for example parameterless constructors) to runtime ViewModels
+- Configure design-time data in AXAML (`Design.DataContext`) or dedicated design-only viewmodel files instead of runtime constructor branching
 
 ### Code-behind rules
 
