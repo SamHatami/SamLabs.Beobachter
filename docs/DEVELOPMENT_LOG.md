@@ -1167,3 +1167,33 @@ Impact:
 
 Follow-ups:
 - Extract a dedicated sidebar composition view to finalize shell-level markup reduction and prepare receiver-setup relocation from the filter band.
+
+## 2026-03-29 - MVVM Refactor Phase 7D: Sidebar Composition + Receiver Setup Relocation
+What changed:
+- Added sidebar composition view model:
+  [WorkspaceSidebarViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/WorkspaceSidebarViewModel.cs)
+  - composes `Sources`, `QuickFilters`, and `ReceiverSetup` for a left-rail surface
+- Added dedicated sidebar view:
+  [WorkspaceSidebarView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/WorkspaceSidebarView.axaml),
+  [WorkspaceSidebarView.axaml.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/WorkspaceSidebarView.axaml.cs)
+  - includes source tree, quick filters, and receiver setup expander in one panel
+- Updated shell VM composition:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - exposes `WorkspaceSidebar` composed from existing child VMs
+- Updated shell layout:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - replaced left-column inline composition with `ContentControl` bound to `WorkspaceSidebar`
+- Removed receiver setup expander from advanced filter surface:
+  [AdvancedLogFiltersView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/AdvancedLogFiltersView.axaml)
+
+Why:
+- Receiver setup was still mixed into the filter band, which diluted filter intent and increased top-surface complexity.
+- Sidebar composition is a clearer structural unit and matches the intended `Sidebar | Stream | Inspector` workspace model.
+
+Impact:
+- Receiver setup is now located in the left rail with related source/navigation surfaces.
+- Filter surface is smaller and focused on query concerns.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Move session health to a true bottom status row and convert center area to explicit three-region workspace proportions for final shell layout polish.

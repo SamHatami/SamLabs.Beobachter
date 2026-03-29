@@ -42,18 +42,8 @@
                 Background="{DynamicResource ShellPanelBrush}">
             <Grid ColumnDefinitions="260,*"
                   ColumnSpacing="8">
-                <Border Grid.Column="0"
-                        CornerRadius="8"
-                        Padding="8"
-                        Background="{DynamicResource ShellBackgroundBrush}">
-                    <Grid RowDefinitions="*,Auto">
-                        <ContentControl Grid.Row="0"
-                                        Content="{Binding Sources}" />
-                        <ContentControl Grid.Row="1"
-                                        Margin="0,8,0,0"
-                                        Content="{Binding QuickFilters}" />
-                    </Grid>
-                </Border>
+                <ContentControl Grid.Column="0"
+                                Content="{Binding WorkspaceSidebar}" />
 
                 <Grid Grid.Column="1"
                       RowDefinitions="*,Auto,Auto">

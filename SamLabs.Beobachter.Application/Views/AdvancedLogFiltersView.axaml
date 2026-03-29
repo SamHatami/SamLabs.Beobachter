@@ -3,7 +3,7 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.AdvancedLogFiltersView"
              x:DataType="viewModels:MainWindowViewModel">
-    <Grid RowDefinitions="Auto,Auto,Auto">
+    <Grid RowDefinitions="Auto,Auto">
         <WrapPanel Grid.Row="0"
                    Margin="0,8,0,0"
                    ItemHeight="56">
@@ -87,12 +87,5 @@
             <Button Content="Enable All Loggers"
                     Command="{Binding Sources.EnableAllLoggersCommand}" />
         </WrapPanel>
-
-        <Expander Grid.Row="2"
-                  Margin="0,10,0,0"
-                  Header="Receiver Setup"
-                  IsExpanded="False">
-            <ContentControl Content="{Binding ReceiverSetup}" />
-        </Expander>
     </Grid>
 </UserControl>

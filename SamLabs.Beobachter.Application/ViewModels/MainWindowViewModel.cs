@@ -138,6 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Stream.PropertyChanged += OnStreamPropertyChanged;
+        WorkspaceSidebar = new WorkspaceSidebarViewModel(Sources, QuickFilters, ReceiverSetup);
         Toolbar = new MainToolbarViewModel(this);
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
@@ -157,6 +158,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public MainToolbarViewModel Toolbar { get; }
+
+    public WorkspaceSidebarViewModel WorkspaceSidebar { get; }
 
     public SourceTreeViewModel Sources { get; }
 

@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             x:Class="SamLabs.Beobachter.Application.Views.WorkspaceSidebarView"
+             x:DataType="viewModels:WorkspaceSidebarViewModel">
+    <Border CornerRadius="8"
+            Padding="8"
+            Background="{DynamicResource ShellBackgroundBrush}">
+        <Grid RowDefinitions="*,Auto,Auto">
+            <ContentControl Grid.Row="0"
+                            Content="{Binding Sources}" />
+            <ContentControl Grid.Row="1"
+                            Margin="0,8,0,0"
+                            Content="{Binding QuickFilters}" />
+            <Expander Grid.Row="2"
+                      Margin="0,8,0,0"
+                      Header="Receiver Setup"
+                      IsExpanded="False">
+                <ContentControl Content="{Binding ReceiverSetup}" />
+            </Expander>
+        </Grid>
+    </Border>
+</UserControl>
