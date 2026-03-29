@@ -116,6 +116,12 @@
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
     </Style>
 
+    <Style Selector="ToggleButton.toolbar-button:checked">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellButtonStrongBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellAccentForegroundBrush}" />
+    </Style>
+
     <Style Selector="DropDownButton.toolbar-button">
         <Setter Property="Padding" Value="{DynamicResource ShellToolbarButtonPadding}" />
         <Setter Property="MinHeight" Value="32" />
@@ -155,6 +161,30 @@
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="MinHeight" Value="32" />
+    </Style>
+
+    <Style Selector="Button.titlebar-button">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellForegroundBrush}" />
+    </Style>
+
+    <Style Selector="Button.titlebar-button:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.titlebar-button:pressed">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonPressedBrush}" />
+    </Style>
+
+    <Style Selector="Button.titlebar-button.titlebar-close-button:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ValidationErrorBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource SeverityBadgeForegroundBrush}" />
     </Style>
 
     <Style Selector="ToggleButton.segment-toggle">

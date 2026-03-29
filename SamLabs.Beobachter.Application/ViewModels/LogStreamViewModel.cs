@@ -22,9 +22,6 @@ public partial class LogStreamViewModel : ViewModelBase
     private bool _isAutoScrollEnabled = true;
 
     [ObservableProperty]
-    private string _autoScrollButtonText = "Pin: On";
-
-    [ObservableProperty]
     private string _densityButtonText = "Density: Comfortable";
 
     [ObservableProperty]
@@ -140,11 +137,6 @@ public partial class LogStreamViewModel : ViewModelBase
     partial void OnIsCompactDensityChanged(bool value)
     {
         UpdateDensityVisuals();
-    }
-
-    partial void OnIsAutoScrollEnabledChanged(bool value)
-    {
-        AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
     }
 
     private void AdjustColumnWidths(double delta)

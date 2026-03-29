@@ -168,7 +168,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnTopBarPauseToggled(object? sender, EventArgs e)
     {
-        Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
+        UpdateShellStatusPresentation();
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -283,8 +283,6 @@ public partial class MainWindowViewModel : ViewModelBase
             ? runtimeStates.Count(static x => x.State == ReceiverRunState.Running)
             : ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
         ShellStatusPresentation presentation = _shellStatusFormatter.Build(
-            TopBar.IsPaused,
-            Stream.IsAutoScrollEnabled,
             _ingestionSession.TotalCount,
             Stream.VisibleEntries.Count,
             _ingestionSession.DroppedCount,
@@ -292,11 +290,11 @@ public partial class MainWindowViewModel : ViewModelBase
             QuickFilters.StructuredOnlyCount,
             _statisticsService.GetSnapshot());
 
-        TopBar.StatusSummary = presentation.StatusSummary;
         StatsSummary1Minute = presentation.StatsSummary1Minute;
         StatsSummary5Minutes = presentation.StatsSummary5Minutes;
         TopLoggersSummary = presentation.TopLoggersSummary;
         TopReceiversSummary = presentation.TopReceiversSummary;
+        SessionHealth.IsPaused = TopBar.IsPaused;
         SessionHealth.ActiveReceiversText = presentation.ActiveReceiversText;
         SessionHealth.BufferedEntriesText = presentation.BufferedEntriesText;
         SessionHealth.StructuredEventsText = presentation.StructuredEventsText;

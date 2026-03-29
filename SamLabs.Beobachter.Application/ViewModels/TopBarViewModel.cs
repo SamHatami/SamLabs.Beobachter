@@ -25,9 +25,6 @@ public sealed partial class TopBarViewModel : ViewModelBase
     private string _pauseButtonIcon = "fa-solid fa-pause";
 
     [ObservableProperty]
-    private string _statusSummary = string.Empty;
-
-    [ObservableProperty]
     private string _themeSummary = string.Empty;
 
     public TopBarViewModel(

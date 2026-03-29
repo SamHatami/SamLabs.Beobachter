@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
@@ -15,6 +16,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+        PropertyChanged += OnWindowPropertyChanged;
+        Closed += OnClosed;
+        UpdateWindowStateIcons();
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -92,5 +96,81 @@ public partial class MainWindow : Window
         };
 
         await window.ShowDialog(this);
+    }
+
+    private void OnTitleBarPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        if (e.Source is Visual sourceVisual &&
+            sourceVisual.GetSelfAndVisualAncestors().OfType<Button>().Any())
+        {
+            return;
+        }
+
+        if (e.ClickCount == 2)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            e.Handled = true;
+            return;
+        }
+
+        if (WindowState == WindowState.Normal)
+        {
+            BeginMoveDrag(e);
+            e.Handled = true;
+        }
+    }
+
+    private void OnMinimizeClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void OnMaximizeClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void OnCloseClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property == WindowStateProperty)
+        {
+            UpdateWindowStateIcons();
+        }
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        if (_boundViewModel is not null)
+        {
+            _boundViewModel.TopBar.SettingsRequested -= OnTopBarSettingsRequested;
+            _boundViewModel = null;
+        }
+
+        DataContextChanged -= OnDataContextChanged;
+        PropertyChanged -= OnWindowPropertyChanged;
+        Closed -= OnClosed;
+    }
+
+    private void UpdateWindowStateIcons()
+    {
+        if (this.FindControl<Control>("WindowMaximizeIcon") is not { } maximizeIcon ||
+            this.FindControl<Control>("WindowRestoreIcon") is not { } restoreIcon)
+        {
+            return;
+        }
+
+        bool isMaximized = WindowState == WindowState.Maximized;
+        maximizeIcon.IsVisible = !isMaximized;
+        restoreIcon.IsVisible = isMaximized;
     }
 }

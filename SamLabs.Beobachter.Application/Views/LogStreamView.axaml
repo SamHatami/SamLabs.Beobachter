@@ -41,10 +41,11 @@
                             ToolTip.Tip="Toggle row density between Comfortable and Compact."
                             Command="{Binding ToggleDensityCommand}"
                             i:Attached.Icon="fa-solid fa-grip-lines" />
-                    <Button Classes="toolbar-button"
-                            ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
-                            Command="{Binding ToggleAutoScrollCommand}"
-                            i:Attached.Icon="fa-solid fa-thumbtack" />
+                    <ToggleButton Classes="toolbar-button"
+                                  ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
+                                  IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"
+                                  Command="{Binding ToggleAutoScrollCommand}"
+                                  i:Attached.Icon="fa-solid fa-thumbtack" />
                 </StackPanel>
             </Grid>
         </Border>

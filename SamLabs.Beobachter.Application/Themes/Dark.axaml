@@ -1,30 +1,32 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF151716" />
-    <SolidColorBrush x:Key="ShellPanelBrush" Color="#FF1B1E1D" />
-    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#FF303634" />
-    <SolidColorBrush x:Key="ShellChromeBrush" Color="#FF242927" />
-    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#FF3B423F" />
-    <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE4E3DE" />
-    <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FFA7A59D" />
+    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF141416" />
+    <SolidColorBrush x:Key="ShellPanelBrush" Color="#FF1C1D21" />
+    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#FF303238" />
+    <SolidColorBrush x:Key="ShellChromeBrush" Color="#FF25272C" />
+    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#FF3C4047" />
+    <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE7E9ED" />
+    <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FFA8ADB7" />
 
-    <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF63A697" />
-    <SolidColorBrush x:Key="ShellAccentForegroundBrush" Color="#FF0F1916" />
+    <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF7F8792" />
+    <SolidColorBrush x:Key="ShellAccentForegroundBrush" Color="#FF121417" />
 
-    <SolidColorBrush x:Key="ShellButtonBrush" Color="#FF2A2F2D" />
-    <SolidColorBrush x:Key="ShellButtonBorderBrush" Color="#FF434A47" />
-    <SolidColorBrush x:Key="ShellButtonHoverBrush" Color="#FF323836" />
-    <SolidColorBrush x:Key="ShellButtonHoverBorderBrush" Color="#FF5C8F84" />
-    <SolidColorBrush x:Key="ShellButtonPressedBrush" Color="#FF232826" />
-    <SolidColorBrush x:Key="ShellButtonPressedBorderBrush" Color="#FF5A7C74" />
-    <SolidColorBrush x:Key="ShellButtonStrongBrush" Color="#FF63A697" />
-    <SolidColorBrush x:Key="ShellButtonStrongBorderBrush" Color="#FF7AB8AA" />
+    <SolidColorBrush x:Key="ShellButtonBrush" Color="#FF2B2E34" />
+    <SolidColorBrush x:Key="ShellButtonBorderBrush" Color="#FF444951" />
+    <SolidColorBrush x:Key="ShellButtonHoverBrush" Color="#FF353942" />
+    <SolidColorBrush x:Key="ShellButtonHoverBorderBrush" Color="#FF636A75" />
+    <SolidColorBrush x:Key="ShellButtonPressedBrush" Color="#FF24272D" />
+    <SolidColorBrush x:Key="ShellButtonPressedBorderBrush" Color="#FF5A606B" />
+    <SolidColorBrush x:Key="ShellButtonStrongBrush" Color="#FF7F8792" />
+    <SolidColorBrush x:Key="ShellButtonStrongBorderBrush" Color="#FF99A1AD" />
 
-    <SolidColorBrush x:Key="ShellExpanderHeaderBrush" Color="#FF2A2F2D" />
-    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBrush" Color="#FF343937" />
+    <SolidColorBrush x:Key="ShellExpanderHeaderBrush" Color="#FF2B2E34" />
+    <SolidColorBrush x:Key="ShellExpanderHeaderHoverBrush" Color="#FF353942" />
 
     <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF6F5F0" />
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFF19993" />
+    <SolidColorBrush x:Key="StatusRunningBrush" Color="#FF69D97A" />
+    <SolidColorBrush x:Key="StatusPausedBrush" Color="#FFF0C64F" />
 
     <SolidColorBrush x:Key="RowTraceBrush" Color="#146E97A2" />
     <SolidColorBrush x:Key="RowDebugBrush" Color="#14818DB8" />

@@ -5,7 +5,6 @@ namespace SamLabs.Beobachter.Application.Services;
 public sealed class ShellStatusPresentation
 {
     public ShellStatusPresentation(
-        string statusSummary,
         string statsSummary1Minute,
         string statsSummary5Minutes,
         string topLoggersSummary,
@@ -15,7 +14,6 @@ public sealed class ShellStatusPresentation
         string structuredEventsText,
         string droppedPacketsText)
     {
-        StatusSummary = statusSummary ?? throw new ArgumentNullException(nameof(statusSummary));
         StatsSummary1Minute = statsSummary1Minute ?? throw new ArgumentNullException(nameof(statsSummary1Minute));
         StatsSummary5Minutes = statsSummary5Minutes ?? throw new ArgumentNullException(nameof(statsSummary5Minutes));
         TopLoggersSummary = topLoggersSummary ?? throw new ArgumentNullException(nameof(topLoggersSummary));
@@ -25,8 +23,6 @@ public sealed class ShellStatusPresentation
         StructuredEventsText = structuredEventsText ?? throw new ArgumentNullException(nameof(structuredEventsText));
         DroppedPacketsText = droppedPacketsText ?? throw new ArgumentNullException(nameof(droppedPacketsText));
     }
-
-    public string StatusSummary { get; }
 
     public string StatsSummary1Minute { get; }
 

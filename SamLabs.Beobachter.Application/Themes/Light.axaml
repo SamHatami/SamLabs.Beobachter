@@ -25,6 +25,8 @@
 
     <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF8F8F5" />
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFBE4F4B" />
+    <SolidColorBrush x:Key="StatusRunningBrush" Color="#FF2F8C42" />
+    <SolidColorBrush x:Key="StatusPausedBrush" Color="#FFAF8600" />
 
     <SolidColorBrush x:Key="RowTraceBrush" Color="#0C7AA1AB" />
     <SolidColorBrush x:Key="RowDebugBrush" Color="#0C8B94BC" />

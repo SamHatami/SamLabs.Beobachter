@@ -6,32 +6,9 @@
              x:DataType="viewModels:TopBarViewModel">
     <Border Classes="shell-panel shell-flat shell-border-horizontal"
             Padding="14,10">
-        <Grid ColumnDefinitions="Auto,*,Auto"
+        <Grid ColumnDefinitions="*,Auto"
               ColumnSpacing="14">
-            <StackPanel Grid.Column="0"
-                        Orientation="Horizontal"
-                        Spacing="12"
-                        VerticalAlignment="Center">
-                <Border Background="{DynamicResource ShellAccentBrush}"
-                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
-                        Padding="10,5">
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="8">
-                        <i:Icon Value="fa-solid fa-wave-square"
-                                FontSize="13"
-                                Foreground="{DynamicResource ShellAccentForegroundBrush}" />
-                        <TextBlock Text="Beobachter"
-                                   FontSize="16"
-                                   FontWeight="Bold"
-                                   Foreground="{DynamicResource ShellAccentForegroundBrush}" />
-                    </StackPanel>
-                </Border>
-                <TextBlock Text="{Binding StatusSummary}"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-            </StackPanel>
-
-            <Border Grid.Column="1"
+            <Border Grid.Column="0"
                     Classes="shell-card"
                     Padding="10,0">
                 <Grid ColumnDefinitions="Auto,*"
@@ -51,7 +28,7 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Column="2"
+            <StackPanel Grid.Column="1"
                         Orientation="Horizontal"
                         Spacing="6"
                         VerticalAlignment="Center">
@@ -60,7 +37,6 @@
                         Command="{Binding ClearSearchCommand}"
                         i:Attached.Icon="fa-solid fa-xmark" />
                 <Button Classes="toolbar-button"
-                        Content="{Binding PauseButtonText}"
                         Command="{Binding TogglePauseCommand}"
                         i:Attached.Icon="{Binding PauseButtonIcon}" />
                 <Button Classes="toolbar-button icon-button"
@@ -68,7 +44,6 @@
                         Command="{Binding OpenSettingsCommand}"
                         i:Attached.Icon="fa-solid fa-gear" />
                 <DropDownButton Classes="toolbar-button"
-                                Content="{Binding ThemeSummary}"
                                 i:Attached.Icon="fa-solid fa-palette">
                     <DropDownButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
