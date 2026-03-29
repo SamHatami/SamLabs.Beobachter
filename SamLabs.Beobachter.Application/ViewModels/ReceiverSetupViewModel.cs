@@ -91,9 +91,7 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             BindAddress = "0.0.0.0",
             Port = 7071
         };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
+        AddReceiverDefinition(vm);
         TryValidateReceiverDefinitions(out _);
     }
 
@@ -107,9 +105,7 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             BindAddress = "0.0.0.0",
             Port = 4505
         };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
+        AddReceiverDefinition(vm);
         TryValidateReceiverDefinitions(out _);
     }
 
@@ -123,9 +119,47 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             FilePath = string.Empty,
             PollIntervalMs = 150
         };
-        AttachReceiverDefinition(vm);
-        ReceiverDefinitions.Add(vm);
-        SelectedReceiverDefinition = vm;
+        AddReceiverDefinition(vm);
+        TryValidateReceiverDefinitions(out _);
+    }
+
+    [RelayCommand]
+    private void AddLocalDiagnosticsPreset()
+    {
+        ReceiverDefinitionViewModel udp = new(ReceiverKinds.Udp)
+        {
+            Id = BuildUniqueReceiverId("udp"),
+            DisplayName = "Local UDP",
+            BindAddress = "127.0.0.1",
+            Port = 7071
+        };
+        ReceiverDefinitionViewModel file = new(ReceiverKinds.File)
+        {
+            Id = BuildUniqueReceiverId("file"),
+            DisplayName = "Local File Tail",
+            FilePath = string.Empty,
+            PollIntervalMs = 150
+        };
+
+        AddReceiverDefinition(udp, selectAfterAdd: false);
+        AddReceiverDefinition(file);
+        ReceiverSetupStatus = "Preset added: Local diagnostics (UDP + File).";
+        TryValidateReceiverDefinitions(out _);
+    }
+
+    [RelayCommand]
+    private void AddTcpIngressPreset()
+    {
+        ReceiverDefinitionViewModel tcp = new(ReceiverKinds.Tcp)
+        {
+            Id = BuildUniqueReceiverId("tcp"),
+            DisplayName = "TCP Ingress",
+            BindAddress = "0.0.0.0",
+            Port = 4505
+        };
+
+        AddReceiverDefinition(tcp);
+        ReceiverSetupStatus = "Preset added: TCP ingress.";
         TryValidateReceiverDefinitions(out _);
     }
 
@@ -350,14 +384,14 @@ public partial class ReceiverSetupViewModel : ViewModelBase
                 RegisterError($"{label} requires a display name.");
             }
 
-            if (!IsValidPort(receiver.Port))
-            {
-                receiver.PortValidationError = "Port must be between 1 and 65535.";
-                RegisterError($"{label} port must be between 1 and 65535.");
-            }
-
             if (receiver.Kind == ReceiverKinds.Udp || receiver.Kind == ReceiverKinds.Tcp)
             {
+                if (!IsValidPort(receiver.Port))
+                {
+                    receiver.PortValidationError = "Port must be between 1 and 65535.";
+                    RegisterError($"{label} port must be between 1 and 65535.");
+                }
+
                 if (!IsValidBindAddress(receiver.BindAddress))
                 {
                     receiver.BindAddressValidationError = BindAddressValidationMessage;
@@ -472,6 +506,16 @@ public partial class ReceiverSetupViewModel : ViewModelBase
     private void DetachReceiverDefinition(ReceiverDefinitionViewModel receiver)
     {
         receiver.PropertyChanged -= OnReceiverDefinitionPropertyChanged;
+    }
+
+    private void AddReceiverDefinition(ReceiverDefinitionViewModel receiver, bool selectAfterAdd = true)
+    {
+        AttachReceiverDefinition(receiver);
+        ReceiverDefinitions.Add(receiver);
+        if (selectAfterAdd)
+        {
+            SelectedReceiverDefinition = receiver;
+        }
     }
 
     private string BuildUniqueReceiverId(string prefix)

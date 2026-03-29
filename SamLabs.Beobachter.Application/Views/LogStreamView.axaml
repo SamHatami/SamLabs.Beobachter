@@ -9,12 +9,15 @@
     <UserControl.Resources>
         <conv:LogLevelToRowBrushConverter x:Key="LogLevelToRowBrushConverter" />
         <conv:LogLevelToBadgeBrushConverter x:Key="LogLevelToBadgeBrushConverter" />
+        <conv:LogLevelToMessageBrushConverter x:Key="LogLevelToMessageBrushConverter" />
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*"
-          RowSpacing="8">
+    <Border Classes="shell-panel shell-flat shell-border-horizontal"
+            Padding="0">
+        <Grid RowDefinitions="Auto,Auto,*"
+              RowSpacing="0">
         <Border Grid.Row="0"
-                Classes="shell-panel"
+                Classes="shell-panel shell-flat shell-border-bottom"
                 Padding="10,8">
             <Grid ColumnDefinitions="Auto,*,Auto"
                   ColumnSpacing="10">
@@ -50,7 +53,7 @@
         </Border>
 
         <Border Grid.Row="1"
-                Classes="shell-panel"
+                Classes="shell-panel shell-flat shell-border-bottom"
                 Padding="10,8">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -75,7 +78,7 @@
         </Border>
 
         <Border Grid.Row="2"
-                Classes="shell-panel"
+                Classes="shell-panel shell-flat shell-border-none"
                 Padding="4">
             <ListBox x:Name="LogEntriesList"
                      Background="Transparent"
@@ -89,7 +92,7 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="models:LogEntry">
-                        <Border Margin="{Binding DataContext.LogRowMargin, ElementName=LogEntriesList}"
+                        <Border Margin="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowMargin, ElementName=LogEntriesList}"
                                 Padding="10,6"
                                 Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
                                 BorderBrush="{DynamicResource ShellChromeBorderBrush}"
@@ -97,13 +100,13 @@
                                 CornerRadius="8">
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=LogEntriesList}" />
-                                    <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=LogEntriesList}" />
-                                    <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).TimestampColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).LevelColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).LoggerColumnWidth, ElementName=LogEntriesList}" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellMutedForegroundBrush}"
                                            Text="{Binding Timestamp}" />
                                 <Border Grid.Column="1"
@@ -111,18 +114,18 @@
                                         CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
                                         Padding="8,2"
                                         HorizontalAlignment="Left">
-                                    <TextBlock FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                    <TextBlock FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource SeverityBadgeForegroundBrush}"
                                                Text="{Binding Level}" />
                                 </Border>
                                 <TextBlock Grid.Column="2"
-                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellForegroundBrush}"
                                            Text="{Binding LoggerName}" />
                                 <TextBlock Grid.Column="3"
-                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
-                                           Foreground="{DynamicResource ShellForegroundBrush}"
+                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                           Foreground="{Binding Level, Converter={StaticResource LogLevelToMessageBrushConverter}}"
                                            Text="{Binding Message}"
                                            TextTrimming="CharacterEllipsis" />
                             </Grid>
@@ -131,5 +134,6 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
-    </Grid>
+        </Grid>
+    </Border>
 </UserControl>

@@ -24,6 +24,7 @@ public static class Root
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<LogLevelColorResourceService>();
         services.AddSingleton<IShellStatusFormatter, ShellStatusFormatter>();
         services.AddSingleton<ISampleLogEntryGenerator, SampleLogEntryGenerator>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();

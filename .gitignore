@@ -326,3 +326,5 @@ ASALocalRun/
 /.dotnet
 /.appdata
 /.claude
+/.artifacts
+/.tmp_build

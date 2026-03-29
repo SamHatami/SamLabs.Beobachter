@@ -21,7 +21,6 @@ public sealed class ReceiverSetupViewModelTests
 
         ReceiverDefinitionViewModel fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
         fileReceiver.FilePath = "C:/logs/app.log";
-        fileReceiver.Port = 7071;
         ReceiverDefinitionViewModel udpReceiver = vm.ReceiverDefinitions.Single(x => x.IsUdp);
         udpReceiver.ParserOrderText = "JsonLogParser, PlainTextParser";
 
@@ -34,6 +33,27 @@ public sealed class ReceiverSetupViewModelTests
         Assert.Single(saved.FileTailReceivers);
         Assert.Equal("C:/logs/app.log", saved.FileTailReceivers[0].FilePath);
         Assert.Equal(["JsonLogParser", "PlainTextParser"], saved.UdpReceivers[0].ParserOrder);
+        Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    [Fact]
+    public async Task SaveReceiverSetup_FileReceiverWithoutPort_IsValid()
+    {
+        FakeSettingsStore settings = new();
+        FakeIngestionSession session = new([]);
+        ReceiverSetupViewModel vm = new(settings, session);
+        await vm.LoadAsync();
+
+        vm.AddFileReceiverCommand.Execute(null);
+        ReceiverDefinitionViewModel fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
+        fileReceiver.FilePath = "C:/logs/app.log";
+        fileReceiver.Port = 0;
+
+        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+
+        Assert.NotNull(settings.LastSavedReceiverDefinitions);
+        Assert.Single(settings.LastSavedReceiverDefinitions!.FileTailReceivers);
+        Assert.Equal("C:/logs/app.log", settings.LastSavedReceiverDefinitions.FileTailReceivers[0].FilePath);
         Assert.Equal(1, session.ReloadReceiversCalls);
     }
 

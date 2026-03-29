@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using SamLabs.Beobachter.Application.Composition;
+using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Services;
 using MainWindow = SamLabs.Beobachter.Application.Views.MainWindow;
@@ -25,8 +26,14 @@ public partial class App : Avalonia.Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var settingsStore = _services.GetRequiredService<ISettingsStore>();
+            var appSettings = settingsStore.LoadAppSettingsAsync().GetAwaiter().GetResult();
+
             var themeService = _services.GetRequiredService<IThemeService>();
-            themeService.SetTheme(AppThemeMode.System);
+            themeService.SetTheme(ParseThemeMode(appSettings.ThemeMode));
+
+            var logLevelColorResourceService = _services.GetRequiredService<LogLevelColorResourceService>();
+            logLevelColorResourceService.ApplyOverrides(appSettings.LogLevelColors);
 
             var ingestionSession = _services.GetRequiredService<IIngestionSession>();
             ingestionSession.StartAsync().GetAwaiter().GetResult();
@@ -44,5 +51,15 @@ public partial class App : Avalonia.Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static AppThemeMode ParseThemeMode(string? themeMode)
+    {
+        if (Enum.TryParse<AppThemeMode>(themeMode, true, out var parsed))
+        {
+            return parsed;
+        }
+
+        return AppThemeMode.System;
     }
 }

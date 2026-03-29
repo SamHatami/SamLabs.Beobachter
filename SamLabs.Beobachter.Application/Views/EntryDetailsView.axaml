@@ -7,9 +7,10 @@
              x:DataType="viewModels:EntryDetailsViewModel">
     <UserControl.Resources>
         <conv:LogLevelToBadgeBrushConverter x:Key="LogLevelToBadgeBrushConverter" />
+        <conv:LogLevelToMessageBrushConverter x:Key="LogLevelToMessageBrushConverter" />
     </UserControl.Resources>
 
-    <Border Classes="shell-panel"
+    <Border Classes="shell-panel shell-flat shell-border-vertical"
             Padding="12">
         <Grid RowDefinitions="Auto,*,Auto"
               RowSpacing="12">
@@ -38,7 +39,7 @@
                                TextWrapping="Wrap"
                                FontSize="18"
                                FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellForegroundBrush}" />
+                               Foreground="{Binding HeaderLevel, Converter={StaticResource LogLevelToMessageBrushConverter}}" />
 
                     <TextBlock Text="{Binding HeaderSourceText}"
                                FontWeight="SemiBold"

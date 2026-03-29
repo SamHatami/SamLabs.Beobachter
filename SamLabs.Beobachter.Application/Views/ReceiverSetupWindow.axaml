@@ -9,7 +9,23 @@
         MinHeight="520"
         Title="Receiver Setup">
     <Border Background="{DynamicResource ShellBackgroundBrush}">
-        <ContentControl Margin="12"
-                        Content="{Binding}" />
+        <Grid RowDefinitions="Auto,*">
+            <Border Grid.Row="0"
+                    Classes="shell-panel shell-flat shell-border-horizontal"
+                    Padding="14,10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="RECEIVER DASHBOARD"
+                               Classes="panel-title" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="Configure UDP, TCP, and file-tail sources"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                </Grid>
+            </Border>
+
+            <ContentControl Grid.Row="1"
+                            Content="{Binding}" />
+        </Grid>
     </Border>
 </Window>

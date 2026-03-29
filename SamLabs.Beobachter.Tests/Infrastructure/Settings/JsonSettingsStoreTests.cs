@@ -12,7 +12,20 @@ public sealed class JsonSettingsStoreTests
         var root = CreateTempDirectory();
         var store = new JsonSettingsStore(new JsonSettingsStoreOptions { RootDirectory = root });
 
-        var app = new AppSettings { ThemeMode = "Dark", ChannelCapacity = 64_000 };
+        var app = new AppSettings
+        {
+            ThemeMode = "Dark",
+            ChannelCapacity = 64_000,
+            LogLevelColors = new LogLevelColorOverrides
+            {
+                Error = new LogLevelColorOverride
+                {
+                    Message = "#FFE11D48",
+                    Badge = "#FFBE123C",
+                    Row = "#22E11D48"
+                }
+            }
+        };
         var receivers = new ReceiverDefinitions
         {
             UdpReceivers =
@@ -78,6 +91,9 @@ public sealed class JsonSettingsStoreTests
         var ui = await store.LoadUiLayoutSettingsAsync();
 
         Assert.Equal("System", app.ThemeMode);
+        Assert.NotNull(app.LogLevelColors);
+        Assert.NotNull(app.LogLevelColors.Error);
+        Assert.Null(app.LogLevelColors.Error.Message);
         Assert.Empty(receivers.UdpReceivers);
         Assert.True(workspace.AutoScroll);
         Assert.Equal(1200, ui.WindowWidth);

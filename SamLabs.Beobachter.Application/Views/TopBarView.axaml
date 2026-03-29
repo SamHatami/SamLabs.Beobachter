@@ -4,7 +4,7 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.TopBarView"
              x:DataType="viewModels:TopBarViewModel">
-    <Border Classes="shell-panel"
+    <Border Classes="shell-panel shell-flat shell-border-horizontal"
             Padding="14,10">
         <Grid ColumnDefinitions="Auto,*,Auto"
               ColumnSpacing="14">

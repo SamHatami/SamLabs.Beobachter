@@ -1,116 +1,276 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.ReceiverSetupView"
              x:DataType="viewModels:ReceiverSetupViewModel">
-    <Grid Margin="0,8,0,0"
-          ColumnDefinitions="*,Auto"
-          ColumnSpacing="10">
-        <ListBox Grid.Column="0"
-                 MinHeight="130"
-                 SelectedItem="{Binding SelectedReceiverDefinition}"
-                 ItemsSource="{Binding ReceiverDefinitions}">
-            <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
-                    <Border Margin="0,0,0,6"
-                            Padding="8"
-                            CornerRadius="6"
-                            Background="{DynamicResource ShellBackgroundBrush}">
-                        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                              ColumnDefinitions="120,*,90">
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding Kind}"
-                                       FontWeight="SemiBold" />
-                            <TextBox Grid.Row="0"
-                                     Grid.Column="1"
-                                     Margin="8,0,8,0"
-                                     Watermark="Display name"
-                                     Text="{Binding DisplayName}" />
-                            <CheckBox Grid.Row="0"
-                                      Grid.Column="2"
-                                      VerticalAlignment="Center"
-                                      Content="Enabled"
-                                      IsChecked="{Binding Enabled}" />
+    <Grid ColumnDefinitions="240,*"
+          ColumnSpacing="0">
+        <Border Grid.Column="0"
+                Classes="shell-panel shell-flat shell-border-right"
+                Padding="10">
+            <StackPanel Spacing="10">
+                <Border Classes="shell-card"
+                        Padding="8">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="SOURCES"
+                                   Classes="section-caption" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Add UDP Receiver"
+                                ToolTip.Tip="Add a UDP listener with default port 7071."
+                                Command="{Binding AddUdpReceiverCommand}"
+                                i:Attached.Icon="fa-solid fa-tower-broadcast" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Add TCP Receiver"
+                                ToolTip.Tip="Add a TCP listener with default port 4505."
+                                Command="{Binding AddTcpReceiverCommand}"
+                                i:Attached.Icon="fa-solid fa-ethernet" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Add File Tail"
+                                ToolTip.Tip="Add a file tail receiver with 150 ms polling interval."
+                                Command="{Binding AddFileReceiverCommand}"
+                                i:Attached.Icon="fa-regular fa-file-lines" />
+                    </StackPanel>
+                </Border>
 
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="Id" />
-                            <TextBox Grid.Row="1"
-                                     Grid.Column="1"
-                                     Grid.ColumnSpan="2"
-                                     Margin="8,6,0,0"
-                                     Text="{Binding Id}" />
+                <Border Classes="shell-card"
+                        Padding="8">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="PRESETS"
+                                   Classes="section-caption" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Local Diagnostics (UDP + File)"
+                                ToolTip.Tip="Adds one local UDP receiver and one local file-tail receiver."
+                                Command="{Binding AddLocalDiagnosticsPresetCommand}"
+                                i:Attached.Icon="fa-solid fa-sliders" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="TCP Ingress"
+                                ToolTip.Tip="Adds a TCP ingress receiver bound to 0.0.0.0:4505."
+                                Command="{Binding AddTcpIngressPresetCommand}"
+                                i:Attached.Icon="fa-solid fa-plug" />
+                    </StackPanel>
+                </Border>
 
-                            <StackPanel Grid.Row="2"
-                                        Grid.Column="0"
-                                        Grid.ColumnSpan="3"
-                                        Margin="0,6,0,0"
-                                        Orientation="Horizontal"
-                                        Spacing="8">
-                                <TextBox Width="180"
-                                         Watermark="Bind address"
-                                         IsVisible="{Binding IsUdp}"
-                                         Text="{Binding BindAddress}" />
-                                <TextBox Width="90"
-                                         Watermark="Port"
-                                         IsVisible="{Binding IsUdp}"
-                                         Text="{Binding Port}" />
-                                <TextBox Width="180"
-                                         Watermark="Bind address"
-                                         IsVisible="{Binding IsTcp}"
-                                         Text="{Binding BindAddress}" />
-                                <TextBox Width="90"
-                                         Watermark="Port"
-                                         IsVisible="{Binding IsTcp}"
-                                         Text="{Binding Port}" />
-                                <TextBox Width="380"
-                                         Watermark="File path"
-                                         IsVisible="{Binding IsFile}"
-                                         Text="{Binding FilePath}" />
-                                <TextBox Width="90"
-                                         Watermark="Poll ms"
-                                         IsVisible="{Binding IsFile}"
-                                         Text="{Binding PollIntervalMs}" />
-                            </StackPanel>
+                <Border Classes="shell-card"
+                        Padding="8">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="ACTIONS"
+                                   Classes="section-caption" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Remove Selected"
+                                ToolTip.Tip="Remove the currently selected receiver row."
+                                Command="{Binding RemoveSelectedReceiverCommand}"
+                                i:Attached.Icon="fa-solid fa-trash" />
+                        <Button Classes="receiver-setup-button primary"
+                                HorizontalAlignment="Stretch"
+                                Content="Save + Reload"
+                                ToolTip.Tip="Save receiver settings and restart receiver transports."
+                                Command="{Binding SaveReceiverSetupCommand}"
+                                i:Attached.Icon="fa-solid fa-floppy-disk" />
+                        <Button Classes="receiver-setup-button"
+                                HorizontalAlignment="Stretch"
+                                Content="Reload From Disk"
+                                ToolTip.Tip="Discard unsaved edits and reload definitions from settings files."
+                                Command="{Binding ReloadReceiverSetupCommand}"
+                                i:Attached.Icon="fa-solid fa-rotate" />
+                    </StackPanel>
+                </Border>
 
-                            <TextBlock Grid.Row="3"
-                                       Grid.Column="0"
-                                       Margin="0,6,0,0"
-                                       VerticalAlignment="Center"
-                                       Text="Parsers" />
-                            <TextBox Grid.Row="3"
-                                     Grid.Column="1"
-                                     Grid.ColumnSpan="2"
-                                     Margin="8,6,0,0"
-                                     ToolTip.Tip="Comma-separated parser names: Log4jXmlParser, JsonLogParser, CsvParser, PlainTextParser"
-                                     Text="{Binding ParserOrderText}" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <Border Classes="shell-card"
+                        Padding="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="STATUS"
+                                   Classes="section-caption" />
+                        <TextBlock Text="{Binding ReceiverSetupStatus}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
 
-        <StackPanel Grid.Column="1"
-                    Spacing="6">
-            <Button Content="Add UDP"
-                    Command="{Binding AddUdpReceiverCommand}" />
-            <Button Content="Add TCP"
-                    Command="{Binding AddTcpReceiverCommand}" />
-            <Button Content="Add File"
-                    Command="{Binding AddFileReceiverCommand}" />
-            <Button Content="Remove"
-                    Command="{Binding RemoveSelectedReceiverCommand}" />
-            <Button Content="Save + Reload"
-                    Command="{Binding SaveReceiverSetupCommand}" />
-            <Button Content="Reload From Disk"
-                    Command="{Binding ReloadReceiverSetupCommand}" />
-            <TextBlock Width="170"
-                       TextWrapping="Wrap"
-                       Foreground="{DynamicResource ShellMutedForegroundBrush}"
-                       Text="{Binding ReceiverSetupStatus}" />
-        </StackPanel>
+        <Border Grid.Column="1"
+                Classes="shell-panel shell-flat shell-border-none"
+                Padding="10">
+            <Grid RowDefinitions="Auto,*"
+                  RowSpacing="8">
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="RECEIVERS"
+                               Classes="panel-title" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{Binding ReceiverDefinitions.Count, StringFormat='{}{0} configured'}"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                </Grid>
+
+                <ListBox Grid.Row="1"
+                         MinHeight="130"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         SelectedItem="{Binding SelectedReceiverDefinition}"
+                         ItemsSource="{Binding ReceiverDefinitions}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
+                            <Border Margin="0,0,0,8"
+                                    Padding="10"
+                                    Classes="shell-card">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                      ColumnDefinitions="130,*,118">
+                                    <Border Grid.Row="0"
+                                            Grid.Column="0"
+                                            Padding="8,3"
+                                            CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
+                                            Background="{DynamicResource ShellChromeBrush}"
+                                            BorderBrush="{DynamicResource ShellChromeBorderBrush}"
+                                            BorderThickness="1"
+                                            ToolTip.Tip="Receiver transport type."
+                                            HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="6">
+                                            <i:Icon Value="fa-solid fa-tower-broadcast"
+                                                    FontSize="10"
+                                                    IsVisible="{Binding IsUdp}"
+                                                    Foreground="{DynamicResource ShellForegroundBrush}" />
+                                            <i:Icon Value="fa-solid fa-ethernet"
+                                                    FontSize="10"
+                                                    IsVisible="{Binding IsTcp}"
+                                                    Foreground="{DynamicResource ShellForegroundBrush}" />
+                                            <i:Icon Value="fa-regular fa-file-lines"
+                                                    FontSize="10"
+                                                    IsVisible="{Binding IsFile}"
+                                                    Foreground="{DynamicResource ShellForegroundBrush}" />
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Text="{Binding Kind}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBox Grid.Row="0"
+                                             Grid.Column="1"
+                                             Margin="8,0,8,0"
+                                             Watermark="Display name"
+                                             ToolTip.Tip="Friendly name shown in the UI."
+                                             Text="{Binding DisplayName}" />
+                                    <CheckBox Grid.Row="0"
+                                              Grid.Column="2"
+                                              VerticalAlignment="Center"
+                                              ToolTip.Tip="Enable or disable this receiver."
+                                              Content="Enabled"
+                                              IsChecked="{Binding Enabled}" />
+
+                                    <TextBlock Grid.Row="1"
+                                               Grid.Column="0"
+                                               Margin="0,6,0,0"
+                                               VerticalAlignment="Center"
+                                               Text="Id"
+                                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                    <TextBox Grid.Row="1"
+                                             Grid.Column="1"
+                                             Grid.ColumnSpan="2"
+                                             Margin="8,6,0,0"
+                                             ToolTip.Tip="Unique identifier used by workspace state and filters."
+                                             Text="{Binding Id}" />
+
+                                    <StackPanel Grid.Row="2"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="3"
+                                                Margin="0,6,0,0"
+                                                Orientation="Horizontal"
+                                                Spacing="8">
+                                        <TextBox Width="180"
+                                                 Watermark="Bind address"
+                                                 IsVisible="{Binding IsUdp}"
+                                                 ToolTip.Tip="Literal IP address only, e.g. 0.0.0.0 or ::1."
+                                                 Text="{Binding BindAddress}" />
+                                        <TextBox Width="90"
+                                                 Watermark="Port"
+                                                 IsVisible="{Binding IsUdp}"
+                                                 ToolTip.Tip="UDP port (1-65535)."
+                                                 Text="{Binding Port}" />
+                                        <TextBox Width="180"
+                                                 Watermark="Bind address"
+                                                 IsVisible="{Binding IsTcp}"
+                                                 ToolTip.Tip="Literal IP address only, e.g. 0.0.0.0 or ::1."
+                                                 Text="{Binding BindAddress}" />
+                                        <TextBox Width="90"
+                                                 Watermark="Port"
+                                                 IsVisible="{Binding IsTcp}"
+                                                 ToolTip.Tip="TCP port (1-65535)."
+                                                 Text="{Binding Port}" />
+                                        <TextBox Width="380"
+                                                 Watermark="File path"
+                                                 IsVisible="{Binding IsFile}"
+                                                 ToolTip.Tip="Absolute path to the log file to tail."
+                                                 Text="{Binding FilePath}" />
+                                        <TextBox Width="90"
+                                                 Watermark="Poll ms"
+                                                 IsVisible="{Binding IsFile}"
+                                                 ToolTip.Tip="Polling interval in milliseconds."
+                                                 Text="{Binding PollIntervalMs}" />
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Row="3"
+                                               Grid.Column="0"
+                                               Margin="0,6,0,0"
+                                               VerticalAlignment="Center"
+                                               Text="Parsers"
+                                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                    <TextBox Grid.Row="3"
+                                             Grid.Column="1"
+                                             Grid.ColumnSpan="2"
+                                             Margin="8,6,0,0"
+                                             ToolTip.Tip="Comma-separated parser names: Log4jXmlParser, JsonLogParser, CsvParser, PlainTextParser"
+                                             Text="{Binding ParserOrderText}" />
+
+                                    <StackPanel Grid.Row="4"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="3"
+                                                Margin="0,8,0,0"
+                                                Spacing="2">
+                                        <TextBlock Text="{Binding DisplayNameValidationError}"
+                                                   IsVisible="{Binding HasDisplayNameValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding IdValidationError}"
+                                                   IsVisible="{Binding HasIdValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding BindAddressValidationError}"
+                                                   IsVisible="{Binding HasBindAddressValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding PortValidationError}"
+                                                   IsVisible="{Binding HasPortValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding FilePathValidationError}"
+                                                   IsVisible="{Binding HasFilePathValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding PollIntervalValidationError}"
+                                                   IsVisible="{Binding HasPollIntervalValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                        <TextBlock Text="{Binding ParserOrderValidationError}"
+                                                   IsVisible="{Binding HasParserOrderValidationError}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ValidationErrorBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

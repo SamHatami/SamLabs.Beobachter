@@ -3,7 +3,7 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels.Status"
              x:Class="SamLabs.Beobachter.Application.Views.Status.SessionHealthView"
              x:DataType="viewModels:SessionHealthViewModel">
-    <Border Classes="shell-panel"
+    <Border Classes="shell-panel shell-flat shell-border-horizontal"
             Padding="12,8">
         <Grid ColumnDefinitions="Auto,Auto,Auto,Auto"
               ColumnSpacing="16">

@@ -25,4 +25,11 @@
     <SolidColorBrush x:Key="BadgeErrorBrush" Color="#FFDC2626" />
     <SolidColorBrush x:Key="BadgeFatalBrush" Color="#FF7F1D1D" />
     <SolidColorBrush x:Key="BadgeFallbackBrush" Color="#FF475569" />
+    <SolidColorBrush x:Key="MessageTraceBrush" Color="#FF38BDF8" />
+    <SolidColorBrush x:Key="MessageDebugBrush" Color="#FFA5B4FC" />
+    <SolidColorBrush x:Key="MessageInfoBrush" Color="#FF93C5FD" />
+    <SolidColorBrush x:Key="MessageWarnBrush" Color="#FFFCD34D" />
+    <SolidColorBrush x:Key="MessageErrorBrush" Color="#FFFCA5A5" />
+    <SolidColorBrush x:Key="MessageFatalBrush" Color="#FFF87171" />
+    <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FFE5E7EB" />
 </ResourceDictionary>

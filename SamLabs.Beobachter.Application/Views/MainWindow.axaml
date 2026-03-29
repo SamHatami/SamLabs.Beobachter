@@ -28,7 +28,6 @@
 
         <!-- Row 1: Workspace (sidebar | splitter | stream | splitter | details) -->
         <Grid Grid.Row="1"
-              Margin="0,1,0,0"
               ColumnDefinitions="240,Auto,*,Auto,340">
 
             <!-- Left sidebar: filters + sources -->
@@ -36,18 +35,18 @@
                             Content="{Binding WorkspaceSidebar}" />
 
             <GridSplitter Grid.Column="1"
-                          Width="4"
+                          Width="1"
                           ResizeBehavior="PreviousAndNext"
-                          Background="{DynamicResource ShellBackgroundBrush}" />
+                          Background="{DynamicResource ShellPanelBorderBrush}" />
 
             <!-- Center: log stream -->
             <ContentControl Grid.Column="2"
                             Content="{Binding Stream}" />
 
             <GridSplitter Grid.Column="3"
-                          Width="4"
+                          Width="1"
                           ResizeBehavior="PreviousAndNext"
-                          Background="{DynamicResource ShellBackgroundBrush}" />
+                          Background="{DynamicResource ShellPanelBorderBrush}" />
 
             <!-- Right: entry details -->
             <ContentControl Grid.Column="4"

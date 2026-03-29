@@ -6,11 +6,11 @@
         <x:Double x:Key="ShellSpace4">8</x:Double>
         <x:Double x:Key="ShellSpace5">12</x:Double>
         <x:Double x:Key="ShellSpace6">16</x:Double>
-        <Thickness x:Key="ShellPanelPadding">12</Thickness>
+        <Thickness x:Key="ShellPanelPadding">0</Thickness>
         <Thickness x:Key="ShellPanelPaddingCompact">10,8</Thickness>
         <Thickness x:Key="ShellToolbarButtonPadding">10,6</Thickness>
-        <Thickness x:Key="ShellPillPadding">8,3</Thickness>
-        <CornerRadius x:Key="ShellPanelCornerRadius">10</CornerRadius>
+        <Thickness x:Key="ShellPillPadding">4,2</Thickness>
+        <CornerRadius x:Key="ShellPanelCornerRadius">4</CornerRadius>
         <CornerRadius x:Key="ShellBadgeCornerRadius">999</CornerRadius>
         <FontFamily x:Key="ShellMonospaceFontFamily">Consolas, Menlo, Monaco, Courier New</FontFamily>
     </Styles.Resources>
@@ -20,6 +20,34 @@
         <Setter Property="BorderBrush" Value="{DynamicResource ShellPanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
+    </Style>
+
+    <Style Selector="Border.shell-flat">
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+
+    <Style Selector="Border.shell-border-horizontal">
+        <Setter Property="BorderThickness" Value="0,1,0,1" />
+    </Style>
+
+    <Style Selector="Border.shell-border-vertical">
+        <Setter Property="BorderThickness" Value="1,0,1,0" />
+    </Style>
+
+    <Style Selector="Border.shell-border-left">
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+
+    <Style Selector="Border.shell-border-right">
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+
+    <Style Selector="Border.shell-border-bottom">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.shell-border-none">
+        <Setter Property="BorderThickness" Value="0" />
     </Style>
 
     <Style Selector="Border.shell-card">
@@ -68,6 +96,31 @@
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
     </Style>
 
+    <Style Selector="Button.receiver-setup-button">
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Background" Value="{DynamicResource ShellPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="Button.receiver-setup-button:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellAccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.receiver-setup-button:pressed">
+        <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+    </Style>
+
+    <Style Selector="Button.receiver-setup-button.primary">
+        <Setter Property="Background" Value="{DynamicResource ShellAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellAccentForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellAccentBrush}" />
+    </Style>
+
     <Style Selector="Button.icon-button">
         <Setter Property="Width" Value="32" />
         <Setter Property="Height" Value="32" />
@@ -107,5 +160,99 @@
         <Setter Property="FontFamily" Value="{DynamicResource ShellMonospaceFontFamily}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll">
+        <Setter Property="AllowAutoHide" Value="False" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical">
+        <Setter Property="Width" Value="6" />
+        <Setter Property="MinWidth" Value="6" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical /template/ Rectangle#TrackRect">
+        <Setter Property="Fill" Value="{DynamicResource ShellChromeBrush}" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical /template/ Thumb">
+        <Setter Property="Background" Value="{DynamicResource ShellMutedForegroundBrush}" />
+        <Setter Property="CornerRadius" Value="999" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical /template/ Thumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShellForegroundBrush}" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical /template/ RepeatButton#PART_LineUpButton">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <Style Selector="ScrollViewer.sidebar-scroll ScrollBar:vertical /template/ RepeatButton#PART_LineDownButton">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander">
+        <Setter Property="Padding" Value="{DynamicResource ShellPanelPaddingCompact}" />
+        <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="MinHeight" Value="32" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellPanelBorderBrush}" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader">
+        <Setter Property="Padding" Value="10,0,2,0" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader /template/ Border#ExpandCollapseChevronBorder">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="14" />
+        <Setter Property="Margin" Value="8,0,6,0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader /template/ Path#ExpandCollapseChevron">
+        <Setter Property="Stroke" Value="{DynamicResource ShellMutedForegroundBrush}" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="Data" Value="M 0 7 L 14 7 M 7 0 L 7 14" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader[Tag=expanded] /template/ Path#ExpandCollapseChevron">
+        <Setter Property="Data" Value="M 0 7 L 14 7" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Border#ExpandCollapseChevronBorder">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style Selector="Expander.sidebar-expander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Path#ExpandCollapseChevron">
+        <Setter Property="Stroke" Value="{DynamicResource ShellForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.sidebar-expander-header">
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="StackPanel.sidebar-expander-content">
+        <Setter Property="Margin" Value="0,6,0,0" />
     </Style>
 </Styles>

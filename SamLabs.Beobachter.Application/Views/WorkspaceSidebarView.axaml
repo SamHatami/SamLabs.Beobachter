@@ -5,11 +5,13 @@
              x:Class="SamLabs.Beobachter.Application.Views.WorkspaceSidebarView"
              x:Name="Root"
              x:DataType="viewModels:WorkspaceSidebarViewModel">
-    <Border Classes="shell-panel"
-            Padding="10">
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="12">
-                <Grid ColumnDefinitions="*,Auto">
+    <Border Classes="shell-panel shell-flat shell-border-vertical"
+            Padding="0">
+        <ScrollViewer Classes="sidebar-scroll">
+            <StackPanel Spacing="0"
+                        HorizontalAlignment="Stretch">
+                <Grid ColumnDefinitions="*,Auto"
+                      Margin="10,10,10,8">
                     <TextBlock Grid.Column="0"
                                Text="FILTERS"
                                Classes="panel-title" />
@@ -20,13 +22,14 @@
                             i:Attached.Icon="fa-solid fa-broom" />
                 </Grid>
 
-                <Expander IsExpanded="True">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="LOG LEVEL"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
-                                Spacing="6">
+                    <StackPanel Classes="sidebar-expander-content"
+                                Spacing="0">
                         <Grid ColumnDefinitions="Auto,*,Auto">
                             <CheckBox Grid.Column="0"
                                       VerticalAlignment="Center"
@@ -35,7 +38,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Error"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageErrorBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding ErrorCount}"
@@ -49,7 +52,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Warn"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageWarnBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding WarnCount}"
@@ -63,7 +66,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Info"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageInfoBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding InfoCount}"
@@ -77,7 +80,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Debug"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageDebugBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding DebugCount}"
@@ -91,7 +94,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Trace"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageTraceBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding TraceCount}"
@@ -105,7 +108,7 @@
                                        Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        Text="Fatal"
-                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                                       Foreground="{DynamicResource MessageFatalBrush}" />
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="{Binding FatalCount}"
@@ -114,12 +117,13 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander IsExpanded="True">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="FILTER PRESETS"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
+                    <StackPanel Classes="sidebar-expander-content"
                                 Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
                             <ToggleButton Grid.Column="0"
@@ -146,18 +150,19 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander IsExpanded="True">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="SOURCE / SERVICE"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
+                    <StackPanel Classes="sidebar-expander-content"
                                 Spacing="8">
                         <TextBox Watermark="Filter sources..."
                                  Text="{Binding Sources.SourceSearchText, UpdateSourceTrigger=PropertyChanged}" />
                         <ItemsControl ItemsSource="{Binding Sources.VisibleSourceItems}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="viewModels:SourceFilterItemViewModel">
+                                <DataTemplate>
                                     <Grid Margin="0,0,0,4"
                                           ColumnDefinitions="Auto,*,Auto">
                                         <CheckBox Grid.Column="0"
@@ -179,12 +184,13 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander IsExpanded="False">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="HOST"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
+                    <StackPanel Classes="sidebar-expander-content"
                                 Spacing="6">
                         <TextBlock Text="Quick host filters"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
@@ -196,8 +202,8 @@
                                         <ToggleButton Grid.Column="0"
                                                       Classes="filter-chip"
                                                       IsChecked="{Binding IsSelected}"
-                                                      Command="{Binding DataContext.ApplyHostFacetCommand, ElementName=Root}"
-                                                      CommandParameter="{Binding}"
+                                                      Command="{Binding ((viewModels:WorkspaceSidebarViewModel)DataContext).ApplyHostFacetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}" 
                                                       Content="{Binding Label}" />
                                         <TextBlock Grid.Column="1"
                                                    Margin="8,0,0,0"
@@ -211,12 +217,13 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander IsExpanded="False">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="STRUCTURED FIELDS"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
+                    <StackPanel Classes="sidebar-expander-content"
                                 Spacing="8">
                         <StackPanel Spacing="2">
                             <TextBlock Text="Receiver"
@@ -263,12 +270,13 @@
                     </StackPanel>
                 </Expander>
 
-                <Expander IsExpanded="False">
+                <Expander Classes="sidebar-expander"
+                          IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="TAGS"
                                    Classes="section-caption" />
                     </Expander.Header>
-                    <StackPanel Margin="0,8,0,0"
+                    <StackPanel Classes="sidebar-expander-content"
                                 Spacing="6">
                         <TextBlock Text="Click a tag chip to narrow the search."
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
@@ -283,7 +291,7 @@
                                     <ToggleButton Margin="0,0,6,6"
                                                   Classes="filter-chip"
                                                   IsChecked="{Binding IsSelected}"
-                                                  Command="{Binding DataContext.ApplyTagFacetCommand, ElementName=Root}"
+                                                  Command="{Binding ((viewModels:WorkspaceSidebarViewModel)DataContext).ApplyTagFacetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                   CommandParameter="{Binding}"
                                                   Content="{Binding Label}" />
                                 </DataTemplate>

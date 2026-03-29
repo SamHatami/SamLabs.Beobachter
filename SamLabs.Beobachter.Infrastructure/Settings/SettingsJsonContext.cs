@@ -7,6 +7,8 @@ namespace SamLabs.Beobachter.Infrastructure.Settings;
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     WriteIndented = true)]
 [JsonSerializable(typeof(AppSettings))]
+[JsonSerializable(typeof(LogLevelColorOverrides))]
+[JsonSerializable(typeof(LogLevelColorOverride))]
 [JsonSerializable(typeof(ReceiverDefinitions))]
 [JsonSerializable(typeof(WorkspaceSettings))]
 [JsonSerializable(typeof(UiLayoutSettings))]
