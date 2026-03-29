@@ -1397,3 +1397,23 @@ Impact:
 
 Follow-ups:
 - Continue splitting receiver/workspace load sequencing from shell VM into a dedicated startup orchestration service.
+
+## 2026-03-29 - MVVM Refactor Phase 9E: Design-Time Construction Moved Out of Runtime Shell VM
+What changed:
+- Removed design-time parameterless constructor from runtime shell VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+- Added dedicated design-only shell VM for preview composition:
+  [MainWindowDesignViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Design/MainWindowDesignViewModel.cs)
+- Updated shell view preview context to use design-only VM:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+
+Why:
+- Runtime ViewModels should not carry design-time constructors or preview-only wiring.
+- Design preview composition belongs in AXAML and design-only viewmodel types.
+
+Impact:
+- Runtime `MainWindowViewModel` now has only DI-based runtime construction.
+- Preview experience remains available through `Design.DataContext` using `MainWindowDesignViewModel`.
+
+Follow-ups:
+- Apply the same design-time pattern to other views if any runtime ViewModels gain preview-only constructors in future changes.

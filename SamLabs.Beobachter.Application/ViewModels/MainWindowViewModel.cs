@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -83,29 +82,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _autoScrollButtonText = "Pin: On";
-
-    [Obsolete("Design-time constructor only. Use the DI constructor for runtime composition.")]
-    public MainWindowViewModel() : this(
-        new ShellStatusFormatter(),
-        new SampleLogEntryGenerator(),
-        new ThemeService(),
-        new DesignIngestionSession(),
-        new WorkspaceStateCoordinator(new DesignSettingsStore()),
-        new LogStreamProjectionService(new LogQueryEvaluator()),
-        new RollingLogStatisticsService(),
-        new SourceTreeViewModel(),
-        new QuickFiltersViewModel(),
-        new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
-        new WorkspaceSidebarViewModel(
-            new SourceTreeViewModel(),
-            new QuickFiltersViewModel(),
-            new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession())),
-        new LogFiltersViewModel(),
-        new LogStreamViewModel(),
-        new EntryDetailsViewModel(new NullClipboardService()),
-        new SessionHealthViewModel())
-    {
-    }
 
     public MainWindowViewModel(
         IShellStatusFormatter shellStatusFormatter,
