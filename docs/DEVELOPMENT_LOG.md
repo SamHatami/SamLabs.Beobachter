@@ -1197,3 +1197,23 @@ Impact:
 
 Follow-ups:
 - Move session health to a true bottom status row and convert center area to explicit three-region workspace proportions for final shell layout polish.
+
+## 2026-03-29 - MVVM Refactor Phase 7E: Three-Region Workspace Layout + Bottom Status Dock
+What changed:
+- Reworked shell workspace layout in:
+  [MainWindow.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/MainWindow.axaml)
+  - changed center workspace to explicit columns: `Sidebar | Stream | Inspector` (`260,*,360`)
+  - bound `Stream` to center column and `Details` to right inspector column
+  - moved `SessionHealth` out of center content and docked it in a dedicated bottom row
+
+Why:
+- The previous center area still stacked details and status beneath the stream, reducing stream prominence and mixing app-state with content.
+- A clear three-region workspace with bottom-docked session status is closer to operator-focused log viewer ergonomics.
+
+Impact:
+- Log stream now remains the visual center while details are consistently presented as a right inspector.
+- Session health is now presented as app-state at the bottom of the shell.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- If needed, replace `SessionHealthView` with a thinner horizontal status-bar variant for denser bottom-dock presentation.

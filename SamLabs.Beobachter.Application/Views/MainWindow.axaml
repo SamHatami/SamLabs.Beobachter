@@ -17,7 +17,7 @@
         <viewModels:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*"
+    <Grid RowDefinitions="Auto,Auto,*,Auto"
           Background="{DynamicResource ShellBackgroundBrush}">
         <ContentControl Grid.Row="0"
                         Margin="16,16,16,8"
@@ -36,29 +36,25 @@
         </Border>
 
         <Border Grid.Row="2"
-                Margin="16,0,16,16"
+                Margin="16,0,16,8"
                 Padding="8"
                 CornerRadius="10"
                 Background="{DynamicResource ShellPanelBrush}">
-            <Grid ColumnDefinitions="260,*"
+            <Grid ColumnDefinitions="260,*,360"
                   ColumnSpacing="8">
                 <ContentControl Grid.Column="0"
                                 Content="{Binding WorkspaceSidebar}" />
 
-                <Grid Grid.Column="1"
-                      RowDefinitions="*,Auto,Auto">
-                    <ContentControl Grid.Row="0"
-                                    Content="{Binding Stream}" />
+                <ContentControl Grid.Column="1"
+                                Content="{Binding Stream}" />
 
-                    <ContentControl Grid.Row="1"
-                                    Margin="0,8,0,0"
-                                    Content="{Binding Details}" />
-
-                    <ContentControl Grid.Row="2"
-                                    Margin="0,8,0,0"
-                                    Content="{Binding SessionHealth}" />
-                </Grid>
+                <ContentControl Grid.Column="2"
+                                Content="{Binding Details}" />
             </Grid>
         </Border>
+
+        <ContentControl Grid.Row="3"
+                        Margin="16,0,16,16"
+                        Content="{Binding SessionHealth}" />
     </Grid>
 </Window>
