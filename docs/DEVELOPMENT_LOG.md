@@ -1261,3 +1261,23 @@ Impact:
 
 Follow-ups:
 - If we need stronger scan-ability under load, split each status metric into a compact label/value token style.
+
+## 2026-03-29 - MVVM Refactor Phase 8C: MainWindowViewModel Convention Cleanup
+What changed:
+- Removed record-based design-time dependency packaging from:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - deleted `DesignDependencies` record
+  - deleted `CreateDesignDependencies()` helper
+  - restored a minimal direct design-time constructor path
+
+Why:
+- The extra design-time record/helper added more structure to `MainWindowViewModel` than needed and pushed against the shell-thinning direction.
+- Keep shell VM changes focused on runtime DI composition and avoid adding new local scaffolding patterns.
+
+Impact:
+- No runtime behavior change.
+- Main shell VM remains simpler and aligns better with existing project conventions.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Continue reducing `MainWindowViewModel` responsibility by extracting workspace/state coordination logic into dedicated services in small phases.

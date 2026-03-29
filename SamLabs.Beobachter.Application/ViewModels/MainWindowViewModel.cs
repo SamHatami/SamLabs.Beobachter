@@ -89,24 +89,23 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _autoScrollButtonText = "Pin: On";
 
     [Obsolete("Design-time constructor only. Use the DI constructor for runtime composition.")]
-    public MainWindowViewModel() : this(CreateDesignDependencies())
-    {
-    }
-
-    private MainWindowViewModel(DesignDependencies dependencies) : this(
-        dependencies.ThemeService,
-        dependencies.IngestionSession,
-        dependencies.SettingsStore,
-        dependencies.StatisticsService,
-        dependencies.QueryEvaluator,
-        dependencies.Sources,
-        dependencies.QuickFilters,
-        dependencies.ReceiverSetup,
-        dependencies.WorkspaceSidebar,
-        dependencies.Filters,
-        dependencies.Stream,
-        dependencies.Details,
-        dependencies.SessionHealth)
+    public MainWindowViewModel() : this(
+        new ThemeService(),
+        new DesignIngestionSession(),
+        new DesignSettingsStore(),
+        new RollingLogStatisticsService(),
+        new LogQueryEvaluator(),
+        new SourceTreeViewModel(),
+        new QuickFiltersViewModel(),
+        new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
+        new WorkspaceSidebarViewModel(
+            new SourceTreeViewModel(),
+            new QuickFiltersViewModel(),
+            new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession())),
+        new LogFiltersViewModel(),
+        new LogStreamViewModel(),
+        new EntryDetailsViewModel(new NullClipboardService()),
+        new SessionHealthViewModel())
     {
     }
 
@@ -180,45 +179,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public EntryDetailsViewModel Details { get; }
 
     public SessionHealthViewModel SessionHealth { get; }
-
-    private static DesignDependencies CreateDesignDependencies()
-    {
-        var settingsStore = new DesignSettingsStore();
-        var ingestionSession = new DesignIngestionSession();
-        var sources = new SourceTreeViewModel();
-        var quickFilters = new QuickFiltersViewModel();
-        var receiverSetup = new ReceiverSetupViewModel(settingsStore, ingestionSession);
-
-        return new DesignDependencies(
-            new ThemeService(),
-            ingestionSession,
-            settingsStore,
-            new RollingLogStatisticsService(),
-            new LogQueryEvaluator(),
-            sources,
-            quickFilters,
-            receiverSetup,
-            new WorkspaceSidebarViewModel(sources, quickFilters, receiverSetup),
-            new LogFiltersViewModel(),
-            new LogStreamViewModel(),
-            new EntryDetailsViewModel(new NullClipboardService()),
-            new SessionHealthViewModel());
-    }
-
-    private sealed record DesignDependencies(
-        IThemeService ThemeService,
-        IIngestionSession IngestionSession,
-        ISettingsStore SettingsStore,
-        ILogStatisticsService StatisticsService,
-        ILogQueryEvaluator QueryEvaluator,
-        SourceTreeViewModel Sources,
-        QuickFiltersViewModel QuickFilters,
-        ReceiverSetupViewModel ReceiverSetup,
-        WorkspaceSidebarViewModel WorkspaceSidebar,
-        LogFiltersViewModel Filters,
-        LogStreamViewModel Stream,
-        EntryDetailsViewModel Details,
-        SessionHealthViewModel SessionHealth);
 
     [RelayCommand]
     private void UseSystemTheme()
