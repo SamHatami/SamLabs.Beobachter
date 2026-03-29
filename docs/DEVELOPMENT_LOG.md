@@ -1449,3 +1449,33 @@ Impact:
 
 Follow-ups:
 - Continue shell thinning by extracting any remaining startup/reload command sequencing from `MainWindowViewModel` into dedicated orchestration services where needed.
+
+## 2026-03-29 - MVVM Toolkit Convention Sweep Across ViewModels
+What changed:
+- Removed manual dependent-property notification boilerplate by using CommunityToolkit attributes:
+  - [QuickFiltersViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Sources/QuickFiltersViewModel.cs)
+    - replaced explicit partial `On...Changed` notification methods with `[NotifyPropertyChangedFor]`
+  - [LogStreamViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/LogStreamViewModel.cs)
+    - replaced explicit column-width `On...Changed` notification methods with `[NotifyPropertyChangedFor(nameof(LogColumnDefinitions))]`
+  - [ReceiverDefinitionViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverDefinitionViewModel.cs)
+    - replaced explicit validation-flag notification partials with `[NotifyPropertyChangedFor]`
+- Refactored toolbar VM away from manual passthrough/raise boilerplate:
+  - [MainToolbarViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Toolbar/MainToolbarViewModel.cs)
+    - converted to `partial`
+    - introduced `[ObservableProperty]`-backed toolbar display fields
+    - replaced passthrough command properties with `[RelayCommand]` methods delegating to shell commands
+    - replaced repeated `OnPropertyChanged(nameof(...))` calls with value synchronization from shell/stream
+- Split `ReceiverKinds` into its own file for single-public-type-per-file consistency:
+  - [ReceiverKinds.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/ReceiverKinds.cs)
+
+Why:
+- Several viewmodels still used manual notification/workaround patterns where toolkit source generators already provide direct support.
+- Reducing hand-written property/command plumbing lowers maintenance cost and keeps viewmodels aligned with project MVVM conventions.
+
+Impact:
+- Viewmodels now rely more consistently on CommunityToolkit.Mvvm generator patterns.
+- Removed all remaining `OnPropertyChanged(nameof(...))` manual notification calls from `Application/ViewModels`.
+- Full suite remains green (`113` passing tests).
+
+Follow-ups:
+- As part of upcoming full view redesign, keep new viewmodels on the same pattern: `[ObservableProperty]`, `[RelayCommand]`, and `[NotifyPropertyChangedFor]` for derived values.
