@@ -53,6 +53,18 @@ public sealed partial class PlainTextParser : ILogParser
                 loggerName = dashMatch.Groups["logger"].Value;
                 message = dashMatch.Groups["msg"].Value;
             }
+            else
+            {
+                var pipeMatch = PipePattern().Match(text);
+                if (pipeMatch.Success)
+                {
+                    timestamp = ParseTimestamp(pipeMatch.Groups["ts"].Value) ?? timestamp;
+                    rawLevelName = pipeMatch.Groups["level"].Value;
+                    level = LogLevelTable.FromName(rawLevelName, LogLevel.Info);
+                    loggerName = pipeMatch.Groups["logger"].Value.Trim();
+                    message = pipeMatch.Groups["msg"].Value.Trim();
+                }
+            }
         }
 
         entry = new LogEntry
@@ -93,4 +105,9 @@ public sealed partial class PlainTextParser : ILogParser
         @"^(?<ts>\d{4}-\d{2}-\d{2}[T\s][^ ]+)\s+(?<level>[A-Za-z0-9]+)\s+(?<logger>\S+)\s+-\s+(?<msg>.+)$",
         RegexOptions.Compiled)]
     private static partial Regex DashPattern();
+
+    [GeneratedRegex(
+        @"^(?<ts>[^|]+?)\s*\|\s*(?<level>[A-Za-z0-9]+)\s*\|\s*(?<logger>[^|]+?)\s*\|\s*(?<msg>.+)$",
+        RegexOptions.Compiled)]
+    private static partial Regex PipePattern();
 }

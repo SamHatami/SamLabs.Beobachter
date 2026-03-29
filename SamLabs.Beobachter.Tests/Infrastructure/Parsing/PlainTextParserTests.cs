@@ -61,4 +61,21 @@ public sealed class PlainTextParserTests
         Assert.Equal(LogLevel.Info, entry.Level);
         Assert.Equal(line, entry.Message);
     }
+
+    [Fact]
+    public void TryParse_ParsesPipeDelimitedFormat()
+    {
+        const string line = "2026-03-29T16:39:57.123+01:00 | ERROR | Demo.Payments.Checkout | Payment failed (#15)";
+
+        var ok = _parser.TryParse(
+            Encoding.UTF8.GetBytes(line),
+            new LogSourceContext { ReceiverId = "plain-4", DefaultLoggerName = "FallbackLogger" },
+            out var entry);
+
+        Assert.True(ok);
+        Assert.NotNull(entry);
+        Assert.Equal(LogLevel.Error, entry!.Level);
+        Assert.Equal("Demo.Payments.Checkout", entry.LoggerName);
+        Assert.Equal("Payment failed (#15)", entry.Message);
+    }
 }

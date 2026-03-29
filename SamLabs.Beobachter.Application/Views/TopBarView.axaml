@@ -63,10 +63,6 @@
                         Content="{Binding PauseButtonText}"
                         Command="{Binding TogglePauseCommand}"
                         i:Attached.Icon="{Binding PauseButtonIcon}" />
-                <Button Classes="toolbar-button"
-                        Content="{Binding AutoScrollButtonText}"
-                        Command="{Binding ToggleAutoScrollCommand}"
-                        i:Attached.Icon="fa-solid fa-thumbtack" />
                 <Button Classes="toolbar-button icon-button"
                         ToolTip.Tip="Receiver settings"
                         Command="{Binding OpenSettingsCommand}"

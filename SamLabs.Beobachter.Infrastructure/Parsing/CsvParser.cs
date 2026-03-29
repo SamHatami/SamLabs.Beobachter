@@ -29,7 +29,9 @@ public sealed class CsvParser : ILogParser
         }
 
         var text = Encoding.UTF8.GetString(payload.Span).Trim();
-        if (string.IsNullOrWhiteSpace(text) || LooksLikeXml(text))
+        if (string.IsNullOrWhiteSpace(text) ||
+            LooksLikeXml(text) ||
+            !LooksLikeDelimited(text, _options.Delimiter))
         {
             return false;
         }
@@ -130,6 +132,11 @@ public sealed class CsvParser : ILogParser
     private static bool LooksLikeXml(string text)
     {
         return text.StartsWith('<');
+    }
+
+    private static bool LooksLikeDelimited(string text, char delimiter)
+    {
+        return text.IndexOf(delimiter) >= 0;
     }
 
     private bool LooksLikeHeader(IReadOnlyList<string> fields)

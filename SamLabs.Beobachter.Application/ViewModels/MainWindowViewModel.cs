@@ -103,6 +103,7 @@ public partial class MainWindowViewModel : ViewModelBase
         TopBar.SearchTextChanged += OnTopBarSearchTextChanged;
         TopBar.PauseToggled += OnTopBarPauseToggled;
         TopBar.AutoScrollToggled += OnTopBarAutoScrollToggled;
+        Stream.AutoScrollToggleRequested += OnStreamAutoScrollToggleRequested;
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources.StateChanged += OnSourcesStateChanged;
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
@@ -177,6 +178,11 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
         Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
+    }
+
+    private void OnStreamAutoScrollToggleRequested(object? sender, EventArgs e)
+    {
+        TopBar.ToggleAutoScrollCommand.Execute(null);
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)

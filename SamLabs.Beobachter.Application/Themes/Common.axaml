@@ -58,7 +58,8 @@
     </Style>
 
     <Style Selector="Border.log-stream-item">
-        <Setter Property="Margin" Value="2,1" />
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="Padding" Value="2"/>
         <Setter Property="MinHeight" Value="22" />
         <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />

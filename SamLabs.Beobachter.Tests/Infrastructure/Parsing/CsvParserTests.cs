@@ -58,4 +58,18 @@ public sealed class CsvParserTests
         Assert.False(ok);
         Assert.Null(entry);
     }
+
+    [Fact]
+    public void TryParse_ReturnsFalseForPipeDelimitedPayload()
+    {
+        const string pipe = "2026-03-29T16:39:57.123+01:00 | WARN | Demo.Inventory.Stock | Low stock detected (#4)";
+
+        var ok = _parser.TryParse(
+            Encoding.UTF8.GetBytes(pipe),
+            new LogSourceContext { ReceiverId = "udp-1", DefaultLoggerName = "DefaultCsv" },
+            out var entry);
+
+        Assert.False(ok);
+        Assert.Null(entry);
+    }
 }

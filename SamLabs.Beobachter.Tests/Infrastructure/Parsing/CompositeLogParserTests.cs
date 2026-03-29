@@ -77,6 +77,24 @@ public sealed class CompositeLogParserTests
         Assert.Equal("alpha", entry.Properties["tenant"]);
     }
 
+    [Fact]
+    public void TryParse_ComposesPlainTextParserForPipeDelimitedPayload()
+    {
+        var parser = new CompositeLogParser([new Log4jXmlParser(), new JsonLogParser(), new CsvParser(), new PlainTextParser()]);
+        const string pipe = "2026-03-29T16:39:57.123+01:00 | ERROR | Demo.Payments.Checkout | Payment failed (#15)";
+
+        var ok = parser.TryParse(
+            Encoding.UTF8.GetBytes(pipe),
+            new LogSourceContext { ReceiverId = "r4", DefaultLoggerName = "Default" },
+            out var entry);
+
+        Assert.True(ok);
+        Assert.NotNull(entry);
+        Assert.Equal(LogLevel.Error, entry!.Level);
+        Assert.Equal("Demo.Payments.Checkout", entry.LoggerName);
+        Assert.Equal("Payment failed (#15)", entry.Message);
+    }
+
     private sealed class FailingParser(string name) : ILogParser
     {
         public string Name => name;
