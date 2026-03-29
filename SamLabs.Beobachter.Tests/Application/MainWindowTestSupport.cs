@@ -28,6 +28,10 @@ internal static class MainWindowTestSupport
         IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
+        SourceTreeViewModel sources = new();
+        QuickFiltersViewModel quickFilters = new();
+        ReceiverSetupViewModel receiverSetup = new(resolvedSettingsStore, session);
+        WorkspaceSidebarViewModel workspaceSidebar = new(sources, quickFilters, receiverSetup);
 
         return new MainWindowViewModel(
             resolvedThemeService,
@@ -35,9 +39,10 @@ internal static class MainWindowTestSupport
             resolvedSettingsStore,
             resolvedStatisticsService,
             new LogQueryEvaluator(),
-            new SourceTreeViewModel(),
-            new QuickFiltersViewModel(),
-            new ReceiverSetupViewModel(resolvedSettingsStore, session),
+            sources,
+            quickFilters,
+            receiverSetup,
+            workspaceSidebar,
             new LogFiltersViewModel(),
             new LogStreamViewModel(),
             new EntryDetailsViewModel(resolvedClipboardService),

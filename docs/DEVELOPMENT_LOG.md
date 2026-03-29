@@ -1217,3 +1217,27 @@ Impact:
 
 Follow-ups:
 - If needed, replace `SessionHealthView` with a thinner horizontal status-bar variant for denser bottom-dock presentation.
+
+## 2026-03-29 - MVVM Refactor Phase 8A: Sidebar Composition via DI
+What changed:
+- Moved sidebar composition ownership from shell runtime code into DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+  - registered `WorkspaceSidebarViewModel` as a singleton feature VM
+- Updated shell VM constructor contract:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - added `WorkspaceSidebarViewModel` as an explicit dependency
+  - removed manual runtime `new WorkspaceSidebarViewModel(...)` composition
+- Updated test support construction to mirror the new shell constructor shape:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+
+Why:
+- Feature-level shell composition should be container-owned at runtime to keep dependency ownership explicit.
+- Manual shell-side instantiation of sidebar composition was the remaining mixed-construction hotspot.
+
+Impact:
+- Runtime shell composition no longer constructs sidebar VM manually.
+- `MainWindowViewModel` dependencies are more explicit and aligned with the existing DI approach for other feature VMs.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- Convert `SessionHealthView` from card-style panel to a denser horizontal bottom status bar surface.
