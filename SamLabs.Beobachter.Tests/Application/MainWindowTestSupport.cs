@@ -28,6 +28,7 @@ internal static class MainWindowTestSupport
         IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
         IWorkspaceStateCoordinator workspaceStateCoordinator = new WorkspaceStateCoordinator(resolvedSettingsStore);
+        IShellStatusFormatter shellStatusFormatter = new ShellStatusFormatter();
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
@@ -35,6 +36,7 @@ internal static class MainWindowTestSupport
         WorkspaceSidebarViewModel workspaceSidebar = new(sources, quickFilters, receiverSetup);
 
         return new MainWindowViewModel(
+            shellStatusFormatter,
             resolvedThemeService,
             session,
             workspaceStateCoordinator,

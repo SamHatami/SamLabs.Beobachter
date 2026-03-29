@@ -24,6 +24,7 @@ public static class Root
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<IShellStatusFormatter, ShellStatusFormatter>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IWorkspaceStateCoordinator, WorkspaceStateCoordinator>();
         services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();

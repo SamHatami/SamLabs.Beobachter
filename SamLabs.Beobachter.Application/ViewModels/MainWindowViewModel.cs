@@ -45,6 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
         nameof(QuickFiltersViewModel.IsStructuredOnlyEnabled)
     };
 
+    private readonly IShellStatusFormatter _shellStatusFormatter;
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
@@ -86,6 +87,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [Obsolete("Design-time constructor only. Use the DI constructor for runtime composition.")]
     public MainWindowViewModel() : this(
+        new ShellStatusFormatter(),
         new ThemeService(),
         new DesignIngestionSession(),
         new WorkspaceStateCoordinator(new DesignSettingsStore()),
@@ -106,6 +108,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public MainWindowViewModel(
+        IShellStatusFormatter shellStatusFormatter,
         IThemeService themeService,
         IIngestionSession ingestionSession,
         IWorkspaceStateCoordinator workspaceStateCoordinator,
@@ -120,6 +123,7 @@ public partial class MainWindowViewModel : ViewModelBase
         EntryDetailsViewModel details,
         SessionHealthViewModel sessionHealth)
     {
+        _shellStatusFormatter = shellStatusFormatter ?? throw new ArgumentNullException(nameof(shellStatusFormatter));
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
@@ -149,11 +153,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _statisticsService.RecordRange(_ingestionSession.Snapshot());
         Sources.RebuildFromSnapshot(_ingestionSession.Snapshot());
         RebuildVisibleEntries();
-        UpdateThemeSummary();
-        UpdateStatusSummary();
-        UpdateStatisticsSummary();
         UpdateQuickFiltersSnapshot();
-        UpdateSessionHealthSummary();
+        UpdateThemeSummary();
+        UpdateShellStatusPresentation();
         _ = LoadReceiverSetupAsync();
         _ = LoadWorkspaceStateAsync();
     }
@@ -221,7 +223,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _ingestionSession.TryPublish(entry);
         }
 
-        UpdateStatusSummary();
+        UpdateShellStatusPresentation();
     }
 
     [RelayCommand]
@@ -230,7 +232,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var nextState = !IsPaused;
         await _ingestionSession.SetPausedAsync(nextState).ConfigureAwait(false);
         IsPaused = nextState;
-        Dispatcher.UIThread.Post(UpdateStatusSummary);
+        Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
     }
 
     [RelayCommand]
@@ -239,20 +241,20 @@ public partial class MainWindowViewModel : ViewModelBase
         var nextState = !IsAutoScrollEnabled;
         await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
         IsAutoScrollEnabled = nextState;
-        Dispatcher.UIThread.Post(UpdateStatusSummary);
+        Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
     }
 
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
-        UpdateStatusSummary();
+        UpdateShellStatusPresentation();
     }
 
     partial void OnIsAutoScrollEnabledChanged(bool value)
     {
         AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
         Stream.IsAutoScrollEnabled = value;
-        UpdateStatusSummary();
+        UpdateShellStatusPresentation();
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -271,7 +273,7 @@ public partial class MainWindowViewModel : ViewModelBase
             QueuePersistWorkspaceState();
         }
 
-        UpdateSessionHealthSummary();
+        UpdateShellStatusPresentation();
     }
 
     private void OnStreamPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -326,10 +328,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
             Stream.AppendEntries(e.AppendedEntries, entry => MatchesFilter(entry, query));
 
-            UpdateStatusSummary();
-            UpdateStatisticsSummary();
             UpdateQuickFiltersSnapshot();
-            UpdateSessionHealthSummary();
+            UpdateShellStatusPresentation();
         });
     }
 
@@ -379,7 +379,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void OnSourcesStateChanged(object? sender, EventArgs e)
     {
         RebuildVisibleEntries();
-        UpdateStatusSummary();
+        UpdateShellStatusPresentation();
     }
 
     private void OnQuickFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -387,14 +387,14 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is null || QuickFilterCriteriaPropertyNames.Contains(e.PropertyName))
         {
             RebuildVisibleEntries();
-            UpdateStatusSummary();
+            UpdateShellStatusPresentation();
         }
     }
 
     private void OnFiltersChanged()
     {
         RebuildVisibleEntries();
-        UpdateStatusSummary();
+        UpdateShellStatusPresentation();
         QueuePersistWorkspaceState();
     }
 
@@ -413,35 +413,6 @@ public partial class MainWindowViewModel : ViewModelBase
         ThemeSummary = $"Theme: {_themeService.CurrentMode}";
     }
 
-    private void UpdateStatusSummary()
-    {
-        var dropped = _ingestionSession.DroppedCount;
-        var state = IsPaused ? "Paused" : "Running";
-        var pin = IsAutoScrollEnabled ? "On" : "Off";
-        StatusSummary = $"State: {state}  Pin: {pin}  Total: {_ingestionSession.TotalCount}  Visible: {Stream.VisibleEntries.Count}  Dropped: {dropped}";
-        UpdateSessionHealthSummary();
-    }
-
-    private void UpdateStatisticsSummary()
-    {
-        var snapshot = _statisticsService.GetSnapshot();
-        StatsSummary1Minute = $"1m: {snapshot.LogsPerSecond1Minute:F1} logs/s | {snapshot.ErrorsPerSecond1Minute:F1} err/s";
-        StatsSummary5Minutes = $"5m: {snapshot.LogsPerSecond5Minutes:F1} logs/s | {snapshot.ErrorsPerSecond5Minutes:F1} err/s";
-        TopLoggersSummary = FormatTop("Top loggers (5m)", snapshot.TopLoggers);
-        TopReceiversSummary = FormatTop("Top receivers (5m)", snapshot.TopReceivers);
-    }
-
-    private static string FormatTop(string label, IReadOnlyList<NamedCount> entries)
-    {
-        if (entries.Count == 0)
-        {
-            return $"{label}: -";
-        }
-
-        var summary = string.Join(", ", entries.Select(static x => $"{x.Name} ({x.Count})"));
-        return $"{label}: {summary}";
-    }
-
     private static bool HasStructuredData(LogEntry entry)
     {
         return entry.Properties.Count > 0 ||
@@ -456,13 +427,28 @@ public partial class MainWindowViewModel : ViewModelBase
         QuickFilters.StructuredOnlyCount = snapshot.Count(HasStructuredData);
     }
 
-    private void UpdateSessionHealthSummary()
+    private void UpdateShellStatusPresentation()
     {
-        var activeReceivers = ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
-        SessionHealth.ActiveReceiversText = $"Active receivers: {activeReceivers:N0}";
-        SessionHealth.BufferedEntriesText = $"Buffered entries: {_ingestionSession.TotalCount:N0}";
-        SessionHealth.StructuredEventsText = $"Structured events: {QuickFilters.StructuredOnlyCount:N0}";
-        SessionHealth.DroppedPacketsText = $"Dropped packets: {_ingestionSession.DroppedCount:N0}";
+        int activeReceivers = ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
+        ShellStatusPresentation presentation = _shellStatusFormatter.Build(
+            IsPaused,
+            IsAutoScrollEnabled,
+            _ingestionSession.TotalCount,
+            Stream.VisibleEntries.Count,
+            _ingestionSession.DroppedCount,
+            activeReceivers,
+            QuickFilters.StructuredOnlyCount,
+            _statisticsService.GetSnapshot());
+
+        StatusSummary = presentation.StatusSummary;
+        StatsSummary1Minute = presentation.StatsSummary1Minute;
+        StatsSummary5Minutes = presentation.StatsSummary5Minutes;
+        TopLoggersSummary = presentation.TopLoggersSummary;
+        TopReceiversSummary = presentation.TopReceiversSummary;
+        SessionHealth.ActiveReceiversText = presentation.ActiveReceiversText;
+        SessionHealth.BufferedEntriesText = presentation.BufferedEntriesText;
+        SessionHealth.StructuredEventsText = presentation.StructuredEventsText;
+        SessionHealth.DroppedPacketsText = presentation.DroppedPacketsText;
     }
 
     private LogLevel PickRandomLevel()
@@ -486,14 +472,14 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
         {
             ApplyPendingReceiverSelection();
-            UpdateSessionHealthSummary();
+            UpdateShellStatusPresentation();
             return;
         }
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             ApplyPendingReceiverSelection();
-            UpdateSessionHealthSummary();
+            UpdateShellStatusPresentation();
         });
     }
 
@@ -559,7 +545,8 @@ public partial class MainWindowViewModel : ViewModelBase
         ApplyPendingReceiverSelection();
 
         RebuildVisibleEntries();
-        UpdateStatusSummary();
+        UpdateQuickFiltersSnapshot();
+        UpdateShellStatusPresentation();
     }
 
     private void QueuePersistWorkspaceState()

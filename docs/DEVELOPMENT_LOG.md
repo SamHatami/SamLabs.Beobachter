@@ -1310,3 +1310,32 @@ Impact:
 
 Follow-ups:
 - Extract status text/statistics/session summary formatting from `MainWindowViewModel` into a dedicated shell status presenter.
+
+## 2026-03-29 - MVVM Refactor Phase 9B: Shell Status Formatting Extraction
+What changed:
+- Added dedicated shell status formatting service and output model:
+  [IShellStatusFormatter.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IShellStatusFormatter.cs),
+  [ShellStatusFormatter.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/ShellStatusFormatter.cs),
+  [ShellStatusPresentation.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/ShellStatusPresentation.cs)
+- Registered formatter in DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Simplified shell VM status responsibilities:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed local status/statistics/session summary formatting helpers
+  - replaced them with one `UpdateShellStatusPresentation()` call that maps formatter output into shell and `SessionHealth` view model state
+- Updated test construction wiring:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+- Added focused formatter unit tests:
+  [ShellStatusFormatterTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/ShellStatusFormatterTests.cs)
+
+Why:
+- Text shaping and summary formatting are presentation policy and were bloating `MainWindowViewModel`.
+- Centralizing this behavior in one service keeps shell VM focused on flow/orchestration.
+
+Impact:
+- No behavior change in displayed shell status information.
+- `MainWindowViewModel` now delegates status formatting instead of implementing it directly.
+- Full suite remains green (`87` passing tests).
+
+Follow-ups:
+- Extract log stream refresh orchestration (`OnEntriesAppended` + rebuild trigger flow) into a dedicated shell coordinator service.
