@@ -1,20 +1,29 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:models="using:SamLabs.Beobachter.Core.Models"
              xmlns:conv="using:SamLabs.Beobachter.Application.Converters"
+             xmlns:designViewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels.Design"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+             mc:Ignorable="d"
              x:Class="SamLabs.Beobachter.Application.Views.LogStreamView"
              x:DataType="viewModels:LogStreamViewModel">
     <UserControl.Resources>
         <conv:LogLevelToRowBrushConverter x:Key="LogLevelToRowBrushConverter" />
-        <conv:LogLevelToBadgeBrushConverter x:Key="LogLevelToBadgeBrushConverter" />
         <conv:LogLevelToMessageBrushConverter x:Key="LogLevelToMessageBrushConverter" />
+        <conv:LogLevelToIconConverter x:Key="LogLevelToIconConverter" />
     </UserControl.Resources>
+
+    <Design.DataContext>
+        <designViewModels:LogStreamDesignViewModel />
+    </Design.DataContext>
 
     <Border Classes="shell-panel shell-flat shell-border-horizontal"
             Padding="0">
         <Grid RowDefinitions="Auto,Auto,*"
+              Grid.IsSharedSizeScope="True"
               RowSpacing="0">
         <Border Grid.Row="0"
                 Classes="shell-panel shell-flat shell-border-bottom"
@@ -26,7 +35,7 @@
                            Classes="section-caption"
                            VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1"
-                           Text="Density and column controls"
+                           Text="Density"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                 <StackPanel Grid.Column="2"
@@ -36,18 +45,6 @@
                             Content="{Binding DensityButtonText}"
                             Command="{Binding ToggleDensityCommand}"
                             i:Attached.Icon="fa-solid fa-table-cells" />
-                    <Button Classes="toolbar-button icon-button"
-                            ToolTip.Tip="Narrow columns"
-                            Command="{Binding DecreaseColumnWidthsCommand}"
-                            i:Attached.Icon="fa-solid fa-compress" />
-                    <Button Classes="toolbar-button icon-button"
-                            ToolTip.Tip="Widen columns"
-                            Command="{Binding IncreaseColumnWidthsCommand}"
-                            i:Attached.Icon="fa-solid fa-expand" />
-                    <Button Classes="toolbar-button icon-button"
-                            ToolTip.Tip="Reset column widths"
-                            Command="{Binding ResetColumnWidthsCommand}"
-                            i:Attached.Icon="fa-solid fa-rotate-left" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -57,18 +54,24 @@
                 Padding="10,8">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
-                    <ColumnDefinition Width="{Binding LevelColumnWidth}" />
-                    <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
+                    <ColumnDefinition Width="Auto"
+                                      SharedSizeGroup="LogTimestampColumn" />
+                    <ColumnDefinition Width="Auto"
+                                      SharedSizeGroup="LogLevelColumn" />
+                    <ColumnDefinition Width="Auto"
+                                      SharedSizeGroup="LogSourceColumn" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
+                           Margin="0,0,10,0"
                            Text="Timestamp"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="1"
+                           Margin="0,0,10,0"
                            Text="Level"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="2"
+                           Margin="0,0,10,0"
                            Text="Source"
                            Classes="section-caption" />
                 <TextBlock Grid.Column="3"
@@ -79,8 +82,10 @@
 
         <Border Grid.Row="2"
                 Classes="shell-panel shell-flat shell-border-none"
-                Padding="4">
+                Padding="2">
             <ListBox x:Name="LogEntriesList"
+                     Classes="log-stream-list"
+                     Classes.log-stream-density-compact="{Binding IsCompactDensity}"
                      Background="Transparent"
                      BorderThickness="0"
                      ItemsSource="{Binding VisibleEntries}"
@@ -92,33 +97,27 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="models:LogEntry">
-                        <Border Margin="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowMargin, ElementName=LogEntriesList}"
-                                Padding="10,6"
-                                Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
-                                BorderBrush="{DynamicResource ShellChromeBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
+                        <Border Classes="log-stream-item"
+                                Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}">
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).TimestampColumnWidth, ElementName=LogEntriesList}" />
-                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).LevelColumnWidth, ElementName=LogEntriesList}" />
-                                    <ColumnDefinition Width="{Binding ((viewModels:LogStreamViewModel)DataContext).LoggerColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="Auto"
+                                                      SharedSizeGroup="LogTimestampColumn" />
+                                    <ColumnDefinition Width="Auto"
+                                                      SharedSizeGroup="LogLevelColumn" />
+                                    <ColumnDefinition Width="Auto"
+                                                      SharedSizeGroup="LogSourceColumn" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
                                            FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellMutedForegroundBrush}"
                                            Text="{Binding Timestamp}" />
-                                <Border Grid.Column="1"
-                                        Background="{Binding Level, Converter={StaticResource LogLevelToBadgeBrushConverter}}"
-                                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
-                                        Padding="8,2"
-                                        HorizontalAlignment="Left">
-                                    <TextBlock FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource SeverityBadgeForegroundBrush}"
-                                               Text="{Binding Level}" />
-                                </Border>
+                                <i:Icon Grid.Column="1"
+                                        Value="{Binding Level, Converter={StaticResource LogLevelToIconConverter}}"
+                                        FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                        VerticalAlignment="Center"
+                                        Foreground="{Binding Level, Converter={StaticResource LogLevelToMessageBrushConverter}}" />
                                 <TextBlock Grid.Column="2"
                                            FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellForegroundBrush}"

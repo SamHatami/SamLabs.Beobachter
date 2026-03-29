@@ -1,10 +1,15 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FF0B1220" />
-    <SolidColorBrush x:Key="ShellPanelBrush" Color="#FF111827" />
-    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#FF243042" />
-    <SolidColorBrush x:Key="ShellChromeBrush" Color="#FF162033" />
-    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#FF314054" />
+    <LinearGradientBrush x:Key="ShellBackgroundBrush"
+                         StartPoint="0,0"
+                         EndPoint="1,1">
+        <GradientStop Color="#FF0A1222" Offset="0" />
+        <GradientStop Color="#FF101A2F" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="ShellPanelBrush" Color="#D9162134" />
+    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#AA31445D" />
+    <SolidColorBrush x:Key="ShellChromeBrush" Color="#CC1B2740" />
+    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#99405570" />
     <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFE5E7EB" />
     <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FF9CA3AF" />
     <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF14B8A6" />

@@ -57,6 +57,34 @@
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
     </Style>
 
+    <Style Selector="Border.log-stream-item">
+        <Setter Property="Margin" Value="2,1" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+    </Style>
+
+    <Style Selector="ListBox.log-stream-density-compact Border.log-stream-item">
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="20" />
+    </Style>
+
+    <Style Selector="ListBox.log-stream-list ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="12" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="ListBox.log-stream-list ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+
     <Style Selector="TextBlock.section-caption">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />

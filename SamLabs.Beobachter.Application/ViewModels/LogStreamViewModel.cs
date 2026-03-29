@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Core.Models;
@@ -24,9 +23,6 @@ public partial class LogStreamViewModel : ViewModelBase
 
     [ObservableProperty]
     private double _logRowFontSize = 12;
-
-    [ObservableProperty]
-    private Thickness _logRowMargin = new(4, 2, 4, 2);
 
     [NotifyPropertyChangedFor(nameof(LogColumnDefinitions))]
     [ObservableProperty]
@@ -160,12 +156,10 @@ public partial class LogStreamViewModel : ViewModelBase
         {
             DensityButtonText = "Density: Compact";
             LogRowFontSize = 11;
-            LogRowMargin = new Thickness(4, 0, 4, 0);
             return;
         }
 
         DensityButtonText = "Density: Comfortable";
         LogRowFontSize = 12;
-        LogRowMargin = new Thickness(4, 2, 4, 2);
     }
 }
