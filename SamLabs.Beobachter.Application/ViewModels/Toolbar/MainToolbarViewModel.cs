@@ -1,11 +1,25 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 
 namespace SamLabs.Beobachter.Application.ViewModels.Toolbar;
 
-public sealed class MainToolbarViewModel : ViewModelBase
+public sealed partial class MainToolbarViewModel : ViewModelBase
 {
+    private static readonly HashSet<string> ObservedShellPropertyNames = new(StringComparer.Ordinal)
+    {
+        nameof(MainWindowViewModel.ThemeSummary),
+        nameof(MainWindowViewModel.StatusSummary),
+        nameof(MainWindowViewModel.StatsSummary1Minute),
+        nameof(MainWindowViewModel.StatsSummary5Minutes),
+        nameof(MainWindowViewModel.TopLoggersSummary),
+        nameof(MainWindowViewModel.TopReceiversSummary),
+        nameof(MainWindowViewModel.PauseButtonText),
+        nameof(MainWindowViewModel.AutoScrollButtonText)
+    };
+
     private readonly MainWindowViewModel _shell;
 
     public MainToolbarViewModel(MainWindowViewModel shell)
@@ -35,78 +49,47 @@ public sealed class MainToolbarViewModel : ViewModelBase
 
     public string DensityButtonText => _shell.Stream.DensityButtonText;
 
-    public IRelayCommand UseSystemThemeCommand => _shell.UseSystemThemeCommand;
+    [RelayCommand]
+    private void UseSystemTheme()
+    {
+        _shell.UseSystemThemeCommand.Execute(null);
+    }
 
-    public IRelayCommand UseLightThemeCommand => _shell.UseLightThemeCommand;
+    [RelayCommand]
+    private void UseLightTheme()
+    {
+        _shell.UseLightThemeCommand.Execute(null);
+    }
 
-    public IRelayCommand UseDarkThemeCommand => _shell.UseDarkThemeCommand;
+    [RelayCommand]
+    private void UseDarkTheme()
+    {
+        _shell.UseDarkThemeCommand.Execute(null);
+    }
 
-    public IAsyncRelayCommand TogglePauseCommand => _shell.TogglePauseCommand;
+    [RelayCommand]
+    private async Task TogglePause()
+    {
+        await _shell.TogglePauseCommand.ExecuteAsync(null);
+    }
 
-    public IAsyncRelayCommand ToggleAutoScrollCommand => _shell.ToggleAutoScrollCommand;
+    [RelayCommand]
+    private async Task ToggleAutoScroll()
+    {
+        await _shell.ToggleAutoScrollCommand.ExecuteAsync(null);
+    }
 
-    public IRelayCommand ToggleDensityCommand => _shell.Stream.ToggleDensityCommand;
+    [RelayCommand]
+    private void ToggleDensity()
+    {
+        _shell.Stream.ToggleDensityCommand.Execute(null);
+    }
 
     private void OnShellPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is null)
+        if (e.PropertyName is null || ObservedShellPropertyNames.Contains(e.PropertyName))
         {
-            OnPropertyChanged(nameof(ThemeSummary));
-            OnPropertyChanged(nameof(StatusSummary));
-            OnPropertyChanged(nameof(StatsSummary1Minute));
-            OnPropertyChanged(nameof(StatsSummary5Minutes));
-            OnPropertyChanged(nameof(TopLoggersSummary));
-            OnPropertyChanged(nameof(TopReceiversSummary));
-            OnPropertyChanged(nameof(PauseButtonText));
-            OnPropertyChanged(nameof(AutoScrollButtonText));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.ThemeSummary), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(ThemeSummary));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.StatusSummary), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(StatusSummary));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.StatsSummary1Minute), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(StatsSummary1Minute));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.StatsSummary5Minutes), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(StatsSummary5Minutes));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.TopLoggersSummary), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(TopLoggersSummary));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.TopReceiversSummary), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(TopReceiversSummary));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.PauseButtonText), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(PauseButtonText));
-            return;
-        }
-
-        if (string.Equals(e.PropertyName, nameof(MainWindowViewModel.AutoScrollButtonText), StringComparison.Ordinal))
-        {
-            OnPropertyChanged(nameof(AutoScrollButtonText));
+            RaiseToolbarStateChanged();
         }
     }
 
@@ -117,5 +100,17 @@ public sealed class MainToolbarViewModel : ViewModelBase
         {
             OnPropertyChanged(nameof(DensityButtonText));
         }
+    }
+
+    private void RaiseToolbarStateChanged()
+    {
+        OnPropertyChanged(nameof(ThemeSummary));
+        OnPropertyChanged(nameof(StatusSummary));
+        OnPropertyChanged(nameof(StatsSummary1Minute));
+        OnPropertyChanged(nameof(StatsSummary5Minutes));
+        OnPropertyChanged(nameof(TopLoggersSummary));
+        OnPropertyChanged(nameof(TopReceiversSummary));
+        OnPropertyChanged(nameof(PauseButtonText));
+        OnPropertyChanged(nameof(AutoScrollButtonText));
     }
 }

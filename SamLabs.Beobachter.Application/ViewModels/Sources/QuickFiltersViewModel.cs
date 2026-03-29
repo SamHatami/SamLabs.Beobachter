@@ -5,15 +5,19 @@ namespace SamLabs.Beobachter.Application.ViewModels.Sources;
 
 public sealed partial class QuickFiltersViewModel : ViewModelBase
 {
+    [NotifyPropertyChangedFor(nameof(ErrorsAndAboveText))]
     [ObservableProperty]
     private bool _isErrorsAndAboveEnabled;
 
+    [NotifyPropertyChangedFor(nameof(StructuredOnlyText))]
     [ObservableProperty]
     private bool _isStructuredOnlyEnabled;
 
+    [NotifyPropertyChangedFor(nameof(ErrorsAndAboveText))]
     [ObservableProperty]
     private int _errorsAndAboveCount;
 
+    [NotifyPropertyChangedFor(nameof(StructuredOnlyText))]
     [ObservableProperty]
     private int _structuredOnlyCount;
 
@@ -42,25 +46,5 @@ public sealed partial class QuickFiltersViewModel : ViewModelBase
     {
         IsErrorsAndAboveEnabled = false;
         IsStructuredOnlyEnabled = false;
-    }
-
-    partial void OnIsErrorsAndAboveEnabledChanged(bool value)
-    {
-        OnPropertyChanged(nameof(ErrorsAndAboveText));
-    }
-
-    partial void OnIsStructuredOnlyEnabledChanged(bool value)
-    {
-        OnPropertyChanged(nameof(StructuredOnlyText));
-    }
-
-    partial void OnErrorsAndAboveCountChanged(int value)
-    {
-        OnPropertyChanged(nameof(ErrorsAndAboveText));
-    }
-
-    partial void OnStructuredOnlyCountChanged(int value)
-    {
-        OnPropertyChanged(nameof(StructuredOnlyText));
     }
 }

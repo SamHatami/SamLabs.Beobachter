@@ -28,12 +28,15 @@ public partial class LogStreamViewModel : ViewModelBase
     [ObservableProperty]
     private Thickness _logRowMargin = new(4, 2, 4, 2);
 
+    [NotifyPropertyChangedFor(nameof(LogColumnDefinitions))]
     [ObservableProperty]
     private double _timestampColumnWidth = 180;
 
+    [NotifyPropertyChangedFor(nameof(LogColumnDefinitions))]
     [ObservableProperty]
     private double _levelColumnWidth = 90;
 
+    [NotifyPropertyChangedFor(nameof(LogColumnDefinitions))]
     [ObservableProperty]
     private double _loggerColumnWidth = 220;
 
@@ -121,21 +124,6 @@ public partial class LogStreamViewModel : ViewModelBase
     partial void OnIsCompactDensityChanged(bool value)
     {
         UpdateDensityVisuals();
-    }
-
-    partial void OnTimestampColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
-    }
-
-    partial void OnLevelColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
-    }
-
-    partial void OnLoggerColumnWidthChanged(double value)
-    {
-        OnPropertyChanged(nameof(LogColumnDefinitions));
     }
 
     private void AdjustColumnWidths(double delta)

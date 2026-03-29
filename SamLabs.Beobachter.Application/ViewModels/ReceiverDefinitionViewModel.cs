@@ -37,24 +37,31 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     [ObservableProperty]
     private string _parserOrderText = string.Join(", ", DefaultParserOrder);
 
+    [NotifyPropertyChangedFor(nameof(HasDisplayNameValidationError))]
     [ObservableProperty]
     private string _displayNameValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasIdValidationError))]
     [ObservableProperty]
     private string _idValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasBindAddressValidationError))]
     [ObservableProperty]
     private string _bindAddressValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasPortValidationError))]
     [ObservableProperty]
     private string _portValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasFilePathValidationError))]
     [ObservableProperty]
     private string _filePathValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasPollIntervalValidationError))]
     [ObservableProperty]
     private string _pollIntervalValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasParserOrderValidationError))]
     [ObservableProperty]
     private string _parserOrderValidationError = string.Empty;
 
@@ -88,46 +95,4 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
         PollIntervalValidationError = string.Empty;
         ParserOrderValidationError = string.Empty;
     }
-
-    partial void OnDisplayNameValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasDisplayNameValidationError));
-    }
-
-    partial void OnIdValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasIdValidationError));
-    }
-
-    partial void OnBindAddressValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasBindAddressValidationError));
-    }
-
-    partial void OnPortValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasPortValidationError));
-    }
-
-    partial void OnFilePathValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasFilePathValidationError));
-    }
-
-    partial void OnPollIntervalValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasPollIntervalValidationError));
-    }
-
-    partial void OnParserOrderValidationErrorChanged(string value)
-    {
-        OnPropertyChanged(nameof(HasParserOrderValidationError));
-    }
-}
-
-public static class ReceiverKinds
-{
-    public const string Udp = "UDP";
-    public const string Tcp = "TCP";
-    public const string File = "FILE";
 }
