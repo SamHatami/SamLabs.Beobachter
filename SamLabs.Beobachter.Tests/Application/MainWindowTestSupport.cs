@@ -54,7 +54,7 @@ internal static class MainWindowTestSupport
             receiverSetup,
             workspaceSidebar,
             filters,
-            new LogStreamViewModel(),
+            new LogStreamViewModel(session),
             new EntryDetailsViewModel(resolvedClipboardService),
             new SessionHealthViewModel());
     }

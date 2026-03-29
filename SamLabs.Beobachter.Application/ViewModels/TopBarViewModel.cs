@@ -25,12 +25,6 @@ public sealed partial class TopBarViewModel : ViewModelBase
     private string _pauseButtonIcon = "fa-solid fa-pause";
 
     [ObservableProperty]
-    private bool _isAutoScrollEnabled = true;
-
-    [ObservableProperty]
-    private string _autoScrollButtonText = "Pin: On";
-
-    [ObservableProperty]
     private string _statusSummary = string.Empty;
 
     [ObservableProperty]
@@ -44,15 +38,12 @@ public sealed partial class TopBarViewModel : ViewModelBase
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
 
         IsPaused = _ingestionSession.IsPaused;
-        IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
         UpdateThemeSummary();
     }
 
     public event EventHandler? SearchTextChanged;
 
     public event EventHandler? PauseToggled;
-
-    public event EventHandler? AutoScrollToggled;
 
     public event EventHandler? SettingsRequested;
 
@@ -69,15 +60,6 @@ public sealed partial class TopBarViewModel : ViewModelBase
         await _ingestionSession.SetPausedAsync(nextState).ConfigureAwait(false);
         IsPaused = nextState;
         PauseToggled?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand]
-    private async Task ToggleAutoScrollAsync()
-    {
-        bool nextState = !IsAutoScrollEnabled;
-        await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
-        IsAutoScrollEnabled = nextState;
-        AutoScrollToggled?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
@@ -111,11 +93,6 @@ public sealed partial class TopBarViewModel : ViewModelBase
     {
         PauseButtonText = value ? "Resume" : "Pause";
         PauseButtonIcon = value ? "fa-solid fa-play" : "fa-solid fa-pause";
-    }
-
-    partial void OnIsAutoScrollEnabledChanged(bool value)
-    {
-        AutoScrollButtonText = value ? "Pin: On" : "Pin: Off";
     }
 
     partial void OnSearchTextChanged(string value)

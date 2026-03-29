@@ -1,4 +1,5 @@
 using System;
+using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
 
@@ -6,7 +7,7 @@ namespace SamLabs.Beobachter.Application.ViewModels.Design;
 
 public sealed class LogStreamDesignViewModel : LogStreamViewModel
 {
-    public LogStreamDesignViewModel()
+    public LogStreamDesignViewModel() : base(new DesignIngestionSession())
     {
         LevelColumnWidth = 40;
         TimestampColumnWidth = 170;

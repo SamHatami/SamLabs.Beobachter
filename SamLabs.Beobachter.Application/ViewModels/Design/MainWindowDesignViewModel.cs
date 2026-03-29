@@ -7,21 +7,25 @@ namespace SamLabs.Beobachter.Application.ViewModels.Design;
 
 public sealed class MainWindowDesignViewModel : MainWindowViewModel
 {
-    public MainWindowDesignViewModel() : base(
+    public MainWindowDesignViewModel() : this(new DesignIngestionSession(), new DesignSettingsStore())
+    {
+    }
+
+    private MainWindowDesignViewModel(DesignIngestionSession ingestionSession, DesignSettingsStore settingsStore) : base(
         new ShellStatusFormatter(),
         new SampleLogEntryGenerator(),
-        new DesignIngestionSession(),
-        new WorkspaceStateCoordinator(new DesignSettingsStore()),
-        new WorkspaceStartupOrchestrator(new WorkspaceStateCoordinator(new DesignSettingsStore())),
+        ingestionSession,
+        new WorkspaceStateCoordinator(settingsStore),
+        new WorkspaceStartupOrchestrator(new WorkspaceStateCoordinator(settingsStore)),
         new LogStreamProjectionService(new LogQueryEvaluator()),
         new RollingLogStatisticsService(),
-        new TopBarViewModel(new ThemeService(), new DesignIngestionSession()),
+        new TopBarViewModel(new ThemeService(), ingestionSession),
         new SourceTreeViewModel(),
         new QuickFiltersViewModel(),
-        new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
+        new ReceiverSetupViewModel(settingsStore, ingestionSession),
         CreateDesignSidebar(),
         new LogFiltersViewModel(),
-        new LogStreamViewModel(),
+        new LogStreamViewModel(ingestionSession),
         new EntryDetailsViewModel(new NullClipboardService()),
         new SessionHealthViewModel())
     {

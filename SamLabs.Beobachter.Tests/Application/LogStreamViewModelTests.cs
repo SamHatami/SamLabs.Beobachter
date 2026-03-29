@@ -10,7 +10,7 @@ public sealed class LogStreamViewModelTests
     [Fact]
     public void AppendEntries_FiltersAndCapsVisibleCollection()
     {
-        LogStreamViewModel vm = new();
+        LogStreamViewModel vm = new(new FakeIngestionSession([]));
         List<LogEntry> entries = [];
         for (var index = 0; index < 2_500; index++)
         {
@@ -30,7 +30,7 @@ public sealed class LogStreamViewModelTests
     [Fact]
     public void RebuildEntries_ReplacesVisibleCollectionUsingFilter()
     {
-        LogStreamViewModel vm = new();
+        LogStreamViewModel vm = new(new FakeIngestionSession([]));
         IReadOnlyList<LogEntry> snapshot =
         [
             MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "ok"),
@@ -48,7 +48,7 @@ public sealed class LogStreamViewModelTests
     [Fact]
     public void ToggleDensity_UpdatesRowMetrics()
     {
-        LogStreamViewModel vm = new();
+        LogStreamViewModel vm = new(new FakeIngestionSession([]));
         Assert.False(vm.IsCompactDensity);
         Assert.Equal("Density: Comfortable", vm.DensityButtonText);
         Assert.Equal(12, vm.LogRowFontSize);
@@ -66,7 +66,7 @@ public sealed class LogStreamViewModelTests
     [Fact]
     public void ColumnWidthCommands_AdjustWithinBoundsAndReset()
     {
-        LogStreamViewModel vm = new();
+        LogStreamViewModel vm = new(new FakeIngestionSession([]));
         vm.DecreaseColumnWidthsCommand.Execute(null);
         Assert.Equal(164, vm.TimestampColumnWidth);
         Assert.Equal(74, vm.LevelColumnWidth);
@@ -95,7 +95,7 @@ public sealed class LogStreamViewModelTests
     [Fact]
     public void SelectionCommands_MoveSelectedEntryWithinBounds()
     {
-        LogStreamViewModel vm = new();
+        LogStreamViewModel vm = new(new FakeIngestionSession([]));
         IReadOnlyList<LogEntry> snapshot =
         [
             MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "first"),

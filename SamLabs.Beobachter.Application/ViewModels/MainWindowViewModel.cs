@@ -102,8 +102,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         TopBar.SearchTextChanged += OnTopBarSearchTextChanged;
         TopBar.PauseToggled += OnTopBarPauseToggled;
-        TopBar.AutoScrollToggled += OnTopBarAutoScrollToggled;
-        Stream.AutoScrollToggleRequested += OnStreamAutoScrollToggleRequested;
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources.StateChanged += OnSourcesStateChanged;
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
@@ -111,7 +109,6 @@ public partial class MainWindowViewModel : ViewModelBase
         Stream.PropertyChanged += OnStreamPropertyChanged;
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
-        Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
         IReadOnlyList<LogEntry> initialSnapshot = _ingestionSession.Snapshot();
         _statisticsService.RecordRange(initialSnapshot);
         Sources.RebuildFromSnapshot(initialSnapshot);
@@ -174,17 +171,6 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
     }
 
-    private void OnTopBarAutoScrollToggled(object? sender, EventArgs e)
-    {
-        Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
-        Dispatcher.UIThread.Post(UpdateShellStatusPresentation);
-    }
-
-    private void OnStreamAutoScrollToggleRequested(object? sender, EventArgs e)
-    {
-        TopBar.ToggleAutoScrollCommand.Execute(null);
-    }
-
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is null || FilterCriteriaPropertyNames.Contains(e.PropertyName))
@@ -239,6 +225,13 @@ public partial class MainWindowViewModel : ViewModelBase
             string.Equals(e.PropertyName, nameof(LogStreamViewModel.LoggerColumnWidth), StringComparison.Ordinal))
         {
             QueuePersistWorkspaceState();
+            return;
+        }
+
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsAutoScrollEnabled), StringComparison.Ordinal))
+        {
+            QueuePersistWorkspaceState();
+            UpdateShellStatusPresentation();
         }
     }
 
@@ -291,7 +284,7 @@ public partial class MainWindowViewModel : ViewModelBase
             : ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
         ShellStatusPresentation presentation = _shellStatusFormatter.Build(
             TopBar.IsPaused,
-            TopBar.IsAutoScrollEnabled,
+            Stream.IsAutoScrollEnabled,
             _ingestionSession.TotalCount,
             Stream.VisibleEntries.Count,
             _ingestionSession.DroppedCount,
@@ -332,6 +325,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Filters.TenantFilter = workspace.TenantFilter;
             Filters.TraceIdFilter = workspace.TraceIdFilter;
             Filters.MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
+            Stream.IsAutoScrollEnabled = workspace.AutoScroll;
             Stream.IsCompactDensity = workspace.CompactDensity;
             Stream.TimestampColumnWidth = Math.Clamp(layout.TimestampColumnWidth, 100, 420);
             Stream.LevelColumnWidth = Math.Clamp(layout.LevelColumnWidth, 70, 200);
@@ -373,7 +367,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Stream.IsCompactDensity,
             ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
             Filters.GetEnabledLevels(),
-            TopBar.IsAutoScrollEnabled,
+            Stream.IsAutoScrollEnabled,
             TopBar.IsPaused,
             Stream.TimestampColumnWidth,
             Stream.LevelColumnWidth,

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
 
 namespace SamLabs.Beobachter.Application.ViewModels;
@@ -11,6 +13,7 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 public partial class LogStreamViewModel : ViewModelBase
 {
     private const int MaxVisibleEntries = 2_000;
+    private readonly IIngestionSession _ingestionSession;
 
     [ObservableProperty]
     private bool _isCompactDensity;
@@ -42,9 +45,13 @@ public partial class LogStreamViewModel : ViewModelBase
     [ObservableProperty]
     private LogEntry? _selectedEntry;
 
-    public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
+    public LogStreamViewModel(IIngestionSession ingestionSession)
+    {
+        _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
+        IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
+    }
 
-    public event EventHandler? AutoScrollToggleRequested;
+    public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
 
     public string LogColumnDefinitions =>
         $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
@@ -56,9 +63,11 @@ public partial class LogStreamViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ToggleAutoScroll()
+    private async Task ToggleAutoScrollAsync()
     {
-        AutoScrollToggleRequested?.Invoke(this, EventArgs.Empty);
+        bool nextState = !IsAutoScrollEnabled;
+        await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
+        IsAutoScrollEnabled = nextState;
     }
 
     [RelayCommand]

@@ -29,12 +29,12 @@ public sealed class MainWindowSessionAndDetailsTests
         FakeIngestionSession session = new([]);
         MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
-        await ((IAsyncRelayCommand)vm.TopBar.ToggleAutoScrollCommand).ExecuteAsync(null);
-        Assert.False(vm.TopBar.IsAutoScrollEnabled);
+        await ((IAsyncRelayCommand)vm.Stream.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.False(vm.Stream.IsAutoScrollEnabled);
         Assert.False(session.IsAutoScrollEnabled);
 
-        await ((IAsyncRelayCommand)vm.TopBar.ToggleAutoScrollCommand).ExecuteAsync(null);
-        Assert.True(vm.TopBar.IsAutoScrollEnabled);
+        await ((IAsyncRelayCommand)vm.Stream.ToggleAutoScrollCommand).ExecuteAsync(null);
+        Assert.True(vm.Stream.IsAutoScrollEnabled);
         Assert.True(session.IsAutoScrollEnabled);
     }
 

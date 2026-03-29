@@ -19,7 +19,7 @@ public sealed class LogStreamProjectionServiceTests
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
         LogFiltersViewModel filters = new();
-        LogStreamViewModel stream = new();
+        LogStreamViewModel stream = new(new FakeIngestionSession([]));
 
         IReadOnlyList<LogEntry> snapshot =
         [
@@ -43,7 +43,7 @@ public sealed class LogStreamProjectionServiceTests
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
         LogFiltersViewModel filters = new();
-        LogStreamViewModel stream = new();
+        LogStreamViewModel stream = new(new FakeIngestionSession([]));
 
         IReadOnlyList<LogEntry> appendedEntries =
         [
