@@ -45,12 +45,12 @@ public partial class MainWindowViewModel : ViewModelBase
     };
 
     private readonly IShellStatusFormatter _shellStatusFormatter;
+    private readonly ISampleLogEntryGenerator _sampleLogEntryGenerator;
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
     private readonly ILogStreamProjectionService _logStreamProjectionService;
     private readonly ILogStatisticsService _statisticsService;
-    private readonly Random _random = new();
     private string? _pendingSelectedReceiverId;
     private bool _isApplyingWorkspaceState;
 
@@ -87,6 +87,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [Obsolete("Design-time constructor only. Use the DI constructor for runtime composition.")]
     public MainWindowViewModel() : this(
         new ShellStatusFormatter(),
+        new SampleLogEntryGenerator(),
         new ThemeService(),
         new DesignIngestionSession(),
         new WorkspaceStateCoordinator(new DesignSettingsStore()),
@@ -108,6 +109,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(
         IShellStatusFormatter shellStatusFormatter,
+        ISampleLogEntryGenerator sampleLogEntryGenerator,
         IThemeService themeService,
         IIngestionSession ingestionSession,
         IWorkspaceStateCoordinator workspaceStateCoordinator,
@@ -123,6 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
         SessionHealthViewModel sessionHealth)
     {
         _shellStatusFormatter = shellStatusFormatter ?? throw new ArgumentNullException(nameof(shellStatusFormatter));
+        _sampleLogEntryGenerator = sampleLogEntryGenerator ?? throw new ArgumentNullException(nameof(sampleLogEntryGenerator));
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
@@ -201,24 +204,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void GenerateSampleEntries()
     {
-        var now = DateTimeOffset.Now;
-        for (var i = 0; i < 12; i++)
+        IReadOnlyList<LogEntry> sampleEntries = _sampleLogEntryGenerator.CreateBatch(_ingestionSession.TotalCount + 1, 12);
+        foreach (LogEntry entry in sampleEntries)
         {
-            var level = PickRandomLevel();
-            var index = i + 1;
-
-            var entry = new LogEntry
-            {
-                Timestamp = now.AddMilliseconds(index * 10),
-                SequenceNumber = _ingestionSession.TotalCount + index,
-                Level = level,
-                ReceiverId = "sample",
-                LoggerName = $"Sample.Component.{_random.Next(1, 5)}",
-                RootLoggerName = $"Sample.Component.{_random.Next(1, 5)}",
-                ThreadName = $"worker-{_random.Next(1, 4)}",
-                Message = $"Sample {level} event #{_random.Next(100, 999)}"
-            };
-
             _ingestionSession.TryPublish(entry);
         }
 
@@ -394,20 +382,6 @@ public partial class MainWindowViewModel : ViewModelBase
         SessionHealth.BufferedEntriesText = presentation.BufferedEntriesText;
         SessionHealth.StructuredEventsText = presentation.StructuredEventsText;
         SessionHealth.DroppedPacketsText = presentation.DroppedPacketsText;
-    }
-
-    private LogLevel PickRandomLevel()
-    {
-        LogLevel[] levels =
-        [
-            LogLevel.Trace,
-            LogLevel.Debug,
-            LogLevel.Info,
-            LogLevel.Warn,
-            LogLevel.Error,
-            LogLevel.Fatal
-        ];
-        return levels[_random.Next(0, levels.Length)];
     }
 
     private async Task LoadReceiverSetupAsync()

@@ -25,6 +25,7 @@ public static class Root
     {
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IShellStatusFormatter, ShellStatusFormatter>();
+        services.AddSingleton<ISampleLogEntryGenerator, SampleLogEntryGenerator>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IWorkspaceStateCoordinator, WorkspaceStateCoordinator>();
         services.AddSingleton<ILogStreamProjectionService, LogStreamProjectionService>();

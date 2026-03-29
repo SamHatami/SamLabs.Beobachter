@@ -1369,3 +1369,31 @@ Impact:
 
 Follow-ups:
 - Continue shell thinning by extracting receiver/workspace load orchestration sequencing from `MainWindowViewModel`.
+
+## 2026-03-29 - MVVM Refactor Phase 9D: Sample Entry Generation Service Extraction
+What changed:
+- Added dedicated sample log-entry generation service:
+  [ISampleLogEntryGenerator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/ISampleLogEntryGenerator.cs),
+  [SampleLogEntryGenerator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/SampleLogEntryGenerator.cs)
+- Registered generator in DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Updated shell VM to delegate sample creation:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed in-VM random/sample construction logic
+  - removed `PickRandomLevel()` helper from shell VM
+- Updated test support wiring:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+- Added generator unit tests:
+  [SampleLogEntryGeneratorTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/SampleLogEntryGeneratorTests.cs)
+
+Why:
+- Sample event generation is not shell coordination responsibility and should not live in `MainWindowViewModel`.
+- Moving it to a service keeps shell VM focused on state/flow and improves testability.
+
+Impact:
+- No behavior change in sample-entry command output shape.
+- `MainWindowViewModel` is smaller and has one less feature-specific concern.
+- Full suite remains green (`92` passing tests).
+
+Follow-ups:
+- Continue splitting receiver/workspace load sequencing from shell VM into a dedicated startup orchestration service.
