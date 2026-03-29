@@ -43,6 +43,9 @@
                 <Button Content="{Binding AutoScrollButtonText}"
                         Padding="8,4"
                         Command="{Binding ToggleAutoScrollCommand}" />
+                <Button Content="Settings"
+                        Padding="8,4"
+                        Command="{Binding OpenSettingsCommand}" />
                 <Border Width="1"
                         Margin="4,2"
                         Background="{DynamicResource ShellMutedForegroundBrush}"

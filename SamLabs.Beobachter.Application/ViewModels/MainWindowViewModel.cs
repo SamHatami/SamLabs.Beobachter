@@ -111,10 +111,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         Stream.IsAutoScrollEnabled = TopBar.IsAutoScrollEnabled;
-        _statisticsService.RecordRange(_ingestionSession.Snapshot());
-        Sources.RebuildFromSnapshot(_ingestionSession.Snapshot());
+        IReadOnlyList<LogEntry> initialSnapshot = _ingestionSession.Snapshot();
+        _statisticsService.RecordRange(initialSnapshot);
+        Sources.RebuildFromSnapshot(initialSnapshot);
+        WorkspaceSidebar.UpdateSnapshot(initialSnapshot);
         RebuildVisibleEntries();
-        UpdateQuickFiltersSnapshot();
         UpdateShellStatusPresentation();
         _ = InitializeWorkspaceAsync();
     }
@@ -241,8 +242,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _statisticsService.RecordRange(e.AppendedEntries);
             _logStreamProjectionService.AppendEntries(e.AppendedEntries, Sources, QuickFilters, Filters, Stream);
-
-            UpdateQuickFiltersSnapshot();
+            WorkspaceSidebar.UpdateSnapshot(_ingestionSession.Snapshot());
             UpdateShellStatusPresentation();
         });
     }
@@ -264,6 +264,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName is null || QuickFilterCriteriaPropertyNames.Contains(e.PropertyName))
         {
             RebuildVisibleEntries();
+            WorkspaceSidebar.SyncFacetSelectionState();
             UpdateShellStatusPresentation();
         }
     }
@@ -271,16 +272,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private void OnFiltersChanged()
     {
         RebuildVisibleEntries();
+        WorkspaceSidebar.SyncFacetSelectionState();
         UpdateShellStatusPresentation();
         QueuePersistWorkspaceState();
-    }
-
-    private void UpdateQuickFiltersSnapshot()
-    {
-        IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
-        QuickFilterSnapshot quickFilterSnapshot = _logStreamProjectionService.ComputeQuickFilterSnapshot(snapshot);
-        QuickFilters.ErrorsAndAboveCount = quickFilterSnapshot.ErrorsAndAboveCount;
-        QuickFilters.StructuredOnlyCount = quickFilterSnapshot.StructuredOnlyCount;
     }
 
     private void UpdateShellStatusPresentation()
@@ -351,7 +345,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         RebuildVisibleEntries();
-        UpdateQuickFiltersSnapshot();
+        WorkspaceSidebar.UpdateSnapshot(_ingestionSession.Snapshot());
         UpdateShellStatusPresentation();
     }
 

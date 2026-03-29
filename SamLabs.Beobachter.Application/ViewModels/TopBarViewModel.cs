@@ -52,6 +52,8 @@ public sealed partial class TopBarViewModel : ViewModelBase
 
     public event EventHandler? AutoScrollToggled;
 
+    public event EventHandler? SettingsRequested;
+
     [RelayCommand]
     private void ClearSearch()
     {
@@ -74,6 +76,12 @@ public sealed partial class TopBarViewModel : ViewModelBase
         await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
         IsAutoScrollEnabled = nextState;
         AutoScrollToggled?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void OpenSettings()
+    {
+        SettingsRequested?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]

@@ -2,117 +2,302 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.WorkspaceSidebarView"
+             x:Name="Root"
              x:DataType="viewModels:WorkspaceSidebarViewModel">
-    <Border Padding="8"
+    <Border Padding="10"
             Background="{DynamicResource ShellPanelBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12">
-
-                <!-- Log Level Filters -->
-                <StackPanel Spacing="4">
-                    <TextBlock Text="LOG LEVEL"
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="FILTERS"
                                FontSize="11"
                                FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <CheckBox Content="Error"
-                              IsChecked="{Binding Filters.ShowError}" />
-                    <CheckBox Content="Warn"
-                              IsChecked="{Binding Filters.ShowWarn}" />
-                    <CheckBox Content="Info"
-                              IsChecked="{Binding Filters.ShowInfo}" />
-                    <CheckBox Content="Debug"
-                              IsChecked="{Binding Filters.ShowDebug}" />
-                    <CheckBox Content="Trace"
-                              IsChecked="{Binding Filters.ShowTrace}" />
-                    <CheckBox Content="Fatal"
-                              IsChecked="{Binding Filters.ShowFatal}" />
-                    <Button Content="Reset Levels"
+                               Foreground="{DynamicResource ShellForegroundBrush}" />
+                    <Button Grid.Column="1"
                             Padding="6,2"
-                            HorizontalAlignment="Left"
-                            Command="{Binding Filters.ResetLevelsCommand}" />
-                </StackPanel>
+                            Command="{Binding ClearAllFiltersCommand}"
+                            Content="Clear All" />
+                </Grid>
 
-                <Border Height="1"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.2" />
-
-                <!-- Source / Logger Tree -->
-                <ContentControl Content="{Binding Sources}" />
-
-                <Border Height="1"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.2" />
-
-                <!-- Structured Filters -->
-                <StackPanel Spacing="4">
-                    <TextBlock Text="FILTERS"
-                               FontSize="11"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Receiver"
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock Text="LOG LEVEL"
                                    FontSize="11"
+                                   FontWeight="SemiBold"
                                    Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <TextBox Watermark="udp-1"
-                                 Text="{Binding Filters.ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="6">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowError}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Error"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding ErrorCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowWarn}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Warn"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding WarnCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowInfo}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Info"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding InfoCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowDebug}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Debug"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding DebugCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowTrace}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Trace"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding TraceCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <CheckBox Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      IsChecked="{Binding Filters.ShowFatal}" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="Fatal"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding FatalCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
                     </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Logger"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <TextBox Watermark="Orders.Api"
-                                 Text="{Binding Filters.LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Thread"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <TextBox Watermark="worker-7"
-                                 Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Tenant"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <TextBox Watermark="alpha"
-                                 Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Trace Id"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <TextBox Watermark="abcd1234"
-                                 Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="Min Level"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                        <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
-                                  SelectedItem="{Binding Filters.MinimumLevelOption}"
-                                  HorizontalAlignment="Stretch" />
-                    </StackPanel>
-                    <Button Content="Clear Filters"
-                            Padding="6,2"
-                            HorizontalAlignment="Left"
-                            Command="{Binding Filters.ClearStructuredFiltersCommand}" />
-                </StackPanel>
+                </Expander>
 
-                <Border Height="1"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.2" />
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock Text="FILTER PRESETS"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <ToggleButton Grid.Column="0"
+                                          IsChecked="{Binding QuickFilters.IsErrorsAndAboveEnabled}"
+                                          Content="Errors and above" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding QuickFilters.ErrorsAndAboveCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <ToggleButton Grid.Column="0"
+                                          IsChecked="{Binding QuickFilters.IsStructuredOnlyEnabled}"
+                                          Content="Structured only" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding QuickFilters.StructuredOnlyCount}"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </Grid>
+                    </StackPanel>
+                </Expander>
 
-                <!-- Quick Filters -->
-                <ContentControl Content="{Binding QuickFilters}" />
+                <Expander IsExpanded="True">
+                    <Expander.Header>
+                        <TextBlock Text="SOURCE / SERVICE"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="8">
+                        <TextBox Watermark="Filter sources..."
+                                 Text="{Binding Sources.SourceSearchText, UpdateSourceTrigger=PropertyChanged}" />
+                        <ItemsControl ItemsSource="{Binding Sources.VisibleSourceItems}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:SourceFilterItemViewModel">
+                                    <Grid Margin="0,0,0,4"
+                                          ColumnDefinitions="Auto,*,Auto">
+                                        <CheckBox Grid.Column="0"
+                                                  VerticalAlignment="Center"
+                                                  IsChecked="{Binding IsEnabled}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Name}"
+                                                   Foreground="{DynamicResource ShellForegroundBrush}" />
+                                        <TextBlock Grid.Column="2"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Count}"
+                                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Expander>
 
-                <Border Height="1"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.2" />
+                <Expander IsExpanded="False">
+                    <Expander.Header>
+                        <TextBlock Text="HOST"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="6">
+                        <TextBlock Text="Quick host filters"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <ItemsControl ItemsSource="{Binding HostOptions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,4"
+                                          ColumnDefinitions="*,Auto">
+                                        <ToggleButton Grid.Column="0"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      Command="{Binding DataContext.ApplyHostFacetCommand, ElementName=Root}"
+                                                      CommandParameter="{Binding}"
+                                                      Content="{Binding Label}" />
+                                        <TextBlock Grid.Column="1"
+                                                   Margin="8,0,0,0"
+                                                   VerticalAlignment="Center"
+                                                   Text="{Binding Count}"
+                                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Expander>
 
-                <!-- Receiver Setup (collapsible) -->
-                <Expander Header="Receiver Setup"
-                          IsExpanded="False">
-                    <ContentControl Content="{Binding ReceiverSetup}" />
+                <Expander IsExpanded="False">
+                    <Expander.Header>
+                        <TextBlock Text="STRUCTURED FIELDS"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="8">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Receiver"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <TextBox Watermark="udp-1"
+                                     Text="{Binding Filters.ReceiverFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Logger"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <TextBox Watermark="Orders.Api"
+                                     Text="{Binding Filters.LoggerFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Thread"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <TextBox Watermark="worker-7"
+                                     Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Tenant"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <TextBox Watermark="alpha"
+                                     Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Trace Id"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <TextBox Watermark="trace-123"
+                                     Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Min Level"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
+                                      SelectedItem="{Binding Filters.MinimumLevelOption}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <Expander IsExpanded="False">
+                    <Expander.Header>
+                        <TextBlock Text="TAGS"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,0"
+                                Spacing="6">
+                        <TextBlock Text="Click a tag chip to narrow the search."
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <ItemsControl ItemsSource="{Binding TagOptions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Margin="0,0,6,6"
+                                                  IsChecked="{Binding IsSelected}"
+                                                  Command="{Binding DataContext.ApplyTagFacetCommand, ElementName=Root}"
+                                                  CommandParameter="{Binding}"
+                                                  Content="{Binding Label}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </Expander>
             </StackPanel>
         </ScrollViewer>

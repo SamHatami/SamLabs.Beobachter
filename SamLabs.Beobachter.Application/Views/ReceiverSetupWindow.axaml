@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+        x:Class="SamLabs.Beobachter.Application.Views.ReceiverSetupWindow"
+        x:DataType="viewModels:ReceiverSetupViewModel"
+        Width="960"
+        Height="720"
+        MinWidth="760"
+        MinHeight="520"
+        Title="Receiver Setup">
+    <Border Background="{DynamicResource ShellBackgroundBrush}">
+        <ContentControl Margin="12"
+                        Content="{Binding}" />
+    </Border>
+</Window>
