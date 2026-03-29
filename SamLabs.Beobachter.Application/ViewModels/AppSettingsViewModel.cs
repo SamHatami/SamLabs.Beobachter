@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Core.Interfaces;
@@ -18,59 +19,29 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private int _channelCapacity;
 
-    [ObservableProperty]
-    private string _traceRowColor = string.Empty;
+    [ObservableProperty] private Color? _traceRowColor;
+    [ObservableProperty] private Color? _traceBadgeColor;
+    [ObservableProperty] private Color? _traceMessageColor;
 
-    [ObservableProperty]
-    private string _traceBadgeColor = string.Empty;
+    [ObservableProperty] private Color? _debugRowColor;
+    [ObservableProperty] private Color? _debugBadgeColor;
+    [ObservableProperty] private Color? _debugMessageColor;
 
-    [ObservableProperty]
-    private string _traceMessageColor = string.Empty;
+    [ObservableProperty] private Color? _infoRowColor;
+    [ObservableProperty] private Color? _infoBadgeColor;
+    [ObservableProperty] private Color? _infoMessageColor;
 
-    [ObservableProperty]
-    private string _debugRowColor = string.Empty;
+    [ObservableProperty] private Color? _warnRowColor;
+    [ObservableProperty] private Color? _warnBadgeColor;
+    [ObservableProperty] private Color? _warnMessageColor;
 
-    [ObservableProperty]
-    private string _debugBadgeColor = string.Empty;
+    [ObservableProperty] private Color? _errorRowColor;
+    [ObservableProperty] private Color? _errorBadgeColor;
+    [ObservableProperty] private Color? _errorMessageColor;
 
-    [ObservableProperty]
-    private string _debugMessageColor = string.Empty;
-
-    [ObservableProperty]
-    private string _infoRowColor = string.Empty;
-
-    [ObservableProperty]
-    private string _infoBadgeColor = string.Empty;
-
-    [ObservableProperty]
-    private string _infoMessageColor = string.Empty;
-
-    [ObservableProperty]
-    private string _warnRowColor = string.Empty;
-
-    [ObservableProperty]
-    private string _warnBadgeColor = string.Empty;
-
-    [ObservableProperty]
-    private string _warnMessageColor = string.Empty;
-
-    [ObservableProperty]
-    private string _errorRowColor = string.Empty;
-
-    [ObservableProperty]
-    private string _errorBadgeColor = string.Empty;
-
-    [ObservableProperty]
-    private string _errorMessageColor = string.Empty;
-
-    [ObservableProperty]
-    private string _fatalRowColor = string.Empty;
-
-    [ObservableProperty]
-    private string _fatalBadgeColor = string.Empty;
-
-    [ObservableProperty]
-    private string _fatalMessageColor = string.Empty;
+    [ObservableProperty] private Color? _fatalRowColor;
+    [ObservableProperty] private Color? _fatalBadgeColor;
+    [ObservableProperty] private Color? _fatalMessageColor;
 
     public AppSettingsViewModel(ISettingsService settingsService)
     {
@@ -88,6 +59,32 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
         Saved = true;
     }
 
+    [RelayCommand]
+    private void ClearColor(string parameterName)
+    {
+        switch (parameterName)
+        {
+            case nameof(TraceRowColor): TraceRowColor = null; break;
+            case nameof(TraceBadgeColor): TraceBadgeColor = null; break;
+            case nameof(TraceMessageColor): TraceMessageColor = null; break;
+            case nameof(DebugRowColor): DebugRowColor = null; break;
+            case nameof(DebugBadgeColor): DebugBadgeColor = null; break;
+            case nameof(DebugMessageColor): DebugMessageColor = null; break;
+            case nameof(InfoRowColor): InfoRowColor = null; break;
+            case nameof(InfoBadgeColor): InfoBadgeColor = null; break;
+            case nameof(InfoMessageColor): InfoMessageColor = null; break;
+            case nameof(WarnRowColor): WarnRowColor = null; break;
+            case nameof(WarnBadgeColor): WarnBadgeColor = null; break;
+            case nameof(WarnMessageColor): WarnMessageColor = null; break;
+            case nameof(ErrorRowColor): ErrorRowColor = null; break;
+            case nameof(ErrorBadgeColor): ErrorBadgeColor = null; break;
+            case nameof(ErrorMessageColor): ErrorMessageColor = null; break;
+            case nameof(FatalRowColor): FatalRowColor = null; break;
+            case nameof(FatalBadgeColor): FatalBadgeColor = null; break;
+            case nameof(FatalMessageColor): FatalMessageColor = null; break;
+        }
+    }
+
     private void LoadFromCurrent()
     {
         AppSettings current = _settingsService.CurrentAppSettings;
@@ -102,24 +99,24 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
         ChannelCapacity = current.ChannelCapacity;
 
         LogLevelColorOverrides c = current.LogLevelColors;
-        TraceRowColor = c.Trace.Row ?? string.Empty;
-        TraceBadgeColor = c.Trace.Badge ?? string.Empty;
-        TraceMessageColor = c.Trace.Message ?? string.Empty;
-        DebugRowColor = c.Debug.Row ?? string.Empty;
-        DebugBadgeColor = c.Debug.Badge ?? string.Empty;
-        DebugMessageColor = c.Debug.Message ?? string.Empty;
-        InfoRowColor = c.Info.Row ?? string.Empty;
-        InfoBadgeColor = c.Info.Badge ?? string.Empty;
-        InfoMessageColor = c.Info.Message ?? string.Empty;
-        WarnRowColor = c.Warn.Row ?? string.Empty;
-        WarnBadgeColor = c.Warn.Badge ?? string.Empty;
-        WarnMessageColor = c.Warn.Message ?? string.Empty;
-        ErrorRowColor = c.Error.Row ?? string.Empty;
-        ErrorBadgeColor = c.Error.Badge ?? string.Empty;
-        ErrorMessageColor = c.Error.Message ?? string.Empty;
-        FatalRowColor = c.Fatal.Row ?? string.Empty;
-        FatalBadgeColor = c.Fatal.Badge ?? string.Empty;
-        FatalMessageColor = c.Fatal.Message ?? string.Empty;
+        TraceRowColor = ParseColor(c.Trace.Row);
+        TraceBadgeColor = ParseColor(c.Trace.Badge);
+        TraceMessageColor = ParseColor(c.Trace.Message);
+        DebugRowColor = ParseColor(c.Debug.Row);
+        DebugBadgeColor = ParseColor(c.Debug.Badge);
+        DebugMessageColor = ParseColor(c.Debug.Message);
+        InfoRowColor = ParseColor(c.Info.Row);
+        InfoBadgeColor = ParseColor(c.Info.Badge);
+        InfoMessageColor = ParseColor(c.Info.Message);
+        WarnRowColor = ParseColor(c.Warn.Row);
+        WarnBadgeColor = ParseColor(c.Warn.Badge);
+        WarnMessageColor = ParseColor(c.Warn.Message);
+        ErrorRowColor = ParseColor(c.Error.Row);
+        ErrorBadgeColor = ParseColor(c.Error.Badge);
+        ErrorMessageColor = ParseColor(c.Error.Message);
+        FatalRowColor = ParseColor(c.Fatal.Row);
+        FatalBadgeColor = ParseColor(c.Fatal.Badge);
+        FatalMessageColor = ParseColor(c.Fatal.Message);
     }
 
     private AppSettings BuildSettings()
@@ -139,46 +136,56 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
             {
                 Trace = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(TraceRowColor),
-                    Badge = NullIfEmpty(TraceBadgeColor),
-                    Message = NullIfEmpty(TraceMessageColor)
+                    Row = ToHex(TraceRowColor),
+                    Badge = ToHex(TraceBadgeColor),
+                    Message = ToHex(TraceMessageColor)
                 },
                 Debug = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(DebugRowColor),
-                    Badge = NullIfEmpty(DebugBadgeColor),
-                    Message = NullIfEmpty(DebugMessageColor)
+                    Row = ToHex(DebugRowColor),
+                    Badge = ToHex(DebugBadgeColor),
+                    Message = ToHex(DebugMessageColor)
                 },
                 Info = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(InfoRowColor),
-                    Badge = NullIfEmpty(InfoBadgeColor),
-                    Message = NullIfEmpty(InfoMessageColor)
+                    Row = ToHex(InfoRowColor),
+                    Badge = ToHex(InfoBadgeColor),
+                    Message = ToHex(InfoMessageColor)
                 },
                 Warn = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(WarnRowColor),
-                    Badge = NullIfEmpty(WarnBadgeColor),
-                    Message = NullIfEmpty(WarnMessageColor)
+                    Row = ToHex(WarnRowColor),
+                    Badge = ToHex(WarnBadgeColor),
+                    Message = ToHex(WarnMessageColor)
                 },
                 Error = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(ErrorRowColor),
-                    Badge = NullIfEmpty(ErrorBadgeColor),
-                    Message = NullIfEmpty(ErrorMessageColor)
+                    Row = ToHex(ErrorRowColor),
+                    Badge = ToHex(ErrorBadgeColor),
+                    Message = ToHex(ErrorMessageColor)
                 },
                 Fatal = new LogLevelColorOverride
                 {
-                    Row = NullIfEmpty(FatalRowColor),
-                    Badge = NullIfEmpty(FatalBadgeColor),
-                    Message = NullIfEmpty(FatalMessageColor)
+                    Row = ToHex(FatalRowColor),
+                    Badge = ToHex(FatalBadgeColor),
+                    Message = ToHex(FatalMessageColor)
                 }
             }
         };
     }
 
-    private static string? NullIfEmpty(string value)
+    private static Color? ParseColor(string? hex)
     {
-        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        if (string.IsNullOrWhiteSpace(hex))
+        {
+            return null;
+        }
+
+        return Color.TryParse(hex.Trim(), out var color) ? color : null;
+    }
+
+    private static string? ToHex(Color? color)
+    {
+        return color.HasValue ? color.Value.ToString() : null;
     }
 }

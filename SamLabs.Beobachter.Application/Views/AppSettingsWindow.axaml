@@ -4,12 +4,39 @@
         xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
         x:Class="SamLabs.Beobachter.Application.Views.AppSettingsWindow"
         x:DataType="viewModels:AppSettingsViewModel"
-        Width="620"
-        Height="640"
-        MinWidth="520"
-        MinHeight="480"
+        Width="680"
+        Height="700"
+        MinWidth="580"
+        MinHeight="520"
         Title="Application Settings"
         WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <!-- Color swatch button: shows the selected color as background -->
+        <Style Selector="Button.color-swatch">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.color-clear">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+        <Style Selector="Button.color-clear:pointerover">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+    </Window.Styles>
+
     <Border Background="{DynamicResource ShellBackgroundBrush}">
         <Grid RowDefinitions="Auto,*,Auto">
 
@@ -41,8 +68,7 @@
                         <StackPanel Spacing="8">
                             <TextBlock Text="THEME"
                                        Classes="section-caption" />
-                            <ComboBox x:Name="ThemeCombo"
-                                      SelectedIndex="{Binding SelectedThemeIndex}"
+                            <ComboBox SelectedIndex="{Binding SelectedThemeIndex}"
                                       MinWidth="200"
                                       HorizontalAlignment="Left">
                                 <ComboBoxItem>
@@ -93,13 +119,13 @@
                         <StackPanel Spacing="10">
                             <TextBlock Text="LOG LEVEL COLOR OVERRIDES"
                                        Classes="section-caption" />
-                            <TextBlock Text="Enter hex colors (e.g. #FF5555) to override default level colors. Leave blank for defaults."
+                            <TextBlock Text="Click a swatch to pick a color. Use the X button to reset to default."
                                        FontSize="11"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
 
                             <!-- Column headers -->
-                            <Grid ColumnDefinitions="80,*,*,*"
+                            <Grid ColumnDefinitions="70,*,*,*"
                                   Margin="0,4,0,0">
                                 <TextBlock Grid.Column="0"
                                            Text="Level"
@@ -123,57 +149,111 @@
                             </Grid>
 
                             <!-- Trace -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Trace" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding TraceRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding TraceBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding TraceMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding TraceRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="TraceRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="TraceRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding TraceBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="TraceBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="TraceBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding TraceMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="TraceMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="TraceMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
 
                             <!-- Debug -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Debug" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding DebugRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding DebugBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding DebugMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding DebugRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="DebugRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="DebugRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding DebugBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="DebugBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="DebugBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding DebugMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="DebugMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="DebugMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
 
                             <!-- Info -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Info" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding InfoRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding InfoBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding InfoMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding InfoRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="InfoRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="InfoRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding InfoBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="InfoBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="InfoBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding InfoMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="InfoMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="InfoMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
 
                             <!-- Warn -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Warn" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding WarnRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding WarnBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding WarnMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding WarnRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="WarnRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="WarnRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding WarnBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="WarnBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="WarnBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding WarnMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="WarnMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="WarnMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
 
                             <!-- Error -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Error" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding ErrorRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding ErrorBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding ErrorMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding ErrorRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="ErrorRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="ErrorRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding ErrorBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="ErrorBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="ErrorBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding ErrorMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="ErrorMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="ErrorMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
 
                             <!-- Fatal -->
-                            <Grid ColumnDefinitions="80,*,*,*">
+                            <Grid ColumnDefinitions="70,*,*,*" RowDefinitions="Auto">
                                 <TextBlock Grid.Column="0" Text="Fatal" VerticalAlignment="Center"
                                            Foreground="{DynamicResource ShellForegroundBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding FatalRowColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="2" Text="{Binding FatalBadgeColor}" Watermark="#hex" Margin="4,0" />
-                                <TextBox Grid.Column="3" Text="{Binding FatalMessageColor}" Watermark="#hex" Margin="4,0" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding FatalRowColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="FatalRowColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="FatalRowColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding FatalBadgeColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="FatalBadgeColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="FatalBadgeColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" Margin="4,0">
+                                    <Button Classes="color-swatch" Background="{Binding FatalMessageColor, Converter={x:Static viewModels:NullableColorToBrushConverter.Instance}}" Tag="FatalMessageColor" Click="OnColorSwatchClick" />
+                                    <Button Classes="color-clear" Command="{Binding ClearColorCommand}" CommandParameter="FatalMessageColor" ToolTip.Tip="Reset to default"><i:Icon Value="fa-solid fa-xmark" FontSize="9" /></Button>
+                                </StackPanel>
                             </Grid>
                         </StackPanel>
                     </Border>
