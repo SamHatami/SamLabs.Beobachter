@@ -2,8 +2,14 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FFF4F6FA" />
     <SolidColorBrush x:Key="ShellPanelBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="ShellPanelBorderBrush" Color="#FFE2E8F0" />
+    <SolidColorBrush x:Key="ShellChromeBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="ShellChromeBorderBrush" Color="#FFD8E1EA" />
     <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FF1F2937" />
     <SolidColorBrush x:Key="ShellMutedForegroundBrush" Color="#FF6B7280" />
+    <SolidColorBrush x:Key="ShellAccentBrush" Color="#FF0F766E" />
+    <SolidColorBrush x:Key="ShellAccentForegroundBrush" Color="#FFF8FAFC" />
+    <SolidColorBrush x:Key="SeverityBadgeForegroundBrush" Color="#FFF9FAFB" />
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFDC2626" />
     <SolidColorBrush x:Key="RowTraceBrush" Color="#080EA5E9" />
     <SolidColorBrush x:Key="RowDebugBrush" Color="#0A6366F1" />
@@ -12,4 +18,11 @@
     <SolidColorBrush x:Key="RowErrorBrush" Color="#14EF4444" />
     <SolidColorBrush x:Key="RowFatalBrush" Color="#1AB91C1C" />
     <SolidColorBrush x:Key="RowFallbackBrush" Color="#00000000" />
+    <SolidColorBrush x:Key="BadgeTraceBrush" Color="#FF0369A1" />
+    <SolidColorBrush x:Key="BadgeDebugBrush" Color="#FF4338CA" />
+    <SolidColorBrush x:Key="BadgeInfoBrush" Color="#FF2563EB" />
+    <SolidColorBrush x:Key="BadgeWarnBrush" Color="#FFB45309" />
+    <SolidColorBrush x:Key="BadgeErrorBrush" Color="#FFB91C1C" />
+    <SolidColorBrush x:Key="BadgeFatalBrush" Color="#FF7F1D1D" />
+    <SolidColorBrush x:Key="BadgeFallbackBrush" Color="#FF64748B" />
 </ResourceDictionary>

@@ -1622,3 +1622,33 @@ Follow-ups:
 - Slice 4: add icons, badge styling, spacing tokens, and severity chips in the stream.
 - Once app build verification is unblocked, rerun the full test suite from the master-based worktree.
 
+
+## 2026-03-29 - UI Rebuild Slice 4: Visual System Pass
+What changed:
+- Added Font Awesome support in:
+  [SamLabs.Beobachter.Application.csproj](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/SamLabs.Beobachter.Application.csproj)
+  and startup registration in:
+  [Program.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Program.cs)
+- Added shared shell tokens and reusable styles in:
+  [Common.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Common.axaml)
+  and expanded dark/light theme resources in:
+  [Dark.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Dark.axaml),
+  [Light.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Themes/Light.axaml)
+- Reworked top bar, stream, details, sidebar, and status visuals in:
+  [TopBarView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/TopBarView.axaml),
+  [LogStreamView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/LogStreamView.axaml),
+  [EntryDetailsView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/EntryDetailsView.axaml),
+  [WorkspaceSidebarView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/WorkspaceSidebarView.axaml),
+  [SessionHealthView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/Status/SessionHealthView.axaml)
+- Added level-badge brush projection in:
+  [LogLevelToBadgeBrushConverter.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Converters/LogLevelToBadgeBrushConverter.cs)
+
+Why:
+- The shell had the right layout after Slices 1 to 3, but still looked transitional: text-only controls, ad-hoc spacing, and row tinting without explicit severity chips.
+- Slice 4 goal is to make the UI read as an intentional system by centralizing shared visual rules and using icons where the surface benefits from faster recognition.
+
+Impact:
+- Theme resources now define panel, chrome, accent, spacing, badge, and monospace tokens instead of leaving those values scattered through views.
+- The top bar and details header actions now use icon-backed controls.
+- Log rows now show explicit severity badges instead of relying only on tinted backgrounds.
+- Sidebar chips and status surfaces now share the same shell styling language.

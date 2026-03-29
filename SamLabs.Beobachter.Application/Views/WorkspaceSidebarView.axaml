@@ -1,31 +1,29 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.WorkspaceSidebarView"
              x:Name="Root"
              x:DataType="viewModels:WorkspaceSidebarViewModel">
-    <Border Padding="10"
-            Background="{DynamicResource ShellPanelBrush}">
+    <Border Classes="shell-panel"
+            Padding="10">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Grid.Column="0"
                                Text="FILTERS"
-                               FontSize="11"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellForegroundBrush}" />
+                               Classes="panel-title" />
                     <Button Grid.Column="1"
-                            Padding="6,2"
+                            Classes="toolbar-button"
                             Command="{Binding ClearAllFiltersCommand}"
-                            Content="Clear All" />
+                            Content="Clear All"
+                            i:Attached.Icon="fa-solid fa-broom" />
                 </Grid>
 
                 <Expander IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="LOG LEVEL"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="6">
@@ -119,14 +117,13 @@
                 <Expander IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="FILTER PRESETS"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
                             <ToggleButton Grid.Column="0"
+                                          Classes="filter-chip"
                                           IsChecked="{Binding QuickFilters.IsErrorsAndAboveEnabled}"
                                           Content="Errors and above" />
                             <TextBlock Grid.Column="1"
@@ -137,6 +134,7 @@
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
                             <ToggleButton Grid.Column="0"
+                                          Classes="filter-chip"
                                           IsChecked="{Binding QuickFilters.IsStructuredOnlyEnabled}"
                                           Content="Structured only" />
                             <TextBlock Grid.Column="1"
@@ -151,9 +149,7 @@
                 <Expander IsExpanded="True">
                     <Expander.Header>
                         <TextBlock Text="SOURCE / SERVICE"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="8">
@@ -186,9 +182,7 @@
                 <Expander IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="HOST"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="6">
@@ -200,6 +194,7 @@
                                     <Grid Margin="0,0,0,4"
                                           ColumnDefinitions="*,Auto">
                                         <ToggleButton Grid.Column="0"
+                                                      Classes="filter-chip"
                                                       IsChecked="{Binding IsSelected}"
                                                       Command="{Binding DataContext.ApplyHostFacetCommand, ElementName=Root}"
                                                       CommandParameter="{Binding}"
@@ -219,9 +214,7 @@
                 <Expander IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="STRUCTURED FIELDS"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="8">
@@ -273,9 +266,7 @@
                 <Expander IsExpanded="False">
                     <Expander.Header>
                         <TextBlock Text="TAGS"
-                                   FontSize="11"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                   Classes="section-caption" />
                     </Expander.Header>
                     <StackPanel Margin="0,8,0,0"
                                 Spacing="6">
@@ -290,6 +281,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <ToggleButton Margin="0,0,6,6"
+                                                  Classes="filter-chip"
                                                   IsChecked="{Binding IsSelected}"
                                                   Command="{Binding DataContext.ApplyTagFacetCommand, ElementName=Root}"
                                                   CommandParameter="{Binding}"

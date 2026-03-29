@@ -383,3 +383,4 @@ public sealed class IngestionSession : IIngestionSession
     }
 
 }
+

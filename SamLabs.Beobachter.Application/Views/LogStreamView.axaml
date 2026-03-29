@@ -1,5 +1,6 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:models="using:SamLabs.Beobachter.Core.Models"
              xmlns:conv="using:SamLabs.Beobachter.Application.Converters"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
@@ -7,104 +8,128 @@
              x:DataType="viewModels:LogStreamViewModel">
     <UserControl.Resources>
         <conv:LogLevelToRowBrushConverter x:Key="LogLevelToRowBrushConverter" />
+        <conv:LogLevelToBadgeBrushConverter x:Key="LogLevelToBadgeBrushConverter" />
     </UserControl.Resources>
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <!-- View controls row -->
-        <StackPanel Grid.Row="0"
-                    Orientation="Horizontal"
-                    Spacing="4"
-                    Margin="4,0,4,4">
-            <Button Content="{Binding DensityButtonText}"
-                    Padding="6,2"
-                    FontSize="11"
-                    Command="{Binding ToggleDensityCommand}" />
-            <Button Content="Col -"
-                    Padding="6,2"
-                    FontSize="11"
-                    Command="{Binding DecreaseColumnWidthsCommand}" />
-            <Button Content="Col +"
-                    Padding="6,2"
-                    FontSize="11"
-                    Command="{Binding IncreaseColumnWidthsCommand}" />
-            <Button Content="Reset"
-                    Padding="6,2"
-                    FontSize="11"
-                    Command="{Binding ResetColumnWidthsCommand}" />
-        </StackPanel>
+    <Grid RowDefinitions="Auto,Auto,*"
+          RowSpacing="8">
+        <Border Grid.Row="0"
+                Classes="shell-panel"
+                Padding="10,8">
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="10">
+                <TextBlock Grid.Column="0"
+                           Text="RESULTS"
+                           Classes="section-caption"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="Density and column controls"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            Spacing="6">
+                    <Button Classes="toolbar-button"
+                            Content="{Binding DensityButtonText}"
+                            Command="{Binding ToggleDensityCommand}"
+                            i:Attached.Icon="fa-solid fa-table-cells" />
+                    <Button Classes="toolbar-button icon-button"
+                            ToolTip.Tip="Narrow columns"
+                            Command="{Binding DecreaseColumnWidthsCommand}"
+                            i:Attached.Icon="fa-solid fa-compress" />
+                    <Button Classes="toolbar-button icon-button"
+                            ToolTip.Tip="Widen columns"
+                            Command="{Binding IncreaseColumnWidthsCommand}"
+                            i:Attached.Icon="fa-solid fa-expand" />
+                    <Button Classes="toolbar-button icon-button"
+                            ToolTip.Tip="Reset column widths"
+                            Command="{Binding ResetColumnWidthsCommand}"
+                            i:Attached.Icon="fa-solid fa-rotate-left" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <!-- Column headers -->
-        <Grid Grid.Row="1"
-              Margin="4,0,4,4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
-                <ColumnDefinition Width="{Binding LevelColumnWidth}" />
-                <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0"
-                       Text="Timestamp"
-                       FontWeight="SemiBold"
-                       FontSize="11"
-                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-            <TextBlock Grid.Column="1"
-                       Text="Level"
-                       FontWeight="SemiBold"
-                       FontSize="11"
-                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-            <TextBlock Grid.Column="2"
-                       Text="Source"
-                       FontWeight="SemiBold"
-                       FontSize="11"
-                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-            <TextBlock Grid.Column="3"
-                       Text="Message"
-                       FontWeight="SemiBold"
-                       FontSize="11"
-                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-        </Grid>
+        <Border Grid.Row="1"
+                Classes="shell-panel"
+                Padding="10,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding TimestampColumnWidth}" />
+                    <ColumnDefinition Width="{Binding LevelColumnWidth}" />
+                    <ColumnDefinition Width="{Binding LoggerColumnWidth}" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="Timestamp"
+                           Classes="section-caption" />
+                <TextBlock Grid.Column="1"
+                           Text="Level"
+                           Classes="section-caption" />
+                <TextBlock Grid.Column="2"
+                           Text="Source"
+                           Classes="section-caption" />
+                <TextBlock Grid.Column="3"
+                           Text="Message"
+                           Classes="section-caption" />
+            </Grid>
+        </Border>
 
-        <!-- Log entries list -->
-        <ListBox x:Name="LogEntriesList"
-                 Grid.Row="2"
-                 Background="Transparent"
-                 ItemsSource="{Binding VisibleEntries}"
-                 SelectedItem="{Binding SelectedEntry}">
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel CacheLength="0.5" />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="models:LogEntry">
-                    <Border Margin="{Binding DataContext.LogRowMargin, ElementName=LogEntriesList}"
-                            Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
-                            CornerRadius="2">
-                        <Grid Margin="4,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=LogEntriesList}" />
-                                <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=LogEntriesList}" />
-                                <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=LogEntriesList}" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0"
-                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
-                                       Text="{Binding Timestamp}" />
-                            <TextBlock Grid.Column="1"
-                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
-                                       FontWeight="SemiBold"
-                                       Text="{Binding Level}" />
-                            <TextBlock Grid.Column="2"
-                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
-                                       Text="{Binding LoggerName}" />
-                            <TextBlock Grid.Column="3"
-                                       FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
-                                       Text="{Binding Message}"
-                                       TextTrimming="CharacterEllipsis" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Border Grid.Row="2"
+                Classes="shell-panel"
+                Padding="4">
+            <ListBox x:Name="LogEntriesList"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ItemsSource="{Binding VisibleEntries}"
+                     SelectedItem="{Binding SelectedEntry}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel CacheLength="0.5" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:LogEntry">
+                        <Border Margin="{Binding DataContext.LogRowMargin, ElementName=LogEntriesList}"
+                                Padding="10,6"
+                                Background="{Binding Level, Converter={StaticResource LogLevelToRowBrushConverter}}"
+                                BorderBrush="{DynamicResource ShellChromeBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding DataContext.TimestampColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="{Binding DataContext.LevelColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="{Binding DataContext.LoggerColumnWidth, ElementName=LogEntriesList}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}"
+                                           Text="{Binding Timestamp}" />
+                                <Border Grid.Column="1"
+                                        Background="{Binding Level, Converter={StaticResource LogLevelToBadgeBrushConverter}}"
+                                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
+                                        Padding="8,2"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SeverityBadgeForegroundBrush}"
+                                               Text="{Binding Level}" />
+                                </Border>
+                                <TextBlock Grid.Column="2"
+                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                           Foreground="{DynamicResource ShellForegroundBrush}"
+                                           Text="{Binding LoggerName}" />
+                                <TextBlock Grid.Column="3"
+                                           FontSize="{Binding DataContext.LogRowFontSize, ElementName=LogEntriesList}"
+                                           Foreground="{DynamicResource ShellForegroundBrush}"
+                                           Text="{Binding Message}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
     </Grid>
 </UserControl>

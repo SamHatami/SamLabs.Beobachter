@@ -3,9 +3,8 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels.Status"
              x:Class="SamLabs.Beobachter.Application.Views.Status.SessionHealthView"
              x:DataType="viewModels:SessionHealthViewModel">
-    <Border Padding="12,8"
-            CornerRadius="8"
-            Background="{DynamicResource ShellPanelBrush}">
+    <Border Classes="shell-panel"
+            Padding="12,8">
         <Grid ColumnDefinitions="Auto,Auto,Auto,Auto"
               ColumnSpacing="16">
             <TextBlock Text="{Binding ActiveReceiversText}"

@@ -1,65 +1,90 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.TopBarView"
              x:DataType="viewModels:TopBarViewModel">
-    <Border Padding="12,8"
-            Background="{DynamicResource ShellPanelBrush}">
-        <Grid ColumnDefinitions="Auto,*,Auto">
+    <Border Classes="shell-panel"
+            Padding="14,10">
+        <Grid ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="14">
             <StackPanel Grid.Column="0"
                         Orientation="Horizontal"
                         Spacing="12"
                         VerticalAlignment="Center">
-                <TextBlock Text="Beobachter"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                <Border Background="{DynamicResource ShellAccentBrush}"
+                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
+                        Padding="10,5">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="8">
+                        <i:Icon Value="fa-solid fa-wave-square"
+                                FontSize="13"
+                                Foreground="{DynamicResource ShellAccentForegroundBrush}" />
+                        <TextBlock Text="Beobachter"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource ShellAccentForegroundBrush}" />
+                    </StackPanel>
+                </Border>
                 <TextBlock Text="{Binding StatusSummary}"
                            VerticalAlignment="Center"
                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
             </StackPanel>
 
-            <TextBox x:Name="SearchTextBox"
-                     Grid.Column="1"
-                     Margin="16,0"
-                     Watermark="Search logs (e.g. error:timeout AND service:payment)"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            <Border Grid.Column="1"
+                    Classes="shell-card"
+                    Padding="10,0">
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="10">
+                    <i:Icon Grid.Column="0"
+                            Value="fa-solid fa-magnifying-glass"
+                            VerticalAlignment="Center"
+                            FontSize="12"
+                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                    <TextBox x:Name="SearchTextBox"
+                             Grid.Column="1"
+                             MinHeight="36"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Watermark="Search logs (e.g. error:timeout AND service:payment)"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </Border>
 
             <StackPanel Grid.Column="2"
                         Orientation="Horizontal"
                         Spacing="6"
                         VerticalAlignment="Center">
-                <Button Content="Clear"
-                        Padding="8,4"
-                        Command="{Binding ClearSearchCommand}" />
-                <Border Width="1"
-                        Margin="4,2"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.3" />
-                <Button Content="{Binding PauseButtonText}"
-                        Padding="8,4"
-                        Command="{Binding TogglePauseCommand}" />
-                <Button Content="{Binding AutoScrollButtonText}"
-                        Padding="8,4"
-                        Command="{Binding ToggleAutoScrollCommand}" />
-                <Button Content="Settings"
-                        Padding="8,4"
-                        Command="{Binding OpenSettingsCommand}" />
-                <Border Width="1"
-                        Margin="4,2"
-                        Background="{DynamicResource ShellMutedForegroundBrush}"
-                        Opacity="0.3" />
-                <DropDownButton Content="{Binding ThemeSummary}"
-                                Padding="8,4">
+                <Button Classes="toolbar-button"
+                        Content="Clear"
+                        Command="{Binding ClearSearchCommand}"
+                        i:Attached.Icon="fa-solid fa-xmark" />
+                <Button Classes="toolbar-button"
+                        Content="{Binding PauseButtonText}"
+                        Command="{Binding TogglePauseCommand}"
+                        i:Attached.Icon="{Binding PauseButtonIcon}" />
+                <Button Classes="toolbar-button"
+                        Content="{Binding AutoScrollButtonText}"
+                        Command="{Binding ToggleAutoScrollCommand}"
+                        i:Attached.Icon="fa-solid fa-thumbtack" />
+                <Button Classes="toolbar-button icon-button"
+                        ToolTip.Tip="Receiver settings"
+                        Command="{Binding OpenSettingsCommand}"
+                        i:Attached.Icon="fa-solid fa-gear" />
+                <DropDownButton Classes="toolbar-button"
+                                Content="{Binding ThemeSummary}"
+                                i:Attached.Icon="fa-solid fa-palette">
                     <DropDownButton.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <MenuItem Header="System"
-                                      Command="{Binding UseSystemThemeCommand}" />
+                                      Command="{Binding UseSystemThemeCommand}"
+                                      i:MenuItem.Icon="fa-solid fa-circle-half-stroke" />
                             <MenuItem Header="Light"
-                                      Command="{Binding UseLightThemeCommand}" />
+                                      Command="{Binding UseLightThemeCommand}"
+                                      i:MenuItem.Icon="fa-solid fa-sun" />
                             <MenuItem Header="Dark"
-                                      Command="{Binding UseDarkThemeCommand}" />
+                                      Command="{Binding UseDarkThemeCommand}"
+                                      i:MenuItem.Icon="fa-solid fa-moon" />
                         </MenuFlyout>
                     </DropDownButton.Flyout>
                 </DropDownButton>

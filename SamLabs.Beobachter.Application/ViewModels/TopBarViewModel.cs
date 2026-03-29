@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +20,9 @@ public sealed partial class TopBarViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _pauseButtonText = "Pause";
+
+    [ObservableProperty]
+    private string _pauseButtonIcon = "fa-solid fa-pause";
 
     [ObservableProperty]
     private bool _isAutoScrollEnabled = true;
@@ -108,6 +110,7 @@ public sealed partial class TopBarViewModel : ViewModelBase
     partial void OnIsPausedChanged(bool value)
     {
         PauseButtonText = value ? "Resume" : "Pause";
+        PauseButtonIcon = value ? "fa-solid fa-play" : "fa-solid fa-pause";
     }
 
     partial void OnIsAutoScrollEnabledChanged(bool value)

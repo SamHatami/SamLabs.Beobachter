@@ -26,8 +26,9 @@
     <Application.DataTemplates>
         <application:ViewLocator/>
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="/Themes/Common.axaml" />
     </Application.Styles>
 </Application>
