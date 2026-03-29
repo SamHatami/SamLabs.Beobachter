@@ -48,9 +48,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
+    private readonly IWorkspaceStartupOrchestrator _workspaceStartupOrchestrator;
     private readonly ILogStreamProjectionService _logStreamProjectionService;
     private readonly ILogStatisticsService _statisticsService;
-    private string? _pendingSelectedReceiverId;
     private bool _isApplyingWorkspaceState;
 
     [ObservableProperty]
@@ -89,6 +89,7 @@ public partial class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IIngestionSession ingestionSession,
         IWorkspaceStateCoordinator workspaceStateCoordinator,
+        IWorkspaceStartupOrchestrator workspaceStartupOrchestrator,
         ILogStreamProjectionService logStreamProjectionService,
         ILogStatisticsService statisticsService,
         SourceTreeViewModel sources,
@@ -105,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
+        _workspaceStartupOrchestrator = workspaceStartupOrchestrator ?? throw new ArgumentNullException(nameof(workspaceStartupOrchestrator));
         _logStreamProjectionService = logStreamProjectionService ?? throw new ArgumentNullException(nameof(logStreamProjectionService));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
 
@@ -134,8 +136,7 @@ public partial class MainWindowViewModel : ViewModelBase
         UpdateQuickFiltersSnapshot();
         UpdateThemeSummary();
         UpdateShellStatusPresentation();
-        _ = LoadReceiverSetupAsync();
-        _ = LoadWorkspaceStateAsync();
+        _ = InitializeWorkspaceAsync();
     }
 
     public MainToolbarViewModel Toolbar { get; }
@@ -363,54 +364,16 @@ public partial class MainWindowViewModel : ViewModelBase
         SessionHealth.DroppedPacketsText = presentation.DroppedPacketsText;
     }
 
-    private async Task LoadReceiverSetupAsync()
+    private async Task InitializeWorkspaceAsync()
     {
-        await ReceiverSetup.LoadAsync().ConfigureAwait(false);
-
-        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
-        {
-            ApplyPendingReceiverSelection();
-            UpdateShellStatusPresentation();
-            return;
-        }
-
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            ApplyPendingReceiverSelection();
-            UpdateShellStatusPresentation();
-        });
-    }
-
-    private void ApplyPendingReceiverSelection()
-    {
-        if (string.IsNullOrWhiteSpace(_pendingSelectedReceiverId) || ReceiverSetup.ReceiverDefinitions.Count == 0)
-        {
-            return;
-        }
-
-        ReceiverSetup.TrySelectReceiverById(_pendingSelectedReceiverId);
-        ReceiverSetup.SelectedReceiverDefinition ??= ReceiverSetup.ReceiverDefinitions.FirstOrDefault();
-        _pendingSelectedReceiverId = null;
-    }
-
-    private async Task LoadWorkspaceStateAsync()
-    {
-        WorkspaceStateSnapshot snapshot = await _workspaceStateCoordinator.LoadAsync().ConfigureAwait(false);
-        WorkspaceSettings workspace = snapshot.WorkspaceSettings;
-        UiLayoutSettings layout = snapshot.UiLayoutSettings;
-
-        if (Avalonia.Application.Current is null || Dispatcher.UIThread.CheckAccess())
-        {
-            ApplyWorkspaceState(workspace, layout);
-            return;
-        }
-
-        await Dispatcher.UIThread.InvokeAsync(() => ApplyWorkspaceState(workspace, layout));
+        await _workspaceStartupOrchestrator
+            .InitializeAsync(ReceiverSetup, ApplyWorkspaceState)
+            .ConfigureAwait(false);
+        UpdateShellStatusPresentation();
     }
 
     private void ApplyWorkspaceState(WorkspaceSettings workspace, UiLayoutSettings layout)
     {
-        _pendingSelectedReceiverId = workspace.SelectedReceiverId;
         _isApplyingWorkspaceState = true;
 
         try
@@ -439,8 +402,6 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _isApplyingWorkspaceState = false;
         }
-
-        ApplyPendingReceiverSelection();
 
         RebuildVisibleEntries();
         UpdateQuickFiltersSnapshot();

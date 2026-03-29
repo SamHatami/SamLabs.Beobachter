@@ -1417,3 +1417,35 @@ Impact:
 
 Follow-ups:
 - Apply the same design-time pattern to other views if any runtime ViewModels gain preview-only constructors in future changes.
+
+## 2026-03-29 - MVVM Refactor Phase 9F: Startup/Load Sequencing Orchestrator Extraction
+What changed:
+- Added dedicated startup orchestration contract and service:
+  [IWorkspaceStartupOrchestrator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/IWorkspaceStartupOrchestrator.cs),
+  [WorkspaceStartupOrchestrator.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/WorkspaceStartupOrchestrator.cs)
+  - orchestrates receiver setup load + workspace state load in one place
+  - applies initial receiver selection after definitions are loaded
+  - owns startup UI-thread dispatch for initial apply/selection callbacks
+- Wired orchestrator in DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Simplified shell VM startup responsibilities:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - removed `LoadReceiverSetupAsync`, `LoadWorkspaceStateAsync`, and pending receiver-id coordination fields/methods
+  - replaced with one `InitializeWorkspaceAsync()` orchestration call
+- Updated construction wiring:
+  [MainWindowDesignViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/Design/MainWindowDesignViewModel.cs),
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+- Added focused startup-orchestrator tests:
+  [WorkspaceStartupOrchestratorTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/WorkspaceStartupOrchestratorTests.cs)
+
+Why:
+- Receiver setup load + workspace load ordering and startup-thread dispatch were still split across shell VM methods.
+- Moving this sequencing into an app service keeps shell VM focused on state flow and command wiring.
+
+Impact:
+- Startup sequencing is now explicit and test-covered in one service.
+- `MainWindowViewModel` no longer coordinates pending receiver selection state across concurrent startup tasks.
+- Full suite remains green (`113` passing tests).
+
+Follow-ups:
+- Continue shell thinning by extracting any remaining startup/reload command sequencing from `MainWindowViewModel` into dedicated orchestration services where needed.

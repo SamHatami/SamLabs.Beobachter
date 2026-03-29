@@ -28,6 +28,7 @@ public static class Root
         services.AddSingleton<ISampleLogEntryGenerator, SampleLogEntryGenerator>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IWorkspaceStateCoordinator, WorkspaceStateCoordinator>();
+        services.AddSingleton<IWorkspaceStartupOrchestrator, WorkspaceStartupOrchestrator>();
         services.AddSingleton<ILogStreamProjectionService, LogStreamProjectionService>();
         services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();

@@ -13,6 +13,7 @@ public sealed class MainWindowDesignViewModel : MainWindowViewModel
         new ThemeService(),
         new DesignIngestionSession(),
         new WorkspaceStateCoordinator(new DesignSettingsStore()),
+        new WorkspaceStartupOrchestrator(new WorkspaceStateCoordinator(new DesignSettingsStore())),
         new LogStreamProjectionService(new LogQueryEvaluator()),
         new RollingLogStatisticsService(),
         new SourceTreeViewModel(),

@@ -28,6 +28,7 @@ internal static class MainWindowTestSupport
         IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
         IWorkspaceStateCoordinator workspaceStateCoordinator = new WorkspaceStateCoordinator(resolvedSettingsStore);
+        IWorkspaceStartupOrchestrator workspaceStartupOrchestrator = new WorkspaceStartupOrchestrator(workspaceStateCoordinator);
         IShellStatusFormatter shellStatusFormatter = new ShellStatusFormatter();
         ISampleLogEntryGenerator sampleLogEntryGenerator = new SampleLogEntryGenerator();
         ILogStreamProjectionService logStreamProjectionService = new LogStreamProjectionService(new LogQueryEvaluator());
@@ -43,6 +44,7 @@ internal static class MainWindowTestSupport
             resolvedThemeService,
             session,
             workspaceStateCoordinator,
+            workspaceStartupOrchestrator,
             logStreamProjectionService,
             resolvedStatisticsService,
             sources,
