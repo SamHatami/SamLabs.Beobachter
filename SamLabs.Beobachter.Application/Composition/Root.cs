@@ -27,6 +27,7 @@ public static class Root
         services.AddSingleton<IShellStatusFormatter, ShellStatusFormatter>();
         services.AddSingleton<IClipboardService, AvaloniaClipboardService>();
         services.AddSingleton<IWorkspaceStateCoordinator, WorkspaceStateCoordinator>();
+        services.AddSingleton<ILogStreamProjectionService, LogStreamProjectionService>();
         services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();

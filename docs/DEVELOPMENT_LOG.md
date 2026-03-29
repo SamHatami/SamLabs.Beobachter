@@ -1339,3 +1339,33 @@ Impact:
 
 Follow-ups:
 - Extract log stream refresh orchestration (`OnEntriesAppended` + rebuild trigger flow) into a dedicated shell coordinator service.
+
+## 2026-03-29 - MVVM Refactor Phase 9C: Log Stream Projection Service Extraction
+What changed:
+- Added dedicated log-stream projection service:
+  [ILogStreamProjectionService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/ILogStreamProjectionService.cs),
+  [LogStreamProjectionService.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/LogStreamProjectionService.cs),
+  [QuickFilterSnapshot.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Services/QuickFilterSnapshot.cs)
+- Registered projection service in DI:
+  [Root.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Composition/Root.cs)
+- Simplified stream/filter orchestration in shell VM:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs)
+  - moved append/rebuild/filter-match logic into projection service
+  - moved quick-filter snapshot computation into projection service
+  - removed direct query-evaluator dependency from shell VM
+- Updated test construction wiring:
+  [MainWindowTestSupport.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/MainWindowTestSupport.cs)
+- Added dedicated projection service tests:
+  [LogStreamProjectionServiceTests.cs](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Tests/Application/LogStreamProjectionServiceTests.cs)
+
+Why:
+- Stream projection/filtering logic is orchestration policy and was still heavily embedded in `MainWindowViewModel`.
+- Extracting this logic keeps the shell VM focused on event wiring and state flow rather than filter internals.
+
+Impact:
+- No behavior change in log visibility/filtering flow.
+- `MainWindowViewModel` is leaner and delegates stream projection mechanics to an app service.
+- Full suite remains green (`90` passing tests).
+
+Follow-ups:
+- Continue shell thinning by extracting receiver/workspace load orchestration sequencing from `MainWindowViewModel`.

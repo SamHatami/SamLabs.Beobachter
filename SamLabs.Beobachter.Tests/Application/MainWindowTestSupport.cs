@@ -29,6 +29,7 @@ internal static class MainWindowTestSupport
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
         IWorkspaceStateCoordinator workspaceStateCoordinator = new WorkspaceStateCoordinator(resolvedSettingsStore);
         IShellStatusFormatter shellStatusFormatter = new ShellStatusFormatter();
+        ILogStreamProjectionService logStreamProjectionService = new LogStreamProjectionService(new LogQueryEvaluator());
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
@@ -40,8 +41,8 @@ internal static class MainWindowTestSupport
             resolvedThemeService,
             session,
             workspaceStateCoordinator,
+            logStreamProjectionService,
             resolvedStatisticsService,
-            new LogQueryEvaluator(),
             sources,
             quickFilters,
             receiverSetup,

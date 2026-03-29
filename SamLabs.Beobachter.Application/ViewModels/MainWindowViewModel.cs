@@ -14,7 +14,6 @@ using SamLabs.Beobachter.Application.ViewModels.Toolbar;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Models;
-using SamLabs.Beobachter.Core.Queries;
 using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Core.Settings;
 
@@ -49,7 +48,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IThemeService _themeService;
     private readonly IIngestionSession _ingestionSession;
     private readonly IWorkspaceStateCoordinator _workspaceStateCoordinator;
-    private readonly ILogQueryEvaluator _queryEvaluator;
+    private readonly ILogStreamProjectionService _logStreamProjectionService;
     private readonly ILogStatisticsService _statisticsService;
     private readonly Random _random = new();
     private string? _pendingSelectedReceiverId;
@@ -91,8 +90,8 @@ public partial class MainWindowViewModel : ViewModelBase
         new ThemeService(),
         new DesignIngestionSession(),
         new WorkspaceStateCoordinator(new DesignSettingsStore()),
+        new LogStreamProjectionService(new LogQueryEvaluator()),
         new RollingLogStatisticsService(),
-        new LogQueryEvaluator(),
         new SourceTreeViewModel(),
         new QuickFiltersViewModel(),
         new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
@@ -112,8 +111,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IThemeService themeService,
         IIngestionSession ingestionSession,
         IWorkspaceStateCoordinator workspaceStateCoordinator,
+        ILogStreamProjectionService logStreamProjectionService,
         ILogStatisticsService statisticsService,
-        ILogQueryEvaluator queryEvaluator,
         SourceTreeViewModel sources,
         QuickFiltersViewModel quickFilters,
         ReceiverSetupViewModel receiverSetup,
@@ -127,8 +126,8 @@ public partial class MainWindowViewModel : ViewModelBase
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         _workspaceStateCoordinator = workspaceStateCoordinator ?? throw new ArgumentNullException(nameof(workspaceStateCoordinator));
+        _logStreamProjectionService = logStreamProjectionService ?? throw new ArgumentNullException(nameof(logStreamProjectionService));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
-        _queryEvaluator = queryEvaluator ?? throw new ArgumentNullException(nameof(queryEvaluator));
 
         Sources = sources ?? throw new ArgumentNullException(nameof(sources));
         QuickFilters = quickFilters ?? throw new ArgumentNullException(nameof(quickFilters));
@@ -320,13 +319,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(() =>
         {
             _statisticsService.RecordRange(e.AppendedEntries);
-            LogQuery query = BuildCurrentQuery();
-            foreach (LogEntry entry in e.AppendedEntries)
-            {
-                Sources.RegisterLogger(entry.LoggerName);
-            }
-
-            Stream.AppendEntries(e.AppendedEntries, entry => MatchesFilter(entry, query));
+            _logStreamProjectionService.AppendEntries(e.AppendedEntries, Sources, QuickFilters, Filters, Stream);
 
             UpdateQuickFiltersSnapshot();
             UpdateShellStatusPresentation();
@@ -336,44 +329,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void RebuildVisibleEntries()
     {
         IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
-        LogQuery query = BuildCurrentQuery();
-        Stream.RebuildEntries(snapshot, entry => MatchesFilter(entry, query));
-    }
-
-    private bool MatchesFilter(LogEntry entry, LogQuery query)
-    {
-        if (!IsLevelEnabled(entry.Level))
-        {
-            return false;
-        }
-
-        if (!IsLoggerEnabled(entry.LoggerName))
-        {
-            return false;
-        }
-
-        if (QuickFilters.IsErrorsAndAboveEnabled &&
-            entry.Level is not LogLevel.Error and not LogLevel.Fatal)
-        {
-            return false;
-        }
-
-        if (QuickFilters.IsStructuredOnlyEnabled && !HasStructuredData(entry))
-        {
-            return false;
-        }
-
-        return _queryEvaluator.Matches(entry, query);
-    }
-
-    private bool IsLoggerEnabled(string loggerName)
-    {
-        return Sources.IsLoggerEnabled(loggerName);
-    }
-
-    private bool IsLevelEnabled(LogLevel level)
-    {
-        return Filters.IsLevelEnabled(level);
+        _logStreamProjectionService.RebuildEntries(snapshot, Sources, QuickFilters, Filters, Stream);
     }
 
     private void OnSourcesStateChanged(object? sender, EventArgs e)
@@ -398,11 +354,6 @@ public partial class MainWindowViewModel : ViewModelBase
         QueuePersistWorkspaceState();
     }
 
-    private LogQuery BuildCurrentQuery()
-    {
-        return Filters.BuildQuery();
-    }
-
     private static double ClampColumnWidth(double value, double min, double max)
     {
         return Math.Clamp(value, min, max);
@@ -413,18 +364,12 @@ public partial class MainWindowViewModel : ViewModelBase
         ThemeSummary = $"Theme: {_themeService.CurrentMode}";
     }
 
-    private static bool HasStructuredData(LogEntry entry)
-    {
-        return entry.Properties.Count > 0 ||
-               !string.IsNullOrWhiteSpace(entry.StructuredPayloadJson) ||
-               !string.IsNullOrWhiteSpace(entry.MessageTemplate);
-    }
-
     private void UpdateQuickFiltersSnapshot()
     {
         IReadOnlyList<LogEntry> snapshot = _ingestionSession.Snapshot();
-        QuickFilters.ErrorsAndAboveCount = snapshot.Count(static entry => entry.Level is LogLevel.Error or LogLevel.Fatal);
-        QuickFilters.StructuredOnlyCount = snapshot.Count(HasStructuredData);
+        QuickFilterSnapshot quickFilterSnapshot = _logStreamProjectionService.ComputeQuickFilterSnapshot(snapshot);
+        QuickFilters.ErrorsAndAboveCount = quickFilterSnapshot.ErrorsAndAboveCount;
+        QuickFilters.StructuredOnlyCount = quickFilterSnapshot.StructuredOnlyCount;
     }
 
     private void UpdateShellStatusPresentation()
