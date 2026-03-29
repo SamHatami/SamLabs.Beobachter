@@ -1241,3 +1241,23 @@ Impact:
 
 Follow-ups:
 - Convert `SessionHealthView` from card-style panel to a denser horizontal bottom status bar surface.
+
+## 2026-03-29 - MVVM Refactor Phase 8B: Horizontal Bottom Status Bar Surface
+What changed:
+- Reworked bottom health view presentation in:
+  [SessionHealthView.axaml](/C:/Workspace/SamLabs.Beobachter/SamLabs.Beobachter.Application/Views/Status/SessionHealthView.axaml)
+  - replaced stacked card layout with a single-row horizontal status surface
+  - kept existing `SessionHealthViewModel` bindings unchanged (`ActiveReceiversText`, `BufferedEntriesText`, `StructuredEventsText`, `DroppedPacketsText`)
+  - switched background from `ShellBackgroundBrush` to `ShellPanelBrush` for clearer shell status bar contrast
+
+Why:
+- The previous vertical card shape consumed too much height for a bottom-docked shell status region.
+- A horizontal status row better matches operator workflows where log stream density is prioritized.
+
+Impact:
+- No behavior or data-flow changes; presentation-only refactor.
+- Bottom status area is denser and visually consistent with the shell’s docked status intent.
+- Full suite remains green (`85` passing tests).
+
+Follow-ups:
+- If we need stronger scan-ability under load, split each status metric into a compact label/value token style.

@@ -3,21 +3,27 @@
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels.Status"
              x:Class="SamLabs.Beobachter.Application.Views.Status.SessionHealthView"
              x:DataType="viewModels:SessionHealthViewModel">
-    <Border Padding="8"
+    <Border Padding="12,8"
             CornerRadius="8"
-            Background="{DynamicResource ShellBackgroundBrush}">
-        <StackPanel Spacing="6">
-            <TextBlock Text="Session Health"
-                       FontWeight="SemiBold"
-                       Foreground="{DynamicResource ShellForegroundBrush}" />
+            Background="{DynamicResource ShellPanelBrush}">
+        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto"
+              ColumnSpacing="16">
             <TextBlock Text="{Binding ActiveReceiversText}"
+                       Grid.Column="0"
+                       VerticalAlignment="Center"
                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
             <TextBlock Text="{Binding BufferedEntriesText}"
+                       Grid.Column="1"
+                       VerticalAlignment="Center"
                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
             <TextBlock Text="{Binding StructuredEventsText}"
+                       Grid.Column="2"
+                       VerticalAlignment="Center"
                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
             <TextBlock Text="{Binding DroppedPacketsText}"
+                       Grid.Column="3"
+                       VerticalAlignment="Center"
                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
