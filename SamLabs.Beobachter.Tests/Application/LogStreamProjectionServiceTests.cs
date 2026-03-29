@@ -55,8 +55,10 @@ public sealed class LogStreamProjectionServiceTests
 
         Assert.Equal(2, stream.VisibleEntries.Count);
         Assert.NotEmpty(sources.LoggerTreeItems);
+        Assert.Equal(2, sources.VisibleSourceItems.Count);
         Assert.Contains(MainWindowTestSupport.Flatten(sources.LoggerTreeItems), x => x.FullPath == "Orders.Api.Payments");
         Assert.Contains(MainWindowTestSupport.Flatten(sources.LoggerTreeItems), x => x.FullPath == "Inventory.Api.Sync");
+        Assert.Contains(sources.VisibleSourceItems, x => x.Name == "Orders.Api.Payments" && x.Count == 1);
     }
 
     [Fact]

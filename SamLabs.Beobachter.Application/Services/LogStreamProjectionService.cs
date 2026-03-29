@@ -51,7 +51,7 @@ public sealed class LogStreamProjectionService : ILogStreamProjectionService
 
         foreach (LogEntry entry in appendedEntries)
         {
-            sources.RegisterLogger(entry.LoggerName);
+            sources.RegisterEntry(entry);
         }
 
         LogQuery query = filters.BuildQuery();
@@ -79,7 +79,7 @@ public sealed class LogStreamProjectionService : ILogStreamProjectionService
             return false;
         }
 
-        if (!sources.IsLoggerEnabled(entry.LoggerName))
+        if (!sources.IsEntryEnabled(entry))
         {
             return false;
         }

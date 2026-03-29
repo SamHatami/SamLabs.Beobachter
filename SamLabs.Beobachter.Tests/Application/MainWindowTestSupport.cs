@@ -38,7 +38,7 @@ internal static class MainWindowTestSupport
         QuickFiltersViewModel quickFilters = new();
         ReceiverSetupViewModel receiverSetup = new(resolvedSettingsStore, session);
         LogFiltersViewModel filters = new();
-        WorkspaceSidebarViewModel workspaceSidebar = new(sources, quickFilters, receiverSetup, filters);
+        WorkspaceSidebarViewModel workspaceSidebar = new(sources, quickFilters, filters);
 
         return new MainWindowViewModel(
             shellStatusFormatter,

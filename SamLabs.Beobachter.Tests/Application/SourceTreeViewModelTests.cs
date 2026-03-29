@@ -20,6 +20,8 @@ public sealed class SourceTreeViewModelTests
         vm.RebuildFromSnapshot(snapshot);
 
         Assert.NotEmpty(vm.LoggerTreeItems);
+        Assert.Equal(2, vm.VisibleSourceItems.Count);
+        Assert.Contains(vm.VisibleSourceItems, x => x.Name == "Orders.Api.Payments" && x.Count == 1);
         Assert.True(vm.IsLoggerEnabled("Orders.Api.Payments"));
         Assert.True(vm.IsLoggerEnabled("Orders.Api.Checkout"));
     }
@@ -62,5 +64,21 @@ public sealed class SourceTreeViewModelTests
         vm.EnableAllLoggersCommand.Execute(null);
 
         Assert.True(vm.IsLoggerEnabled("Orders.Api.Payments"));
+    }
+
+    [Fact]
+    public void SourceSearchText_FiltersVisibleSourceItems()
+    {
+        SourceTreeViewModel vm = new();
+        vm.RebuildFromSnapshot(
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api.Payments", LogLevel.Warn, "warn"),
+            MainWindowTestSupport.CreateEntry("Inventory.Api.Sync", LogLevel.Info, "info")
+        ]);
+
+        vm.SourceSearchText = "Orders";
+
+        Assert.Single(vm.VisibleSourceItems);
+        Assert.Equal("Orders.Api.Payments", vm.VisibleSourceItems[0].Name);
     }
 }

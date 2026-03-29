@@ -19,7 +19,16 @@ public partial class MainWindow : Window
 
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
+        if (_boundViewModel is not null)
+        {
+            _boundViewModel.TopBar.SettingsRequested -= OnTopBarSettingsRequested;
+        }
+
         _boundViewModel = DataContext as MainWindowViewModel;
+        if (_boundViewModel is not null)
+        {
+            _boundViewModel.TopBar.SettingsRequested += OnTopBarSettingsRequested;
+        }
     }
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)
@@ -68,5 +77,20 @@ public partial class MainWindow : Window
             _boundViewModel.Stream.SelectPreviousEntryCommand.Execute(null);
             e.Handled = true;
         }
+    }
+
+    private async void OnTopBarSettingsRequested(object? sender, EventArgs e)
+    {
+        if (_boundViewModel is null)
+        {
+            return;
+        }
+
+        ReceiverSetupWindow window = new()
+        {
+            DataContext = _boundViewModel.ReceiverSetup
+        };
+
+        await window.ShowDialog(this);
     }
 }

@@ -54,6 +54,7 @@ public sealed class LogQueryEvaluatorTests
             ThreadName = "thread-99",
             Message = "Charge created",
             Exception = "TimeoutException",
+            HostName = "node-7",
             Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["tenant"] = "beta"
@@ -63,8 +64,10 @@ public sealed class LogQueryEvaluatorTests
         Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "worker" }));
         Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "thread-99" }));
         Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "timeout" }));
+        Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "node-7" }));
         Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "tenant" }));
         Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "beta" }));
+        Assert.True(_evaluator.Matches(entry, new LogQuery { TextContains = "tenant:beta" }));
         Assert.False(_evaluator.Matches(entry, new LogQuery { TextContains = "does-not-exist" }));
     }
 }

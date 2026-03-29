@@ -32,7 +32,6 @@ public sealed class MainWindowDesignViewModel : MainWindowViewModel
         return new WorkspaceSidebarViewModel(
             new SourceTreeViewModel(),
             new QuickFiltersViewModel(),
-            new ReceiverSetupViewModel(new DesignSettingsStore(), new DesignIngestionSession()),
             new LogFiltersViewModel());
     }
 }

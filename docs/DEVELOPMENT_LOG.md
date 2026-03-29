@@ -1535,3 +1535,57 @@ Follow-ups:
 - Move receiver setup from sidebar expander to dedicated settings dialog.
 - Add sample generation to a dev/debug menu or remove from main surface.
 
+## 2026-03-29 - UI Rebuild Slice 2: Sidebar Facets + Receiver Setup Dialog
+What changed:
+- Rebuilt the sidebar surface in:
+  [WorkspaceSidebarView.axaml](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/WorkspaceSidebarView.axaml)
+  into a cohesive filter panel with:
+  - level checkboxes + counts
+  - inline preset toggles
+  - source/service checkbox list + counts + source search
+  - collapsible host, structured-field, and tags sections
+- Expanded source filtering state in:
+  [SourceTreeViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/SourceTreeViewModel.cs)
+  with flat source items/counts while preserving existing logger-tree state syncing.
+- Added sidebar-owned facet/count orchestration in:
+  [WorkspaceSidebarViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/WorkspaceSidebarViewModel.cs)
+  plus new UI item models:
+  [SourceFilterItemViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/SourceFilterItemViewModel.cs),
+  [SidebarFacetOptionViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/SidebarFacetOptionViewModel.cs)
+- Moved receiver setup out of the sidebar into a dedicated window:
+  [ReceiverSetupWindow.axaml](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/ReceiverSetupWindow.axaml),
+  [ReceiverSetupWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/ReceiverSetupWindow.axaml.cs)
+  opened from the top bar via:
+  [TopBarViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/TopBarViewModel.cs),
+  [TopBarView.axaml](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/TopBarView.axaml),
+  [MainWindow.axaml.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Views/MainWindow.axaml.cs)
+- Updated shell coordination so sidebar counts/facets refresh from the live snapshot in:
+  [MainWindowViewModel.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/ViewModels/MainWindowViewModel.cs),
+  [LogStreamProjectionService.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Application/Services/LogStreamProjectionService.cs)
+- Broadened text fallback matching for host names and `key:value` tag chips in:
+  [LogQueryEvaluator.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Core/Services/LogQueryEvaluator.cs)
+- Added/updated tests around source items, sidebar facets, and text fallback:
+  [SourceTreeViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Application/SourceTreeViewModelTests.cs),
+  [LogStreamProjectionServiceTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Application/LogStreamProjectionServiceTests.cs),
+  [WorkspaceSidebarViewModelTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Application/WorkspaceSidebarViewModelTests.cs),
+  [LogQueryEvaluatorTests.cs](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/SamLabs.Beobachter.Tests/Core/LogQueryEvaluatorTests.cs)
+- Added:
+  [global.json](/C:/Workspace/SamLabs.Beobachter/.claude/worktrees/upbeat-chandrasekhar/global.json)
+  to pin the repo to the installed `.NET 8.0.112` SDK because the default `.NET 10.0.103` install in this environment is missing workload-resolver folders and fails before real compilation starts.
+
+Why:
+- The Slice 1 sidebar was still transitional: raw structured fields, separate quick-filter block, and receiver setup still crowding the filter surface.
+- The target shell needs one coherent left rail focused on faceted filtering, with setup/edit workflows moved behind explicit settings access.
+- Receiver setup is still a valid child surface, but it should be opened intentionally rather than permanently occupying filter real estate.
+
+Impact:
+- Sidebar composition is now much closer to the target mockup and easier to scan under load.
+- Quick filters are no longer a standalone card; they behave as part of the sidebar filter system.
+- Receiver setup remains available, but no longer competes with day-to-day filtering space.
+- Verification is partially blocked in this environment: direct `dotnet msbuild` on individual net8 projects works in some cases, but solution/app `Build` still fails during project-reference target-framework evaluation without surfacing compiler/XAML diagnostics.
+
+Follow-ups:
+- Slice 3: replace the details text blob with structured header/attributes/payload/exception sections.
+- Slice 4: add icons, badges, and formalized panel/spacing tokens.
+- Revisit source display naming later if we want service-friendly aliases rather than exact logger/source names in the left rail.
+

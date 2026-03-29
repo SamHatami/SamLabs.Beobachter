@@ -65,9 +65,13 @@ public sealed class LogQueryEvaluator : ILogQueryEvaluator
     {
         return Contains(entry.Message, term) ||
                Contains(entry.LoggerName, term) ||
+               Contains(entry.HostName, term) ||
                Contains(entry.Exception, term) ||
                Contains(entry.ThreadName, term) ||
-               entry.Properties.Any(pair => Contains(pair.Key, term) || Contains(pair.Value, term));
+               entry.Properties.Any(pair =>
+                   Contains(pair.Key, term) ||
+                   Contains(pair.Value, term) ||
+                   Contains($"{pair.Key}:{pair.Value}", term));
     }
 
     private static bool MatchesPropertyFilters(LogEntry entry, IReadOnlyDictionary<string, string> filters)
