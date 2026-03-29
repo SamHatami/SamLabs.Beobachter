@@ -55,23 +55,12 @@
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
-                    <DropDownButton Classes="titlebar-button"
-                                    ToolTip.Tip="Theme"
-                                    i:Attached.Icon="fa-solid fa-palette">
-                        <DropDownButton.Flyout>
-                            <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                <MenuItem Header="System"
-                                          Command="{Binding TopBar.UseSystemThemeCommand}"
-                                          i:MenuItem.Icon="fa-solid fa-circle-half-stroke" />
-                                <MenuItem Header="Light"
-                                          Command="{Binding TopBar.UseLightThemeCommand}"
-                                          i:MenuItem.Icon="fa-solid fa-sun" />
-                                <MenuItem Header="Dark"
-                                          Command="{Binding TopBar.UseDarkThemeCommand}"
-                                          i:MenuItem.Icon="fa-solid fa-moon" />
-                            </MenuFlyout>
-                        </DropDownButton.Flyout>
-                    </DropDownButton>
+                    <Button Classes="titlebar-button"
+                            Click="OnAppSettingsClick"
+                            ToolTip.Tip="Application Settings">
+                        <i:Icon Value="fa-solid fa-gear"
+                                FontSize="13" />
+                    </Button>
 
                     <Button Classes="titlebar-button"
                             Click="OnMinimizeClick"

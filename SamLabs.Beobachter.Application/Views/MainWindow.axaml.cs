@@ -5,12 +5,14 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using SamLabs.Beobachter.Application.ViewModels;
+using SamLabs.Beobachter.Core.Interfaces;
 
 namespace SamLabs.Beobachter.Application.Views;
 
 public partial class MainWindow : Window
 {
     private MainWindowViewModel? _boundViewModel;
+    private ISettingsService? _settingsService;
 
     public MainWindow()
     {
@@ -19,6 +21,12 @@ public partial class MainWindow : Window
         PropertyChanged += OnWindowPropertyChanged;
         Closed += OnClosed;
         UpdateWindowStateIcons();
+    }
+
+    public ISettingsService? SettingsService
+    {
+        get => _settingsService;
+        set => _settingsService = value;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -93,6 +101,21 @@ public partial class MainWindow : Window
         ReceiverSetupWindow window = new()
         {
             DataContext = _boundViewModel.ReceiverSetup
+        };
+
+        await window.ShowDialog(this);
+    }
+
+    private async void OnAppSettingsClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (_settingsService is null)
+        {
+            return;
+        }
+
+        AppSettingsWindow window = new()
+        {
+            DataContext = new AppSettingsViewModel(_settingsService)
         };
 
         await window.ShowDialog(this);

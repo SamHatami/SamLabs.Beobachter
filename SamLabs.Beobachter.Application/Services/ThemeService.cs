@@ -25,6 +25,4 @@ public sealed class ThemeService : IThemeService
             _ => ThemeVariant.Default
         };
     }
-
-    AppThemeMode IThemeService.CurrentMode { get; }
 }

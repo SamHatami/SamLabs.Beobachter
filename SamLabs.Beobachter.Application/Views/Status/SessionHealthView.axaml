@@ -27,9 +27,20 @@
 
             <StackPanel Grid.Column="1"
                         Orientation="Horizontal"
-                        Spacing="8"
+                        Spacing="12"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="6"
+                            IsVisible="{Binding HasSettingsNotification}">
+                    <i:Icon Value="fa-solid fa-check-circle"
+                            FontSize="11"
+                            Foreground="{DynamicResource StatusRunningBrush}" />
+                    <TextBlock Text="{Binding SettingsNotification}"
+                               VerticalAlignment="Center"
+                               FontSize="11"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                </StackPanel>
                 <i:Icon Value="fa-solid fa-circle"
                         FontSize="10"
                         IsVisible="{Binding IsRunning}"

@@ -20,11 +20,9 @@ internal static class MainWindowTestSupport
         IIngestionSession session,
         IClipboardService? clipboardService = null,
         ISettingsStore? settingsStore = null,
-        IThemeService? themeService = null,
         ILogStatisticsService? statisticsService = null)
     {
         ArgumentNullException.ThrowIfNull(session);
-        IThemeService resolvedThemeService = themeService ?? new ThemeService();
         IClipboardService resolvedClipboardService = clipboardService ?? new FakeClipboardService();
         ISettingsStore resolvedSettingsStore = settingsStore ?? new FakeSettingsStore();
         IWorkspaceStateCoordinator workspaceStateCoordinator = new WorkspaceStateCoordinator(resolvedSettingsStore);
@@ -33,7 +31,7 @@ internal static class MainWindowTestSupport
         ISampleLogEntryGenerator sampleLogEntryGenerator = new SampleLogEntryGenerator();
         ILogStreamProjectionService logStreamProjectionService = new LogStreamProjectionService(new LogQueryEvaluator());
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
-        TopBarViewModel topBar = new(resolvedThemeService, session);
+        TopBarViewModel topBar = new(session);
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
         ReceiverSetupViewModel receiverSetup = new(resolvedSettingsStore, session);
@@ -56,7 +54,7 @@ internal static class MainWindowTestSupport
             filters,
             new LogStreamViewModel(session),
             new EntryDetailsViewModel(resolvedClipboardService),
-            new SessionHealthViewModel());
+            new SessionHealthViewModel(new FakeSettingsService()));
     }
 
     public static LogEntry CreateEntry(string logger, LogLevel level, string message)
@@ -191,6 +189,25 @@ internal sealed class FakeClipboardService : IClipboardService
     {
         LastText = text;
         return ValueTask.CompletedTask;
+    }
+}
+
+internal sealed class FakeSettingsService : ISettingsService
+{
+    public AppSettings CurrentAppSettings { get; private set; } = new();
+
+    public event EventHandler<AppSettingsSavedEventArgs>? AppSettingsSaved;
+
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAppSettingsAsync(AppSettings settings)
+    {
+        CurrentAppSettings = settings;
+        AppSettingsSaved?.Invoke(this, new AppSettingsSavedEventArgs(settings));
+        return Task.CompletedTask;
     }
 }
 

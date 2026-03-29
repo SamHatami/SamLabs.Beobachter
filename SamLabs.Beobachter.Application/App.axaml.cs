@@ -3,9 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using SamLabs.Beobachter.Application.Composition;
-using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Interfaces;
-using SamLabs.Beobachter.Core.Services;
 using MainWindow = SamLabs.Beobachter.Application.Views.MainWindow;
 using MainWindowViewModel = SamLabs.Beobachter.Application.ViewModels.MainWindowViewModel;
 
@@ -26,14 +24,8 @@ public partial class App : Avalonia.Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var settingsStore = _services.GetRequiredService<ISettingsStore>();
-            var appSettings = settingsStore.LoadAppSettingsAsync().GetAwaiter().GetResult();
-
-            var themeService = _services.GetRequiredService<IThemeService>();
-            themeService.SetTheme(ParseThemeMode(appSettings.ThemeMode));
-
-            var logLevelColorResourceService = _services.GetRequiredService<LogLevelColorResourceService>();
-            logLevelColorResourceService.ApplyOverrides(appSettings.LogLevelColors);
+            var settingsService = _services.GetRequiredService<ISettingsService>();
+            settingsService.InitializeAsync().GetAwaiter().GetResult();
 
             var ingestionSession = _services.GetRequiredService<IIngestionSession>();
             ingestionSession.StartAsync().GetAwaiter().GetResult();
@@ -41,6 +33,7 @@ public partial class App : Avalonia.Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext = _services.GetRequiredService<MainWindowViewModel>(),
+                SettingsService = settingsService
             };
 
             desktop.Exit += (_, _) =>
@@ -51,15 +44,5 @@ public partial class App : Avalonia.Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private static AppThemeMode ParseThemeMode(string? themeMode)
-    {
-        if (Enum.TryParse<AppThemeMode>(themeMode, true, out var parsed))
-        {
-            return parsed;
-        }
-
-        return AppThemeMode.System;
     }
 }

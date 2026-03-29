@@ -1,0 +1,203 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
+        x:Class="SamLabs.Beobachter.Application.Views.AppSettingsWindow"
+        x:DataType="viewModels:AppSettingsViewModel"
+        Width="620"
+        Height="640"
+        MinWidth="520"
+        MinHeight="480"
+        Title="Application Settings"
+        WindowStartupLocation="CenterOwner">
+    <Border Background="{DynamicResource ShellBackgroundBrush}">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Classes="shell-panel shell-flat shell-border-horizontal"
+                    Padding="14,10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="APPLICATION SETTINGS"
+                               Classes="panel-title" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="Theme, capacity, and log level colors"
+                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="16">
+                <StackPanel Spacing="20">
+
+                    <!-- Theme Section -->
+                    <Border Classes="shell-card"
+                            Padding="14">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="THEME"
+                                       Classes="section-caption" />
+                            <ComboBox x:Name="ThemeCombo"
+                                      SelectedIndex="{Binding SelectedThemeIndex}"
+                                      MinWidth="200"
+                                      HorizontalAlignment="Left">
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <i:Icon Value="fa-solid fa-circle-half-stroke" FontSize="12" />
+                                        <TextBlock Text="System" />
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <i:Icon Value="fa-solid fa-sun" FontSize="12" />
+                                        <TextBlock Text="Light" />
+                                    </StackPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <i:Icon Value="fa-solid fa-moon" FontSize="12" />
+                                        <TextBlock Text="Dark" />
+                                    </StackPanel>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Channel Capacity -->
+                    <Border Classes="shell-card"
+                            Padding="14">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="LOG BUFFER CAPACITY"
+                                       Classes="section-caption" />
+                            <TextBlock Text="Maximum number of log entries held in memory. Requires restart to take effect."
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            <NumericUpDown Value="{Binding ChannelCapacity}"
+                                           Minimum="1000"
+                                           Maximum="1000000"
+                                           Increment="5000"
+                                           FormatString="N0"
+                                           MinWidth="200"
+                                           HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Log Level Colors -->
+                    <Border Classes="shell-card"
+                            Padding="14">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="LOG LEVEL COLOR OVERRIDES"
+                                       Classes="section-caption" />
+                            <TextBlock Text="Enter hex colors (e.g. #FF5555) to override default level colors. Leave blank for defaults."
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+
+                            <!-- Column headers -->
+                            <Grid ColumnDefinitions="80,*,*,*"
+                                  Margin="0,4,0,0">
+                                <TextBlock Grid.Column="0"
+                                           Text="Level"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="Row"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           Margin="4,0,0,0"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                <TextBlock Grid.Column="2"
+                                           Text="Badge"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           Margin="4,0,0,0"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                <TextBlock Grid.Column="3"
+                                           Text="Message"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           Margin="4,0,0,0"
+                                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                            </Grid>
+
+                            <!-- Trace -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Trace" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding TraceRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding TraceBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding TraceMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+
+                            <!-- Debug -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Debug" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding DebugRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding DebugBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding DebugMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+
+                            <!-- Info -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Info" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding InfoRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding InfoBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding InfoMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+
+                            <!-- Warn -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Warn" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding WarnRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding WarnBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding WarnMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+
+                            <!-- Error -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Error" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding ErrorRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding ErrorBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding ErrorMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+
+                            <!-- Fatal -->
+                            <Grid ColumnDefinitions="80,*,*,*">
+                                <TextBlock Grid.Column="0" Text="Fatal" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource ShellForegroundBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding FatalRowColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="2" Text="{Binding FatalBadgeColor}" Watermark="#hex" Margin="4,0" />
+                                <TextBox Grid.Column="3" Text="{Binding FatalMessageColor}" Watermark="#hex" Margin="4,0" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    Classes="shell-panel shell-flat shell-border-horizontal"
+                    Padding="14,10">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="8">
+                    <Button Content="Cancel"
+                            Classes="receiver-setup-button"
+                            Click="OnCancelClick" />
+                    <Button Content="Save"
+                            Classes="receiver-setup-button primary"
+                            Command="{Binding SaveCommand}"
+                            Click="OnSaveClick" />
+                </StackPanel>
+            </Border>
+
+        </Grid>
+    </Border>
+</Window>
