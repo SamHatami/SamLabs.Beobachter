@@ -22,35 +22,10 @@
 
     <Border Classes="shell-panel shell-flat shell-border-horizontal"
             Padding="0">
-        <Grid RowDefinitions="Auto,Auto,*"
+        <Grid RowDefinitions="Auto,*"
               Grid.IsSharedSizeScope="True"
               RowSpacing="0">
         <Border Grid.Row="0"
-                Classes="shell-panel shell-flat shell-border-bottom"
-                Padding="10,8">
-            <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="10">
-                <TextBlock Grid.Column="0"
-                           Text="RESULTS"
-                           Classes="section-caption"
-                           VerticalAlignment="Center" />
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            Spacing="6">
-                    <Button Classes="toolbar-button"
-                            ToolTip.Tip="Toggle row density between Comfortable and Compact."
-                            Command="{Binding ToggleDensityCommand}"
-                            i:Attached.Icon="fa-solid fa-grip-lines" />
-                    <ToggleButton Classes="toolbar-button"
-                                  ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
-                                  IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"
-                                  Command="{Binding ToggleAutoScrollCommand}"
-                                  i:Attached.Icon="fa-solid fa-thumbtack" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <Border Grid.Row="1"
                 Classes="shell-panel shell-flat shell-border-bottom"
                 Padding="10,8">
             <Grid>
@@ -62,6 +37,8 @@
                     <ColumnDefinition Width="Auto"
                                       SharedSizeGroup="LogSourceColumn" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto"
+                                      SharedSizeGroup="LogActionsColumn" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
                            Margin="0,0,10,0"
@@ -78,10 +55,24 @@
                 <TextBlock Grid.Column="3"
                            Text="Message"
                            Classes="section-caption" />
+                <StackPanel Grid.Column="4"
+                            Orientation="Horizontal"
+                            Spacing="6"
+                            HorizontalAlignment="Right">
+                    <Button Classes="toolbar-button"
+                            ToolTip.Tip="Toggle row density between Comfortable and Compact."
+                            Command="{Binding ToggleDensityCommand}"
+                            i:Attached.Icon="fa-solid fa-grip-lines" />
+                    <ToggleButton Classes="toolbar-button"
+                                  ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
+                                  IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"
+                                  Command="{Binding ToggleAutoScrollCommand}"
+                                  i:Attached.Icon="fa-solid fa-thumbtack" />
+                </StackPanel>
             </Grid>
         </Border>
 
-        <Border Grid.Row="2"
+        <Border Grid.Row="1"
                 Classes="shell-panel shell-flat shell-border-none"
                 Padding="2">
             <ListBox x:Name="LogEntriesList"
@@ -109,6 +100,8 @@
                                     <ColumnDefinition Width="Auto"
                                                       SharedSizeGroup="LogSourceColumn" />
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto"
+                                                      SharedSizeGroup="LogActionsColumn" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
                                            FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
@@ -128,6 +121,8 @@
                                            Foreground="{Binding Level, Converter={StaticResource LogLevelToMessageBrushConverter}}"
                                            Text="{Binding Message}"
                                            TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="4"
+                                           Text="" />
                             </Grid>
                         </Border>
                     </DataTemplate>

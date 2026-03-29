@@ -23,7 +23,7 @@
         <designViewModels:MainWindowDesignViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto"
+    <Grid RowDefinitions="Auto,*,Auto"
           Background="{DynamicResource ShellBackgroundBrush}">
 
         <Border Grid.Row="0"
@@ -55,6 +55,24 @@
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
+                    <DropDownButton Classes="titlebar-button"
+                                    ToolTip.Tip="Theme"
+                                    i:Attached.Icon="fa-solid fa-palette">
+                        <DropDownButton.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="System"
+                                          Command="{Binding TopBar.UseSystemThemeCommand}"
+                                          i:MenuItem.Icon="fa-solid fa-circle-half-stroke" />
+                                <MenuItem Header="Light"
+                                          Command="{Binding TopBar.UseLightThemeCommand}"
+                                          i:MenuItem.Icon="fa-solid fa-sun" />
+                                <MenuItem Header="Dark"
+                                          Command="{Binding TopBar.UseDarkThemeCommand}"
+                                          i:MenuItem.Icon="fa-solid fa-moon" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+
                     <Button Classes="titlebar-button"
                             Click="OnMinimizeClick"
                             ToolTip.Tip="Minimize">
@@ -84,13 +102,8 @@
             </Grid>
         </Border>
 
-        <!-- Row 1: Top Bar -->
-        <ContentControl x:Name="TopBarHost"
-                        Grid.Row="1"
-                        Content="{Binding TopBar}" />
-
-        <!-- Row 2: Workspace (sidebar | splitter | stream | splitter | details) -->
-        <Grid Grid.Row="2"
+        <!-- Row 1: Workspace (sidebar | splitter | stream panel | splitter | details) -->
+        <Grid Grid.Row="1"
               ColumnDefinitions="240,Auto,*,Auto,340">
 
             <!-- Left sidebar: filters + sources -->
@@ -102,9 +115,15 @@
                           ResizeBehavior="PreviousAndNext"
                           Background="{DynamicResource ShellPanelBorderBrush}" />
 
-            <!-- Center: log stream -->
-            <ContentControl Grid.Column="2"
-                            Content="{Binding Stream}" />
+            <!-- Center: stream search + log stream -->
+            <Grid Grid.Column="2"
+                  RowDefinitions="Auto,*">
+                <ContentControl x:Name="StreamSearchHost"
+                                Grid.Row="0"
+                                Content="{Binding TopBar}" />
+                <ContentControl Grid.Row="1"
+                                Content="{Binding Stream}" />
+            </Grid>
 
             <GridSplitter Grid.Column="3"
                           Width="1"
@@ -116,8 +135,8 @@
                             Content="{Binding Details}" />
         </Grid>
 
-        <!-- Row 3: Bottom Status Strip -->
-        <ContentControl Grid.Row="3"
+        <!-- Row 2: Bottom Status Strip -->
+        <ContentControl Grid.Row="2"
                         Content="{Binding SessionHealth}" />
     </Grid>
 </Window>

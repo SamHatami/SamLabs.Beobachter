@@ -43,22 +43,6 @@
                         ToolTip.Tip="Receiver settings"
                         Command="{Binding OpenSettingsCommand}"
                         i:Attached.Icon="fa-solid fa-gear" />
-                <DropDownButton Classes="toolbar-button"
-                                i:Attached.Icon="fa-solid fa-palette">
-                    <DropDownButton.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <MenuItem Header="System"
-                                      Command="{Binding UseSystemThemeCommand}"
-                                      i:MenuItem.Icon="fa-solid fa-circle-half-stroke" />
-                            <MenuItem Header="Light"
-                                      Command="{Binding UseLightThemeCommand}"
-                                      i:MenuItem.Icon="fa-solid fa-sun" />
-                            <MenuItem Header="Dark"
-                                      Command="{Binding UseDarkThemeCommand}"
-                                      i:MenuItem.Icon="fa-solid fa-moon" />
-                        </MenuFlyout>
-                    </DropDownButton.Flyout>
-                </DropDownButton>
             </StackPanel>
         </Grid>
     </Border>

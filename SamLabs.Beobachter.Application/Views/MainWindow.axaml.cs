@@ -44,7 +44,7 @@ public partial class MainWindow : Window
 
         if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.F)
         {
-            TopBarView? topBarView = TopBarHost.GetVisualDescendants()
+            TopBarView? topBarView = StreamSearchHost.GetVisualDescendants()
                 .OfType<TopBarView>()
                 .FirstOrDefault();
             topBarView?.FocusSearchBox();
