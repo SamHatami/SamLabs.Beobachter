@@ -28,6 +28,10 @@
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFF19993" />
     <SolidColorBrush x:Key="StatusRunningBrush" Color="#FF69D97A" />
     <SolidColorBrush x:Key="StatusPausedBrush" Color="#FFF0C64F" />
+    <SolidColorBrush x:Key="ReceiverPowerButtonBackgroundBrush" Color="#FF2B2E34" />
+    <SolidColorBrush x:Key="ReceiverPowerButtonBorderBrush" Color="#FF4A4F58" />
+    <SolidColorBrush x:Key="ReceiverPowerOnBrush" Color="#FF69D97A" />
+    <SolidColorBrush x:Key="ReceiverPowerOffBrush" Color="#FF8F949E" />
     <SolidColorBrush x:Key="StreamPauseActiveBrush" Color="#FF2B3830" />
     <SolidColorBrush x:Key="StreamPauseActiveBorderBrush" Color="#FF58745E" />
     <SolidColorBrush x:Key="StreamPausePausedBrush" Color="#FF3A2D2F" />
@@ -57,5 +61,5 @@
     <SolidColorBrush x:Key="MessageFatalBrush" Color="#FFC99691" />
     <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FFE4E3DE" />
     
-    <SolidColorBrush x:Key="ButtonClearLog" Color="Red"/>
+    <SolidColorBrush x:Key="ButtonClearLog" Color="#F87171"/>
 </ResourceDictionary>

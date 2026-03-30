@@ -16,10 +16,11 @@
                                Text="FILTERS"
                                Classes="panel-title" />
                     <Button Grid.Column="1"
-                            Classes="toolbar-button"
-                            Command="{Binding ClearAllFiltersCommand}"
-                            Content="Clear All"
-                            i:Attached.Icon="fa-solid fa-broom" />
+                            Classes="toolbar-button sidebar-header-action"
+                            Command="{Binding ResetAllFiltersCommand}"
+                            Content="Reset"
+                            ToolTip.Tip="Reset search, level, quick, source, and structured filters."
+                            i:Attached.Icon="fa-solid fa-filter" />
                 </Grid>
 
                 <Expander Classes="sidebar-expander"

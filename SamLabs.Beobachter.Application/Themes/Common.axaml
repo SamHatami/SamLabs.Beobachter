@@ -125,6 +125,12 @@
         <Setter Property="Foreground" Value="{DynamicResource ButtonClearLog}"/>
     </Style>
 
+    <Style Selector="Button.sidebar-header-action">
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
     <Style Selector="Button.stream-pause-toggle.stream-pause-active">
         <Setter Property="Background" Value="{DynamicResource StreamPauseActiveBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource StreamPauseActiveBorderBrush}" />
@@ -398,6 +404,10 @@
         <Setter Property="ColumnSpacing" Value="8" />
     </Style>
 
+    <Style Selector="TextBlock.receiver-tree-header-title">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <Style Selector="Border.receiver-tree-header-count-badge">
         <Setter Property="Padding" Value="5,5" />
         <Setter Property="Margin" Value="0,5" />
@@ -497,17 +507,73 @@
         <Setter Property="Fill" Value="{DynamicResource MessageErrorBrush}" />
     </Style>
 
+    <Style Selector="Ellipse.receiver-tree-state.receiver-tree-state-disabled">
+        <Setter Property="Fill" Value="{DynamicResource ReceiverPowerOffBrush}" />
+    </Style>
+
     <Style Selector="TextBlock.receiver-tree-item-title">
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         <Setter Property="FontSize" Value="12" />
     </Style>
 
-    <Style Selector="ToggleSwitch.receiver-tree-enabled-toggle">
+    <Style Selector="ToggleButton.receiver-tree-power-toggle">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="22" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource ReceiverPowerButtonBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ReceiverPowerButtonBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
+        <Setter Property="Margin" Value="1,0,2,0" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle i|Icon.receiver-tree-power-toggle-icon">
+        <Setter Property="Foreground" Value="{DynamicResource ReceiverPowerOffBrush}" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle:checked">
+        <Setter Property="Background" Value="{DynamicResource ReceiverPowerButtonBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ReceiverPowerButtonBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle:checked i|Icon.receiver-tree-power-toggle-icon">
+        <Setter Property="Foreground" Value="{DynamicResource ReceiverPowerOnBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle:checked:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellButtonHoverBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
+    </Style>
+
+    <Style Selector="ToggleButton.receiver-tree-power-toggle:checked:pressed">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonPressedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellButtonPressedBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
     </Style>
 
     <Style Selector="Button.receiver-tree-edit-button">
         <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.receiver-tree-delete-button">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="4,0,0,0" />
     </Style>
 </Styles>

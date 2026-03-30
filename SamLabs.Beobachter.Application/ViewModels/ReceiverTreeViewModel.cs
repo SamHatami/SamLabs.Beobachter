@@ -79,6 +79,19 @@ public sealed partial class ReceiverTreeViewModel : ViewModelBase
         RequestOpenEditor();
     }
 
+    [RelayCommand]
+    private void RemoveReceiver(ReceiverDefinitionViewModel? receiver)
+    {
+        if (receiver is null)
+        {
+            return;
+        }
+
+        ReceiverSetup.SelectedReceiverDefinition = receiver;
+        SelectedNode = receiver;
+        ReceiverSetup.RemoveSelectedReceiverCommand.Execute(null);
+    }
+
     public void UpdateRuntimeStates(IReadOnlyList<ReceiverRuntimeState> runtimeStates)
     {
         foreach (ReceiverDefinitionViewModel receiver in ReceiverSetup.ReceiverDefinitions)

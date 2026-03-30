@@ -29,27 +29,38 @@
 
         <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
             <Grid Classes="receiver-tree-item-row"
-                  ColumnDefinitions="Auto,*,Auto,Auto">
+                  ColumnDefinitions="Auto,Auto,*,Auto,Auto">
                 <Grid Grid.Column="0"
                       Classes="receiver-tree-state-host">
                     <Ellipse Classes="receiver-tree-state receiver-tree-state-running"
-                             IsVisible="{Binding IsRunning}" />
+                             IsVisible="{Binding IsStatusRunning}" />
                     <Ellipse Classes="receiver-tree-state receiver-tree-state-faulted"
-                             IsVisible="{Binding IsFaulted}" />
+                             IsVisible="{Binding IsStatusFaulted}" />
+                    <Ellipse Classes="receiver-tree-state receiver-tree-state-disabled"
+                             IsVisible="{Binding IsStatusDisabled}" />
                 </Grid>
-                <TextBlock Grid.Column="1"
+                <ToggleButton Grid.Column="1"
+                              Classes="receiver-tree-power-toggle"
+                              IsChecked="{Binding Enabled, Mode=TwoWay}"
+                              ToolTip.Tip="Enable or disable this receiver">
+                    <i:Icon Classes="receiver-tree-power-toggle-icon"
+                            Value="fa-solid fa-power-off" />
+                </ToggleButton>
+                <TextBlock Grid.Column="2"
                            Classes="receiver-tree-item-title"
                            Text="{Binding DisplayName}" />
-                <ToggleSwitch Grid.Column="2"
-                              Classes="receiver-tree-enabled-toggle"
-                              IsChecked="{Binding Enabled, Mode=TwoWay}"
-                              ToolTip.Tip="Enable or disable this receiver" />
                 <Button Grid.Column="3"
                         Classes="toolbar-button icon-button receiver-tree-edit-button"
                         Command="{Binding ((viewModels:ReceiverTreeViewModel)DataContext).OpenReceiverEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                         CommandParameter="{Binding}"
                         ToolTip.Tip="Edit receiver"
                         i:Attached.Icon="fa-solid fa-pen" />
+                <Button Grid.Column="4"
+                        Classes="toolbar-button-clear icon-button receiver-tree-delete-button"
+                        Command="{Binding ((viewModels:ReceiverTreeViewModel)DataContext).RemoveReceiverCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                        ToolTip.Tip="Delete receiver"
+                        i:Attached.Icon="fa-solid fa-trash-can" />
             </Grid>
         </DataTemplate>
     </UserControl.DataTemplates>
@@ -60,7 +71,7 @@
             <Grid Classes="receiver-tree-header-grid"
                   ColumnDefinitions="Auto,Auto,*,Auto">
                 <TextBlock Grid.Column="0"
-                           Classes="section-caption"
+                           Classes="section-caption receiver-tree-header-title"
                            Text="RECEIVERS" />
                 <Border Grid.Column="1"
                         Classes="receiver-tree-header-count-badge">

@@ -51,7 +51,7 @@ public sealed partial class WorkspaceSidebarViewModel : ViewModelBase
     public ObservableCollection<SidebarFacetOptionViewModel> TagOptions { get; } = [];
 
     [RelayCommand]
-    private void ClearAllFilters()
+    private void ResetAllFilters()
     {
         Filters.ClearSearchCommand.Execute(null);
         Filters.ClearStructuredFiltersCommand.Execute(null);

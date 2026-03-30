@@ -28,6 +28,9 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     [ObservableProperty]
     private string _displayName = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(IsStatusRunning))]
+    [NotifyPropertyChangedFor(nameof(IsStatusFaulted))]
+    [NotifyPropertyChangedFor(nameof(IsStatusDisabled))]
     [ObservableProperty]
     private bool _enabled = true;
 
@@ -89,6 +92,8 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsRunning))]
     [NotifyPropertyChangedFor(nameof(IsFaulted))]
     [NotifyPropertyChangedFor(nameof(IsStopped))]
+    [NotifyPropertyChangedFor(nameof(IsStatusRunning))]
+    [NotifyPropertyChangedFor(nameof(IsStatusFaulted))]
     [ObservableProperty]
     private ReceiverRunState _runState = ReceiverRunState.Stopped;
 
@@ -103,6 +108,12 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     public bool IsFaulted => RunState == ReceiverRunState.Faulted;
 
     public bool IsStopped => RunState == ReceiverRunState.Stopped;
+
+    public bool IsStatusRunning => Enabled && !IsFaulted;
+
+    public bool IsStatusFaulted => Enabled && IsFaulted;
+
+    public bool IsStatusDisabled => !Enabled;
 
     public bool HasDisplayNameValidationError => DisplayNameValidationError.Length > 0;
 
