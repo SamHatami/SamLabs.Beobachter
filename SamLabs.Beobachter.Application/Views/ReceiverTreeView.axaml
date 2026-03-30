@@ -7,14 +7,17 @@
              x:DataType="viewModels:ReceiverTreeViewModel">
 
     <Expander Classes="sidebar-expander"
-              IsExpanded="{Binding IsExpanded}">
+              IsExpanded="True">
         <Expander.Header>
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8">
-                <TextBlock Text="RECEIVERS"
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
+                  ColumnSpacing="8">
+                <TextBlock Grid.Column="0"
+                           Text="RECEIVERS"
                            Classes="section-caption"
                            VerticalAlignment="Center" />
-                <Border Padding="5,1"
+                <Border Grid.Column="1"
+                        Padding="5,5"
+                        Margin="0,5"
                         CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
                         Background="{DynamicResource ShellChromeBrush}"
                         BorderBrush="{DynamicResource ShellChromeBorderBrush}"
@@ -24,31 +27,29 @@
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                 </Border>
-            </StackPanel>
+                <StackPanel Grid.Column="3"
+                            Orientation="Horizontal"
+                            Spacing="2"
+                            IsVisible="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=Expander}}">
+                    <Button Classes="toolbar-button"
+                            
+                            Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
+                            ToolTip.Tip="Save + Reload"
+                            i:Attached.Icon="fa-solid fa-floppy-disk" />
+                    <Button Classes="toolbar-button"
+                            Command="{Binding ReceiverSetup.ReloadReceiverSetupCommand}"
+                            ToolTip.Tip="Reload from disk"
+                            i:Attached.Icon="fa-solid fa-rotate" />
+                    <Button Classes="toolbar-button"
+                            Click="OnOpenEditorClick"
+                            ToolTip.Tip="Open receiver editor"
+                            i:Attached.Icon="fa-solid fa-gear" />
+                </StackPanel>
+            </Grid>
         </Expander.Header>
 
         <StackPanel Classes="sidebar-expander-content"
                     Spacing="0">
-
-            <!-- Toolbar: Save, Reload, Open Editor -->
-            <StackPanel Orientation="Horizontal"
-                        Spacing="2"
-                        HorizontalAlignment="Right"
-                        Margin="0,0,0,6">
-                <Button Classes="toolbar-button"
-                        Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
-                        ToolTip.Tip="Save + Reload"
-                        i:Attached.Icon="fa-solid fa-floppy-disk" />
-                <Button Classes="toolbar-button"
-                        Command="{Binding ReceiverSetup.ReloadReceiverSetupCommand}"
-                        ToolTip.Tip="Reload from disk"
-                        i:Attached.Icon="fa-solid fa-rotate" />
-                <Button Classes="toolbar-button"
-                        Click="OnOpenEditorClick"
-                        ToolTip.Tip="Open receiver editor"
-                        i:Attached.Icon="fa-solid fa-gear" />
-            </StackPanel>
-
             <!-- UDP group -->
             <Grid ColumnDefinitions="Auto,*,Auto"
                   ColumnSpacing="4"
@@ -77,7 +78,7 @@
                         <StackPanel Orientation="Horizontal"
                                     Spacing="6"
                                     MinHeight="26"
-                                    Margin="2,1">
+                                    Margin="20,1">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="4"
                                         VerticalAlignment="Center"
@@ -90,8 +91,7 @@
                                          Height="7"
                                          Fill="#ef4444"
                                          IsVisible="{Binding IsFaulted}" />
-                                <TextBlock Width="170"
-                                           Text="{Binding DisplayName}"
+                                <TextBlock Text="{Binding DisplayName}"
                                            VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis"
                                            FontSize="12" />
@@ -139,7 +139,7 @@
                         <StackPanel Orientation="Horizontal"
                                     Spacing="6"
                                     MinHeight="26"
-                                    Margin="2,1">
+                                    Margin="20,1">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="4"
                                         VerticalAlignment="Center"
@@ -152,8 +152,8 @@
                                          Height="7"
                                          Fill="#ef4444"
                                          IsVisible="{Binding IsFaulted}" />
-                                <TextBlock Width="170"
-                                           Text="{Binding DisplayName}"
+                                <TextBlock
+                                    Text="{Binding DisplayName}"
                                            VerticalAlignment="Center"
                                            TextTrimming="CharacterEllipsis"
                                            FontSize="12" />
@@ -201,7 +201,7 @@
                         <StackPanel Orientation="Horizontal"
                                     Spacing="6"
                                     MinHeight="26"
-                                    Margin="2,1">
+                                    Margin="20,1">
                             <StackPanel Orientation="Horizontal"
                                         Spacing="4"
                                         VerticalAlignment="Center"

@@ -22,7 +22,8 @@ public sealed class ReceiverSetupViewModelTests
         ReceiverDefinitionViewModel fileReceiver = vm.ReceiverDefinitions.Single(x => x.IsFile);
         fileReceiver.FilePath = "C:/logs/app.log";
         ReceiverDefinitionViewModel udpReceiver = vm.ReceiverDefinitions.Single(x => x.IsUdp);
-        udpReceiver.ParserOrderText = "JsonLogParser, PlainTextParser";
+        udpReceiver.IsLog4jXmlParserEnabled = false;
+        udpReceiver.IsCsvParserEnabled = false;
 
         await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
 
@@ -34,6 +35,28 @@ public sealed class ReceiverSetupViewModelTests
         Assert.Equal("C:/logs/app.log", saved.FileTailReceivers[0].FilePath);
         Assert.Equal(["JsonLogParser", "PlainTextParser"], saved.UdpReceivers[0].ParserOrder);
         Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    [Fact]
+    public async Task SaveReceiverSetup_NoParsersSelected_IsRejectedBeforeReload()
+    {
+        FakeSettingsStore settings = new();
+        FakeIngestionSession session = new([]);
+        ReceiverSetupViewModel vm = new(settings, session);
+        await vm.LoadAsync();
+
+        vm.AddUdpReceiverCommand.Execute(null);
+        ReceiverDefinitionViewModel udp = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        udp.IsLog4jXmlParserEnabled = false;
+        udp.IsJsonLogParserEnabled = false;
+        udp.IsCsvParserEnabled = false;
+        udp.IsPlainTextParserEnabled = false;
+
+        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+
+        Assert.Null(settings.LastSavedReceiverDefinitions);
+        Assert.Equal(0, session.ReloadReceiversCalls);
+        Assert.Equal("Parser order cannot be empty.", udp.ParserOrderValidationError);
     }
 
     [Fact]

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SamLabs.Beobachter.Core.Models;
 
@@ -5,7 +8,12 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 
 public sealed partial class ReceiverDefinitionViewModel : ObservableObject
 {
+    private const string Log4jXmlParserName = "Log4jXmlParser";
+    private const string JsonLogParserName = "JsonLogParser";
+    private const string CsvParserName = "CsvParser";
+    private const string PlainTextParserName = "PlainTextParser";
     private static readonly string[] DefaultParserOrder = ["Log4jXmlParser", "JsonLogParser", "CsvParser", "PlainTextParser"];
+    private bool _isSyncingParserSelection;
 
     public ReceiverDefinitionViewModel(string kind)
     {
@@ -37,6 +45,18 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
 
     [ObservableProperty]
     private string _parserOrderText = string.Join(", ", DefaultParserOrder);
+
+    [ObservableProperty]
+    private bool _isLog4jXmlParserEnabled = true;
+
+    [ObservableProperty]
+    private bool _isJsonLogParserEnabled = true;
+
+    [ObservableProperty]
+    private bool _isCsvParserEnabled = true;
+
+    [ObservableProperty]
+    private bool _isPlainTextParserEnabled = true;
 
     [NotifyPropertyChangedFor(nameof(HasDisplayNameValidationError))]
     [ObservableProperty]
@@ -107,5 +127,105 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
         FilePathValidationError = string.Empty;
         PollIntervalValidationError = string.Empty;
         ParserOrderValidationError = string.Empty;
+    }
+
+    partial void OnParserOrderTextChanged(string value)
+    {
+        if (_isSyncingParserSelection)
+        {
+            return;
+        }
+
+        ApplyParserSelectionFromParserOrder(value);
+    }
+
+    partial void OnIsLog4jXmlParserEnabledChanged(bool value)
+    {
+        SyncParserOrderFromSelection();
+    }
+
+    partial void OnIsJsonLogParserEnabledChanged(bool value)
+    {
+        SyncParserOrderFromSelection();
+    }
+
+    partial void OnIsCsvParserEnabledChanged(bool value)
+    {
+        SyncParserOrderFromSelection();
+    }
+
+    partial void OnIsPlainTextParserEnabledChanged(bool value)
+    {
+        SyncParserOrderFromSelection();
+    }
+
+    private void ApplyParserSelectionFromParserOrder(string value)
+    {
+        HashSet<string> selected = ParseParserNames(value);
+
+        _isSyncingParserSelection = true;
+        try
+        {
+            IsLog4jXmlParserEnabled = selected.Contains(Log4jXmlParserName);
+            IsJsonLogParserEnabled = selected.Contains(JsonLogParserName);
+            IsCsvParserEnabled = selected.Contains(CsvParserName);
+            IsPlainTextParserEnabled = selected.Contains(PlainTextParserName);
+        }
+        finally
+        {
+            _isSyncingParserSelection = false;
+        }
+    }
+
+    private void SyncParserOrderFromSelection()
+    {
+        if (_isSyncingParserSelection)
+        {
+            return;
+        }
+
+        List<string> parserOrder = [];
+        if (IsLog4jXmlParserEnabled)
+        {
+            parserOrder.Add(Log4jXmlParserName);
+        }
+
+        if (IsJsonLogParserEnabled)
+        {
+            parserOrder.Add(JsonLogParserName);
+        }
+
+        if (IsCsvParserEnabled)
+        {
+            parserOrder.Add(CsvParserName);
+        }
+
+        if (IsPlainTextParserEnabled)
+        {
+            parserOrder.Add(PlainTextParserName);
+        }
+
+        _isSyncingParserSelection = true;
+        try
+        {
+            ParserOrderText = string.Join(", ", parserOrder);
+        }
+        finally
+        {
+            _isSyncingParserSelection = false;
+        }
+    }
+
+    private static HashSet<string> ParseParserNames(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return [];
+        }
+
+        return value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(static parserName => parserName.Length > 0)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 }

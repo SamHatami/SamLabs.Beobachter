@@ -541,7 +541,7 @@ public partial class ReceiverSetupViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            return DefaultParserOrder;
+            return [];
         }
 
         return value

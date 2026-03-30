@@ -4,12 +4,11 @@
         x:Class="SamLabs.Beobachter.Application.Views.ReceiverSetupWindow"
         x:DataType="viewModels:ReceiverSetupViewModel"
         Width="960"
-        Height="720"
         MinWidth="760"
-        MinHeight="520"
+        SizeToContent="Height"
         Title="Receiver Setup">
     <Border Background="{DynamicResource ShellBackgroundBrush}">
-        <Grid RowDefinitions="Auto,*">
+        <Grid RowDefinitions="Auto,Auto,Auto">
             <Border Grid.Row="0"
                     Classes="shell-panel shell-flat shell-border-horizontal"
                     Padding="14,10">
@@ -26,6 +25,20 @@
 
             <ContentControl Grid.Row="1"
                             Content="{Binding}" />
+
+            <Border Grid.Row="2"
+                    Classes="shell-panel shell-flat shell-border-horizontal"
+                    Padding="14,10">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8"
+                            HorizontalAlignment="Right">
+                    <Button Content="Cancel"
+                            Click="OnCancelClick" />
+                    <Button Classes="receiver-setup-button primary"
+                            Content="Save"
+                            Click="OnSaveClick" />
+                </StackPanel>
+            </Border>
         </Grid>
     </Border>
 </Window>
