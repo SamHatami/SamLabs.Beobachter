@@ -129,6 +129,30 @@ public sealed class TcpReceiverTests
         Assert.Equal(LogLevel.Info, entry.Level);
     }
 
+    [Fact]
+    public async Task StopAsync_WithConnectedIdleClient_CompletesPromptly()
+    {
+        int port = GetFreeTcpPort();
+        TcpReceiverOptions options = new()
+        {
+            Id = "tcp-receiver-idle-stop",
+            DisplayName = "TCP Receiver Idle Stop",
+            BindAddress = IPAddress.Loopback.ToString(),
+            Port = port,
+            DefaultLoggerName = "TcpDefault"
+        };
+
+        await using TcpReceiver receiver = new(options, new Log4jXmlParser());
+        Channel<LogEntry> channel = Channel.CreateBounded<LogEntry>(new BoundedChannelOptions(8));
+        await receiver.StartAsync(channel.Writer, CancellationToken.None);
+
+        using TcpClient client = new();
+        await client.ConnectAsync(IPAddress.Loopback, port);
+
+        using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(3));
+        await receiver.StopAsync(timeout.Token);
+    }
+
     private static int GetFreeTcpPort()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);

@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Threading;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,7 @@ namespace SamLabs.Beobachter.Application;
 public partial class App : Avalonia.Application
 {
     private IServiceProvider? _services;
+    private int _shutdownStarted;
 
     public override void Initialize()
     {
@@ -39,13 +42,56 @@ public partial class App : Avalonia.Application
                 ReleaseNotesProvider = releaseNotesProvider
             };
 
-            desktop.Exit += (_, _) =>
-            {
-                ingestionSession.StopAsync().GetAwaiter().GetResult();
-                ingestionSession.DisposeAsync().GetAwaiter().GetResult();
-            };
+            desktop.Exit += OnDesktopExit;
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnDesktopExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    {
+        ShutdownServices();
+    }
+
+    private void ShutdownServices()
+    {
+        if (Interlocked.Exchange(ref _shutdownStarted, 1) != 0)
+        {
+            return;
+        }
+
+        IServiceProvider? services = _services;
+        _services = null;
+        if (services is null)
+        {
+            return;
+        }
+
+        try
+        {
+            IIngestionSession? ingestionSession = services.GetService<IIngestionSession>();
+            ingestionSession?.StopAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"Shutdown stop failed: {ex}");
+        }
+
+        try
+        {
+            switch (services)
+            {
+                case IAsyncDisposable asyncDisposable:
+                    asyncDisposable.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                    break;
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"Service provider dispose failed: {ex}");
+        }
     }
 }

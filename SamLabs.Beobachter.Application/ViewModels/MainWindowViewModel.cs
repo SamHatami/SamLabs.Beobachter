@@ -17,7 +17,7 @@ using SamLabs.Beobachter.Core.Settings;
 
 namespace SamLabs.Beobachter.Application.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private static readonly HashSet<string> FilterCriteriaPropertyNames = new(StringComparer.Ordinal)
     {
@@ -50,6 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly ILogStatisticsService _statisticsService;
     private bool _isApplyingWorkspaceState;
     private bool _isSyncingSearchText;
+    private bool _disposed;
 
     [ObservableProperty]
     private string _statsSummary1Minute = "1m: 0 logs/s | 0 err/s";
@@ -385,5 +386,25 @@ public partial class MainWindowViewModel : ViewModelBase
             Stream.LoggerColumnWidth);
 
         _workspaceStateCoordinator.QueuePersist(update);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        TopBar.SearchTextChanged -= OnTopBarSearchTextChanged;
+        Filters.PropertyChanged -= OnFiltersPropertyChanged;
+        Sources.StateChanged -= OnSourcesStateChanged;
+        QuickFilters.PropertyChanged -= OnQuickFiltersPropertyChanged;
+        ReceiverSetup.PropertyChanged -= OnReceiverSetupPropertyChanged;
+        Stream.PropertyChanged -= OnStreamPropertyChanged;
+        Stream.EntriesCleared -= OnStreamEntriesCleared;
+        Details.FilterByPropertyRequested -= OnFilterByPropertyRequested;
+        _ingestionSession.EntriesAppended -= OnEntriesAppended;
     }
 }

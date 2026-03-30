@@ -7,7 +7,7 @@ using SamLabs.Beobachter.Core.Interfaces;
 
 namespace SamLabs.Beobachter.Application.ViewModels.Status;
 
-public sealed partial class SessionHealthViewModel : ViewModelBase
+public sealed partial class SessionHealthViewModel : ViewModelBase, IDisposable
 {
     private readonly ISettingsService _settingsService;
     private CancellationTokenSource? _notificationCts;
@@ -76,5 +76,13 @@ public sealed partial class SessionHealthViewModel : ViewModelBase
         catch (TaskCanceledException)
         {
         }
+    }
+
+    public void Dispose()
+    {
+        _settingsService.AppSettingsSaved -= OnAppSettingsSaved;
+        _notificationCts?.Cancel();
+        _notificationCts?.Dispose();
+        _notificationCts = null;
     }
 }

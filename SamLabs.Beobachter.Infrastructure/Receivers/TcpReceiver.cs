@@ -15,6 +15,7 @@ public sealed class TcpReceiver : ILogReceiver
     private readonly ILogParser _parser;
     private readonly SemaphoreSlim _lifecycleLock = new(1, 1);
     private readonly ConcurrentDictionary<long, Task> _clientTasks = new();
+    private readonly ConcurrentDictionary<long, TcpClient> _clients = new();
     private readonly LogSourceContext _sourceContext;
 
     private TcpListener? _listener;
@@ -95,6 +96,19 @@ public sealed class TcpReceiver : ILogReceiver
 
         listenerToStop?.Stop();
 
+        TcpClient[] activeClients = _clients.Values.ToArray();
+        foreach (TcpClient activeClient in activeClients)
+        {
+            try
+            {
+                activeClient.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Client already closed.
+            }
+        }
+
         if (acceptLoopTaskToAwait is not null)
         {
             try
@@ -125,6 +139,7 @@ public sealed class TcpReceiver : ILogReceiver
         }
 
         _clientTasks.Clear();
+        _clients.Clear();
         runCtsToDispose?.Dispose();
     }
 
@@ -168,12 +183,13 @@ public sealed class TcpReceiver : ILogReceiver
             client.ReceiveBufferSize = _options.ReceiveBufferSize;
 
             var clientId = Interlocked.Increment(ref _nextClientId);
-            var clientTask = Task.Run(() => HandleClientAsync(client, cancellationToken), CancellationToken.None);
+            _clients[clientId] = client;
+            var clientTask = Task.Run(() => HandleClientAsync(clientId, client, cancellationToken), CancellationToken.None);
             _clientTasks[clientId] = clientTask;
         }
     }
 
-    private async Task HandleClientAsync(TcpClient client, CancellationToken cancellationToken)
+    private async Task HandleClientAsync(long clientId, TcpClient client, CancellationToken cancellationToken)
     {
         ChannelWriter<LogEntry>? writer = _writer;
         if (writer is null)
@@ -221,7 +237,15 @@ public sealed class TcpReceiver : ILogReceiver
         }
         finally
         {
-            client.Dispose();
+            _clientTasks.TryRemove(clientId, out _);
+            if (_clients.TryRemove(clientId, out TcpClient? trackedClient))
+            {
+                trackedClient.Dispose();
+            }
+            else
+            {
+                client.Dispose();
+            }
         }
     }
 

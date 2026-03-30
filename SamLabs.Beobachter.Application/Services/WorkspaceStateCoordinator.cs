@@ -6,7 +6,7 @@ using SamLabs.Beobachter.Core.Settings;
 
 namespace SamLabs.Beobachter.Application.Services;
 
-public sealed class WorkspaceStateCoordinator : IWorkspaceStateCoordinator
+public sealed class WorkspaceStateCoordinator : IWorkspaceStateCoordinator, IDisposable
 {
     private readonly ISettingsStore _settingsStore;
     private readonly object _gate = new();
@@ -94,6 +94,16 @@ public sealed class WorkspaceStateCoordinator : IWorkspaceStateCoordinator
         catch (OperationCanceledException)
         {
             // Debounce cancellation path.
+        }
+    }
+
+    public void Dispose()
+    {
+        lock (_gate)
+        {
+            _persistStateCts?.Cancel();
+            _persistStateCts?.Dispose();
+            _persistStateCts = null;
         }
     }
 }
