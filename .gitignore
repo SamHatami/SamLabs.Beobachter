@@ -329,3 +329,4 @@ ASALocalRun/
 /.claude
 /.artifacts
 /.tmp_build
+/.tmp_test_obj

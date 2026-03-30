@@ -47,12 +47,17 @@ public partial class ReceiverSetupViewModel : ViewModelBase
 
     private readonly ISettingsStore _settingsStore;
     private readonly IIngestionSession _ingestionSession;
+    private bool _isAutoApplyingEnabledChanges;
+    private bool _hasPendingEnabledChange;
 
     [ObservableProperty]
     private ReceiverDefinitionViewModel? _selectedReceiverDefinition;
 
+    [NotifyPropertyChangedFor(nameof(HasReceiverSetupStatus))]
     [ObservableProperty]
     private string _receiverSetupStatus = string.Empty;
+
+    public bool HasReceiverSetupStatus => ReceiverSetupStatus.Length > 0;
 
     public ReceiverSetupViewModel(
         ISettingsStore settingsStore,
@@ -124,46 +129,6 @@ public partial class ReceiverSetupViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void AddLocalDiagnosticsPreset()
-    {
-        ReceiverDefinitionViewModel udp = new(ReceiverKinds.Udp)
-        {
-            Id = BuildUniqueReceiverId("udp"),
-            DisplayName = "Local UDP",
-            BindAddress = "127.0.0.1",
-            Port = 7071
-        };
-        ReceiverDefinitionViewModel file = new(ReceiverKinds.File)
-        {
-            Id = BuildUniqueReceiverId("file"),
-            DisplayName = "Local File Tail",
-            FilePath = string.Empty,
-            PollIntervalMs = 150
-        };
-
-        AddReceiverDefinition(udp, selectAfterAdd: false);
-        AddReceiverDefinition(file);
-        ReceiverSetupStatus = "Preset added: Local diagnostics (UDP + File).";
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
-    private void AddTcpIngressPreset()
-    {
-        ReceiverDefinitionViewModel tcp = new(ReceiverKinds.Tcp)
-        {
-            Id = BuildUniqueReceiverId("tcp"),
-            DisplayName = "TCP Ingress",
-            BindAddress = "0.0.0.0",
-            Port = 4505
-        };
-
-        AddReceiverDefinition(tcp);
-        ReceiverSetupStatus = "Preset added: TCP ingress.";
-        TryValidateReceiverDefinitions(out _);
-    }
-
-    [RelayCommand]
     private void RemoveSelectedReceiver()
     {
         if (SelectedReceiverDefinition is null)
@@ -181,18 +146,30 @@ public partial class ReceiverSetupViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveReceiverSetupAsync()
     {
+        await SaveReceiverSetupCoreAsync(showStatusMessage: true).ConfigureAwait(false);
+    }
+
+    private async Task SaveReceiverSetupCoreAsync(bool showStatusMessage)
+    {
         if (!TryValidateReceiverDefinitions(out string validationError))
         {
-            ReceiverSetupStatus = $"Validation failed: {validationError}";
+            if (showStatusMessage)
+            {
+                ReceiverSetupStatus = $"Validation failed: {validationError}";
+            }
+
             return;
         }
 
         ReceiverDefinitions mapped = MapToReceiverDefinitions();
         await _settingsStore.SaveReceiverDefinitionsAsync(mapped);
         ReceiverReloadResult reloadResult = await _ingestionSession.ReloadReceiversAsync();
-        ReceiverSetupStatus = BuildReloadStatusMessage(
-            $"Saved {ReceiverDefinitions.Count} receiver(s).",
-            reloadResult);
+        if (showStatusMessage)
+        {
+            ReceiverSetupStatus = BuildReloadStatusMessage(
+                $"Saved {ReceiverDefinitions.Count} receiver(s).",
+                reloadResult);
+        }
     }
 
     [RelayCommand]
@@ -210,6 +187,39 @@ public partial class ReceiverSetupViewModel : ViewModelBase
         if (e.PropertyName is null || ReceiverEditablePropertyNames.Contains(e.PropertyName))
         {
             TryValidateReceiverDefinitions(out _);
+        }
+
+        if (string.Equals(e.PropertyName, nameof(ReceiverDefinitionViewModel.Enabled), StringComparison.Ordinal))
+        {
+            QueueApplyEnabledChanges();
+        }
+    }
+
+    private void QueueApplyEnabledChanges()
+    {
+        _hasPendingEnabledChange = true;
+        if (_isAutoApplyingEnabledChanges)
+        {
+            return;
+        }
+
+        _ = ApplyEnabledChangesAsync();
+    }
+
+    private async Task ApplyEnabledChangesAsync()
+    {
+        _isAutoApplyingEnabledChanges = true;
+        try
+        {
+            while (_hasPendingEnabledChange)
+            {
+                _hasPendingEnabledChange = false;
+                await SaveReceiverSetupCoreAsync(showStatusMessage: false).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            _isAutoApplyingEnabledChanges = false;
         }
     }
 

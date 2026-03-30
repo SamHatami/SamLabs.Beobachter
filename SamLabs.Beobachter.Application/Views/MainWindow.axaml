@@ -120,9 +120,14 @@
                           ResizeBehavior="PreviousAndNext"
                           />
 
-            <!-- Right: entry details -->
-            <ContentControl Grid.Column="4"
-                            Content="{Binding Details}" />
+            <!-- Right: receiver tree + entry details -->
+            <Grid Grid.Column="4"
+                  RowDefinitions="Auto,*">
+                <ContentControl Grid.Row="0"
+                                Content="{Binding ReceiverTree}" />
+                <ContentControl Grid.Row="1"
+                                Content="{Binding Details}" />
+            </Grid>
         </Grid>
 
         <!-- Row 2: Bottom Status Strip -->

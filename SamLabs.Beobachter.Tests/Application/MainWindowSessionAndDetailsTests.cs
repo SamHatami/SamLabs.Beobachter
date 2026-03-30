@@ -14,14 +14,14 @@ public sealed class MainWindowSessionAndDetailsTests
         FakeIngestionSession session = new([]);
         MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
 
-        await ((IAsyncRelayCommand)vm.TopBar.TogglePauseCommand).ExecuteAsync(null);
-        Assert.True(vm.TopBar.IsPaused);
+        await ((IAsyncRelayCommand)vm.Stream.TogglePauseCommand).ExecuteAsync(null);
+        Assert.True(vm.Stream.IsPaused);
         Assert.True(session.IsPaused);
         Assert.True(vm.SessionHealth.IsPaused);
         Assert.Equal("Status: Paused", vm.SessionHealth.StatusText);
 
-        await ((IAsyncRelayCommand)vm.TopBar.TogglePauseCommand).ExecuteAsync(null);
-        Assert.False(vm.TopBar.IsPaused);
+        await ((IAsyncRelayCommand)vm.Stream.TogglePauseCommand).ExecuteAsync(null);
+        Assert.False(vm.Stream.IsPaused);
         Assert.False(session.IsPaused);
         Assert.False(vm.SessionHealth.IsPaused);
         Assert.Equal("Status: Running", vm.SessionHealth.StatusText);

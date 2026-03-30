@@ -51,6 +51,7 @@ public static class Root
         services.AddSingleton<SourceTreeViewModel>();
         services.AddSingleton<QuickFiltersViewModel>();
         services.AddSingleton<ReceiverSetupViewModel>();
+        services.AddSingleton<ReceiverTreeViewModel>();
         services.AddSingleton<LogFiltersViewModel>();
         services.AddSingleton<LogStreamViewModel>();
         services.AddSingleton<EntryDetailsViewModel>();

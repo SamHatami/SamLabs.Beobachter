@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Enums;
 using SamLabs.Beobachter.Core.Models;
@@ -61,6 +62,31 @@ public sealed class LogStreamViewModelTests
         vm.ToggleDensityCommand.Execute(null);
         Assert.False(vm.IsCompactDensity);
         Assert.Equal("Density: Comfortable", vm.DensityButtonText);
+    }
+
+    [Fact]
+    public async Task TogglePause_UpdatesSessionAndIconState()
+    {
+        FakeIngestionSession session = new([]);
+        LogStreamViewModel vm = new(session);
+
+        Assert.False(vm.IsPaused);
+        Assert.True(vm.IsStreamActive);
+        Assert.Equal("fa-solid fa-pause", vm.PauseButtonIcon);
+
+        await ((IAsyncRelayCommand)vm.TogglePauseCommand).ExecuteAsync(null);
+
+        Assert.True(vm.IsPaused);
+        Assert.False(vm.IsStreamActive);
+        Assert.True(session.IsPaused);
+        Assert.Equal("fa-solid fa-play", vm.PauseButtonIcon);
+
+        await ((IAsyncRelayCommand)vm.TogglePauseCommand).ExecuteAsync(null);
+
+        Assert.False(vm.IsPaused);
+        Assert.True(vm.IsStreamActive);
+        Assert.False(session.IsPaused);
+        Assert.Equal("fa-solid fa-pause", vm.PauseButtonIcon);
     }
 
     [Fact]

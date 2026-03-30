@@ -31,10 +31,11 @@ internal static class MainWindowTestSupport
         ISampleLogEntryGenerator sampleLogEntryGenerator = new SampleLogEntryGenerator();
         ILogStreamProjectionService logStreamProjectionService = new LogStreamProjectionService(new LogQueryEvaluator());
         ILogStatisticsService resolvedStatisticsService = statisticsService ?? new RollingLogStatisticsService();
-        TopBarViewModel topBar = new(session);
+        TopBarViewModel topBar = new();
         SourceTreeViewModel sources = new();
         QuickFiltersViewModel quickFilters = new();
         ReceiverSetupViewModel receiverSetup = new(resolvedSettingsStore, session);
+        ReceiverTreeViewModel receiverTree = new(receiverSetup);
         LogFiltersViewModel filters = new();
         WorkspaceSidebarViewModel workspaceSidebar = new(sources, quickFilters, filters);
 
@@ -50,6 +51,7 @@ internal static class MainWindowTestSupport
             sources,
             quickFilters,
             receiverSetup,
+            receiverTree,
             workspaceSidebar,
             filters,
             new LogStreamViewModel(session),

@@ -28,6 +28,10 @@
     <SolidColorBrush x:Key="ValidationErrorBrush" Color="#FFF19993" />
     <SolidColorBrush x:Key="StatusRunningBrush" Color="#FF69D97A" />
     <SolidColorBrush x:Key="StatusPausedBrush" Color="#FFF0C64F" />
+    <SolidColorBrush x:Key="StreamPauseActiveBrush" Color="#FF2B3830" />
+    <SolidColorBrush x:Key="StreamPauseActiveBorderBrush" Color="#FF58745E" />
+    <SolidColorBrush x:Key="StreamPausePausedBrush" Color="#FF3A2D2F" />
+    <SolidColorBrush x:Key="StreamPausePausedBorderBrush" Color="#FF8A6366" />
 
     <SolidColorBrush x:Key="RowTraceBrush" Color="#146E97A2" />
     <SolidColorBrush x:Key="RowDebugBrush" Color="#14818DB8" />

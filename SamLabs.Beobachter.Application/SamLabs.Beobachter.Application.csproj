@@ -24,6 +24,7 @@
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.12" />
         <PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.2" />
         <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.1" />
     </ItemGroup>

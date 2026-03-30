@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using SamLabs.Beobachter.Core.Models;
 
 namespace SamLabs.Beobachter.Application.ViewModels;
 
@@ -65,11 +66,23 @@ public sealed partial class ReceiverDefinitionViewModel : ObservableObject
     [ObservableProperty]
     private string _parserOrderValidationError = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(IsRunning))]
+    [NotifyPropertyChangedFor(nameof(IsFaulted))]
+    [NotifyPropertyChangedFor(nameof(IsStopped))]
+    [ObservableProperty]
+    private ReceiverRunState _runState = ReceiverRunState.Stopped;
+
     public bool IsUdp => Kind == ReceiverKinds.Udp;
 
     public bool IsTcp => Kind == ReceiverKinds.Tcp;
 
     public bool IsFile => Kind == ReceiverKinds.File;
+
+    public bool IsRunning => RunState == ReceiverRunState.Running;
+
+    public bool IsFaulted => RunState == ReceiverRunState.Faulted;
+
+    public bool IsStopped => RunState == ReceiverRunState.Stopped;
 
     public bool HasDisplayNameValidationError => DisplayNameValidationError.Length > 0;
 

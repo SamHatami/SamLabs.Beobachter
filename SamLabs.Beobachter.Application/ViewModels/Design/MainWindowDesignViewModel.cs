@@ -14,7 +14,19 @@ public sealed class MainWindowDesignViewModel : MainWindowViewModel
     private MainWindowDesignViewModel(
         DesignIngestionSession ingestionSession,
         DesignSettingsStore settingsStore,
-        DesignSettingsService settingsService) : base(
+        DesignSettingsService settingsService) : this(
+        ingestionSession,
+        settingsStore,
+        settingsService,
+        new ReceiverSetupViewModel(settingsStore, ingestionSession))
+    {
+    }
+
+    private MainWindowDesignViewModel(
+        DesignIngestionSession ingestionSession,
+        DesignSettingsStore settingsStore,
+        DesignSettingsService settingsService,
+        ReceiverSetupViewModel receiverSetup) : base(
         new ShellStatusFormatter(),
         new SampleLogEntryGenerator(),
         ingestionSession,
@@ -22,10 +34,11 @@ public sealed class MainWindowDesignViewModel : MainWindowViewModel
         new WorkspaceStartupOrchestrator(new WorkspaceStateCoordinator(settingsStore)),
         new LogStreamProjectionService(new LogQueryEvaluator()),
         new RollingLogStatisticsService(),
-        new TopBarViewModel(ingestionSession),
+        new TopBarViewModel(),
         new SourceTreeViewModel(),
         new QuickFiltersViewModel(),
-        new ReceiverSetupViewModel(settingsStore, ingestionSession),
+        receiverSetup,
+        new ReceiverTreeViewModel(receiverSetup),
         CreateDesignSidebar(),
         new LogFiltersViewModel(),
         new LogStreamViewModel(ingestionSession),

@@ -16,6 +16,7 @@
         <conv:LogLevelToIconConverter x:Key="LogLevelToIconConverter" />
     </UserControl.Resources>
 
+    <!--- the synatx errors here is due to having a designviewmodel -->
     <Design.DataContext>
         <designViewModels:LogStreamDesignViewModel />
     </Design.DataContext>
@@ -68,6 +69,12 @@
                             ToolTip.Tip="Toggle row density between Comfortable and Compact."
                             Command="{Binding ToggleDensityCommand}"
                             i:Attached.Icon="fa-solid fa-grip-lines" />
+                    <Button Classes="toolbar-button stream-pause-toggle"
+                            Classes.stream-pause-active="{Binding IsStreamActive}"
+                            Classes.stream-pause-paused="{Binding IsPaused}"
+                            ToolTip.Tip="Pause or resume stream ingestion."
+                            Command="{Binding TogglePauseCommand}"
+                            i:Attached.Icon="{Binding PauseButtonIcon}" />
                     <ToggleButton Classes="toolbar-button"
                                   ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
                                   IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"

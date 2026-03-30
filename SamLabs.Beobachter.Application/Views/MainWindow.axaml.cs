@@ -34,12 +34,14 @@ public partial class MainWindow : Window
         if (_boundViewModel is not null)
         {
             _boundViewModel.TopBar.SettingsRequested -= OnTopBarSettingsRequested;
+            _boundViewModel.ReceiverTree.OpenEditorRequested -= OnReceiverTreeOpenEditorRequested;
         }
 
         _boundViewModel = DataContext as MainWindowViewModel;
         if (_boundViewModel is not null)
         {
             _boundViewModel.TopBar.SettingsRequested += OnTopBarSettingsRequested;
+            _boundViewModel.ReceiverTree.OpenEditorRequested += OnReceiverTreeOpenEditorRequested;
         }
     }
 
@@ -92,6 +94,16 @@ public partial class MainWindow : Window
     }
 
     private async void OnTopBarSettingsRequested(object? sender, EventArgs e)
+    {
+        await OpenReceiverEditorAsync();
+    }
+
+    private async void OnReceiverTreeOpenEditorRequested(object? sender, EventArgs e)
+    {
+        await OpenReceiverEditorAsync();
+    }
+
+    private async System.Threading.Tasks.Task OpenReceiverEditorAsync()
     {
         if (_boundViewModel is null)
         {
@@ -176,6 +188,7 @@ public partial class MainWindow : Window
         if (_boundViewModel is not null)
         {
             _boundViewModel.TopBar.SettingsRequested -= OnTopBarSettingsRequested;
+            _boundViewModel.ReceiverTree.OpenEditorRequested -= OnReceiverTreeOpenEditorRequested;
             _boundViewModel = null;
         }
 

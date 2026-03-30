@@ -114,6 +114,16 @@
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
     </Style>
 
+    <Style Selector="Button.stream-pause-toggle.stream-pause-active">
+        <Setter Property="Background" Value="{DynamicResource StreamPauseActiveBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource StreamPauseActiveBorderBrush}" />
+    </Style>
+
+    <Style Selector="Button.stream-pause-toggle.stream-pause-paused">
+        <Setter Property="Background" Value="{DynamicResource StreamPausePausedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource StreamPausePausedBorderBrush}" />
+    </Style>
+
     <Style Selector="ToggleButton.toolbar-button">
         <Setter Property="Padding" Value="{DynamicResource ShellToolbarButtonPadding}" />
         <Setter Property="MinHeight" Value="32" />

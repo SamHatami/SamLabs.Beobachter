@@ -21,6 +21,11 @@ public partial class LogStreamViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isAutoScrollEnabled = true;
 
+    [NotifyPropertyChangedFor(nameof(IsStreamActive))]
+    [NotifyPropertyChangedFor(nameof(PauseButtonIcon))]
+    [ObservableProperty]
+    private bool _isPaused;
+
     [ObservableProperty]
     private string _densityButtonText = "Density: Comfortable";
 
@@ -46,12 +51,17 @@ public partial class LogStreamViewModel : ViewModelBase
     {
         _ingestionSession = ingestionSession ?? throw new ArgumentNullException(nameof(ingestionSession));
         IsAutoScrollEnabled = _ingestionSession.IsAutoScrollEnabled;
+        IsPaused = _ingestionSession.IsPaused;
     }
 
     public ObservableCollection<LogEntry> VisibleEntries { get; } = [];
 
     public string LogColumnDefinitions =>
         $"{TimestampColumnWidth:0},{LevelColumnWidth:0},{LoggerColumnWidth:0},*";
+
+    public bool IsStreamActive => !IsPaused;
+
+    public string PauseButtonIcon => IsPaused ? "fa-solid fa-play" : "fa-solid fa-pause";
 
     [RelayCommand]
     private void ToggleDensity()
@@ -65,6 +75,14 @@ public partial class LogStreamViewModel : ViewModelBase
         bool nextState = !IsAutoScrollEnabled;
         await _ingestionSession.SetAutoScrollAsync(nextState).ConfigureAwait(false);
         IsAutoScrollEnabled = nextState;
+    }
+
+    [RelayCommand]
+    private async Task TogglePauseAsync()
+    {
+        bool nextState = !IsPaused;
+        await _ingestionSession.SetPausedAsync(nextState).ConfigureAwait(false);
+        IsPaused = nextState;
     }
 
     [RelayCommand]

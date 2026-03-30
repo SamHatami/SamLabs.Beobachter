@@ -36,9 +36,6 @@
                         Content="Clear"
                         Command="{Binding ClearSearchCommand}"
                         i:Attached.Icon="fa-solid fa-xmark" />
-                <Button Classes="toolbar-button"
-                        Command="{Binding TogglePauseCommand}"
-                        i:Attached.Icon="{Binding PauseButtonIcon}" />
                 <Button Classes="toolbar-button icon-button"
                         ToolTip.Tip="Receiver settings"
                         Command="{Binding OpenSettingsCommand}"

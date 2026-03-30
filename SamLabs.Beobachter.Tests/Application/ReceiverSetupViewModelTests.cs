@@ -157,6 +157,44 @@ public sealed class ReceiverSetupViewModelTests
     }
 
     [Fact]
+    public async Task ToggleEnabled_AutoSavesAndReloadsSession()
+    {
+        FakeSettingsStore settings =
+        new()
+        {
+            ReceiverDefinitions = new ReceiverDefinitions
+            {
+                UdpReceivers =
+                [
+                    new UdpReceiverDefinition
+                    {
+                        Id = "udp-a",
+                        DisplayName = "UDP A",
+                        Enabled = true,
+                        BindAddress = "127.0.0.1",
+                        Port = 17071
+                    }
+                ]
+            }
+        };
+
+        FakeIngestionSession session = new([]);
+        ReceiverSetupViewModel vm = new(settings, session);
+        await vm.LoadAsync();
+
+        Assert.Equal(0, session.ReloadReceiversCalls);
+
+        ReceiverDefinitionViewModel udp = vm.ReceiverDefinitions.Single(x => x.Id == "udp-a");
+        udp.Enabled = false;
+
+        await MainWindowTestSupport.WaitForConditionAsync(() => session.ReloadReceiversCalls == 1);
+
+        Assert.NotNull(settings.LastSavedReceiverDefinitions);
+        Assert.False(settings.LastSavedReceiverDefinitions!.UdpReceivers[0].Enabled);
+        Assert.Equal(string.Empty, vm.ReceiverSetupStatus);
+    }
+
+    [Fact]
     public async Task TrySelectReceiverById_SelectsMatchingReceiver()
     {
         FakeSettingsStore settings =

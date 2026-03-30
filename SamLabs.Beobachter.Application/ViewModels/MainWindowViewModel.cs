@@ -75,6 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
         SourceTreeViewModel sources,
         QuickFiltersViewModel quickFilters,
         ReceiverSetupViewModel receiverSetup,
+        ReceiverTreeViewModel receiverTree,
         WorkspaceSidebarViewModel workspaceSidebar,
         LogFiltersViewModel filters,
         LogStreamViewModel stream,
@@ -93,6 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Sources = sources ?? throw new ArgumentNullException(nameof(sources));
         QuickFilters = quickFilters ?? throw new ArgumentNullException(nameof(quickFilters));
         ReceiverSetup = receiverSetup ?? throw new ArgumentNullException(nameof(receiverSetup));
+        ReceiverTree = receiverTree ?? throw new ArgumentNullException(nameof(receiverTree));
         WorkspaceSidebar = workspaceSidebar ?? throw new ArgumentNullException(nameof(workspaceSidebar));
         Filters = filters ?? throw new ArgumentNullException(nameof(filters));
         Stream = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -100,7 +102,6 @@ public partial class MainWindowViewModel : ViewModelBase
         SessionHealth = sessionHealth ?? throw new ArgumentNullException(nameof(sessionHealth));
 
         TopBar.SearchTextChanged += OnTopBarSearchTextChanged;
-        TopBar.PauseToggled += OnTopBarPauseToggled;
         Filters.PropertyChanged += OnFiltersPropertyChanged;
         Sources.StateChanged += OnSourcesStateChanged;
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
@@ -127,6 +128,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public QuickFiltersViewModel QuickFilters { get; }
 
     public ReceiverSetupViewModel ReceiverSetup { get; }
+
+    public ReceiverTreeViewModel ReceiverTree { get; }
 
     public LogFiltersViewModel Filters { get; }
 
@@ -169,11 +172,6 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             _isSyncingSearchText = false;
         }
-    }
-
-    private void OnTopBarPauseToggled(object? sender, EventArgs e)
-    {
-        UpdateShellStatusPresentation();
     }
 
     private void OnFiltersPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -233,7 +231,8 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsAutoScrollEnabled), StringComparison.Ordinal))
+        if (string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsAutoScrollEnabled), StringComparison.Ordinal) ||
+            string.Equals(e.PropertyName, nameof(LogStreamViewModel.IsPaused), StringComparison.Ordinal))
         {
             QueuePersistWorkspaceState();
             UpdateShellStatusPresentation();
@@ -284,6 +283,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void UpdateShellStatusPresentation()
     {
         IReadOnlyList<ReceiverRuntimeState> runtimeStates = _ingestionSession.GetReceiverRuntimeStates();
+        ReceiverTree.UpdateRuntimeStates(runtimeStates);
         int activeReceivers = runtimeStates.Count > 0
             ? runtimeStates.Count(static x => x.State == ReceiverRunState.Running)
             : ReceiverSetup.ReceiverDefinitions.Count(static x => x.Enabled);
@@ -299,7 +299,7 @@ public partial class MainWindowViewModel : ViewModelBase
         StatsSummary5Minutes = presentation.StatsSummary5Minutes;
         TopLoggersSummary = presentation.TopLoggersSummary;
         TopReceiversSummary = presentation.TopReceiversSummary;
-        SessionHealth.IsPaused = TopBar.IsPaused;
+        SessionHealth.IsPaused = Stream.IsPaused;
         SessionHealth.ActiveReceiversText = presentation.ActiveReceiversText;
         SessionHealth.BufferedEntriesText = presentation.BufferedEntriesText;
         SessionHealth.StructuredEventsText = presentation.StructuredEventsText;
@@ -328,6 +328,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Filters.SetPropertyFiltersFromDictionary(workspace.PropertyFilters);
             Filters.MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
             Stream.IsAutoScrollEnabled = workspace.AutoScroll;
+            Stream.IsPaused = workspace.PauseIngest;
             Stream.IsCompactDensity = workspace.CompactDensity;
             Stream.TimestampColumnWidth = Math.Clamp(layout.TimestampColumnWidth, 100, 420);
             Stream.LevelColumnWidth = Math.Clamp(layout.LevelColumnWidth, 70, 200);
@@ -369,7 +370,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,
             Filters.GetEnabledLevels(),
             Stream.IsAutoScrollEnabled,
-            TopBar.IsPaused,
+            Stream.IsPaused,
             Stream.TimestampColumnWidth,
             Stream.LevelColumnWidth,
             Stream.LoggerColumnWidth);
