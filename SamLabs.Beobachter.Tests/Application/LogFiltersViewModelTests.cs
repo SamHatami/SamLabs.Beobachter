@@ -17,10 +17,10 @@ public sealed class LogFiltersViewModelTests
             ReceiverFilter = "udp-1",
             LoggerFilter = "Orders.Api",
             ThreadFilter = "worker-9",
-            TenantFilter = "alpha",
-            TraceIdFilter = "trace-123",
             MinimumLevelOption = "Warn"
         };
+        vm.SetPropertyFilterValue("tenant", "alpha");
+        vm.SetPropertyFilterValue("traceId", "trace-123");
 
         LogQuery query = vm.BuildQuery();
 
@@ -43,10 +43,10 @@ public sealed class LogFiltersViewModelTests
             ReceiverFilter = "udp-1",
             LoggerFilter = "Orders.Api",
             ThreadFilter = "worker-9",
-            TenantFilter = "alpha",
-            TraceIdFilter = "trace-123",
             MinimumLevelOption = "Error"
         };
+        vm.SetPropertyFilterValue("tenant", "alpha");
+        vm.SetPropertyFilterValue("traceId", "trace-123");
 
         vm.ClearSearchCommand.Execute(null);
         vm.ClearStructuredFiltersCommand.Execute(null);
@@ -55,9 +55,8 @@ public sealed class LogFiltersViewModelTests
         Assert.Equal(string.Empty, vm.ReceiverFilter);
         Assert.Equal(string.Empty, vm.LoggerFilter);
         Assert.Equal(string.Empty, vm.ThreadFilter);
-        Assert.Equal(string.Empty, vm.TenantFilter);
-        Assert.Equal(string.Empty, vm.TraceIdFilter);
         Assert.Equal("Any", vm.MinimumLevelOption);
+        Assert.All(vm.PropertyFilters, x => Assert.Equal(string.Empty, x.Value));
     }
 
     [Fact]

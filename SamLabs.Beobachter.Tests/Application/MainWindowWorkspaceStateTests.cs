@@ -48,8 +48,8 @@ public sealed class MainWindowWorkspaceStateTests
         vm.Filters.ReceiverFilter = "udp-a";
         vm.Filters.LoggerFilter = "Orders.Api";
         vm.Filters.ThreadFilter = "worker-9";
-        vm.Filters.TenantFilter = "alpha";
-        vm.Filters.TraceIdFilter = "trace-xyz";
+        vm.Filters.SetPropertyFilterValue("tenant", "alpha");
+        vm.Filters.SetPropertyFilterValue("traceId", "trace-xyz");
         vm.Filters.MinimumLevelOption = "Warn";
         vm.Stream.IsCompactDensity = true;
         vm.ReceiverSetup.SelectedReceiverDefinition = vm.ReceiverSetup.ReceiverDefinitions.Single(x => x.Id == "tcp-b");
@@ -61,8 +61,8 @@ public sealed class MainWindowWorkspaceStateTests
         Assert.Equal("udp-a", saved.ReceiverFilter);
         Assert.Equal("Orders.Api", saved.LoggerFilter);
         Assert.Equal("worker-9", saved.ThreadFilter);
-        Assert.Equal("alpha", saved.TenantFilter);
-        Assert.Equal("trace-xyz", saved.TraceIdFilter);
+        Assert.Equal("alpha", saved.PropertyFilters["tenant"]);
+        Assert.Equal("trace-xyz", saved.PropertyFilters["traceId"]);
         Assert.Equal("Warn", saved.MinimumLevelOption);
         Assert.True(saved.CompactDensity);
         Assert.Equal("tcp-b", saved.SelectedReceiverId);

@@ -91,16 +91,24 @@
                                               IsVisible="{Binding HasAttributes}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="viewModels:EntryDetailPropertyViewModel">
-                                            <Grid ColumnDefinitions="150,*"
-                                                  ColumnSpacing="12">
+                                            <Grid ColumnDefinitions="150,*,Auto"
+                                                  ColumnSpacing="8"
+                                                  Margin="0,1">
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding Key}"
                                                            FontWeight="SemiBold"
+                                                           VerticalAlignment="Top"
                                                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding Value}"
                                                            TextWrapping="Wrap"
                                                            Foreground="{DynamicResource ShellForegroundBrush}" />
+                                                <Button Grid.Column="2"
+                                                        Classes="toolbar-button icon-button"
+                                                        VerticalAlignment="Top"
+                                                        Command="{Binding FilterCommand}"
+                                                        ToolTip.Tip="Filter by this value"
+                                                        i:Attached.Icon="fa-solid fa-filter" />
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

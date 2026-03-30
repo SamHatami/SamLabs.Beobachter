@@ -84,10 +84,10 @@ public sealed class MainWindowFilteringTests
         vm.Filters.ThreadFilter = "worker-1";
         Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.Filters.TenantFilter = "alp";
+        vm.Filters.SetPropertyFilterValue("tenant", "alp");
         Assert.Single(vm.Stream.VisibleEntries);
 
-        vm.Filters.TraceIdFilter = "trace-1";
+        vm.Filters.SetPropertyFilterValue("traceId", "trace-1");
         Assert.Single(vm.Stream.VisibleEntries);
 
         vm.Filters.MinimumLevelOption = "Fatal";

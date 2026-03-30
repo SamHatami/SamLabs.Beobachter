@@ -293,26 +293,45 @@
                                      Text="{Binding Filters.ThreadFilter, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
                         <StackPanel Spacing="2">
-                            <TextBlock Text="Tenant"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                            <TextBox Watermark="alpha"
-                                     Text="{Binding Filters.TenantFilter, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
-                        <StackPanel Spacing="2">
-                            <TextBlock Text="Trace Id"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                            <TextBox Watermark="trace-123"
-                                     Text="{Binding Filters.TraceIdFilter, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
-                        <StackPanel Spacing="2">
                             <TextBlock Text="Min Level"
                                        FontSize="11"
                                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
                             <ComboBox ItemsSource="{Binding Filters.MinimumLevelOptions}"
                                       SelectedItem="{Binding Filters.MinimumLevelOption}" />
                         </StackPanel>
+
+                        <!-- Dynamic property filters discovered from the stream -->
+                        <TextBlock Text="PROPERTIES"
+                                   Classes="section-caption"
+                                   Margin="0,4,0,0" />
+                        <TextBlock Text="No properties seen yet. Properties appear as log entries arrive."
+                                   IsVisible="{Binding !Filters.HasPropertyFilters}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        <ItemsControl ItemsSource="{Binding Filters.PropertyFilters}"
+                                      IsVisible="{Binding Filters.HasPropertyFilters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:PropertyFilterItemViewModel">
+                                    <StackPanel Spacing="2"
+                                                Margin="0,0,0,4">
+                                        <TextBlock Text="{Binding Key}"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                        <Grid ColumnDefinitions="*,Auto"
+                                              ColumnSpacing="4">
+                                            <TextBox Grid.Column="0"
+                                                     Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Button Grid.Column="1"
+                                                    Classes="toolbar-button"
+                                                    Command="{Binding ClearValueCommand}"
+                                                    ToolTip.Tip="Clear"
+                                                    i:Attached.Icon="fa-solid fa-xmark" />
+                                        </Grid>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Expander>
 

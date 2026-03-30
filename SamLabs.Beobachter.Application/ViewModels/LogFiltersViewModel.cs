@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -23,12 +25,6 @@ public partial class LogFiltersViewModel : ViewModelBase
     private string _threadFilter = string.Empty;
 
     [ObservableProperty]
-    private string _tenantFilter = string.Empty;
-
-    [ObservableProperty]
-    private string _traceIdFilter = string.Empty;
-
-    [ObservableProperty]
     private string _minimumLevelOption = "Any";
 
     [ObservableProperty]
@@ -48,6 +44,14 @@ public partial class LogFiltersViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _showFatal = true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPropertyFilters))]
+    private int _propertyFilterCount;
+
+    public ObservableCollection<PropertyFilterItemViewModel> PropertyFilters { get; } = [];
+
+    public bool HasPropertyFilters => PropertyFilters.Count > 0;
 
     public IReadOnlyList<string> MinimumLevelOptions { get; } =
     [
@@ -72,9 +76,12 @@ public partial class LogFiltersViewModel : ViewModelBase
         ReceiverFilter = string.Empty;
         LoggerFilter = string.Empty;
         ThreadFilter = string.Empty;
-        TenantFilter = string.Empty;
-        TraceIdFilter = string.Empty;
         MinimumLevelOption = "Any";
+
+        foreach (PropertyFilterItemViewModel item in PropertyFilters)
+        {
+            item.Value = string.Empty;
+        }
     }
 
     [RelayCommand]
@@ -88,19 +95,74 @@ public partial class LogFiltersViewModel : ViewModelBase
         ShowFatal = true;
     }
 
+    public void SetPropertyKeys(IReadOnlyList<string> keys)
+    {
+        HashSet<string> existing = new(PropertyFilters.Select(static x => x.Key), StringComparer.OrdinalIgnoreCase);
+        foreach (string key in keys)
+        {
+            if (existing.Contains(key))
+            {
+                continue;
+            }
+
+            PropertyFilterItemViewModel item = new(key);
+            item.PropertyChanged += OnPropertyFilterItemChanged;
+            PropertyFilters.Add(item);
+            existing.Add(key);
+        }
+
+        PropertyFilterCount = PropertyFilters.Count;
+    }
+
+    public void SetPropertyFilterValue(string key, string value)
+    {
+        PropertyFilterItemViewModel? existing = PropertyFilters.FirstOrDefault(x =>
+            string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase));
+
+        if (existing is null)
+        {
+            existing = new PropertyFilterItemViewModel(key);
+            existing.PropertyChanged += OnPropertyFilterItemChanged;
+            PropertyFilters.Add(existing);
+            PropertyFilterCount = PropertyFilters.Count;
+        }
+
+        existing.Value = value;
+    }
+
+    public IReadOnlyDictionary<string, string> GetPropertyFilters()
+    {
+        Dictionary<string, string> result = new(StringComparer.OrdinalIgnoreCase);
+        foreach (PropertyFilterItemViewModel item in PropertyFilters)
+        {
+            string? v = NormalizeFilter(item.Value);
+            if (v is not null)
+            {
+                result[item.Key] = v;
+            }
+        }
+
+        return result;
+    }
+
+    public void SetPropertyFiltersFromDictionary(IReadOnlyDictionary<string, string> saved)
+    {
+        foreach (KeyValuePair<string, string> pair in saved)
+        {
+            SetPropertyFilterValue(pair.Key, pair.Value);
+        }
+    }
+
     public LogQuery BuildQuery()
     {
         Dictionary<string, string> propertyFilters = new(StringComparer.OrdinalIgnoreCase);
-        string? tenant = NormalizeFilter(TenantFilter);
-        if (tenant is not null)
+        foreach (PropertyFilterItemViewModel item in PropertyFilters)
         {
-            propertyFilters["tenant"] = tenant;
-        }
-
-        string? traceId = NormalizeFilter(TraceIdFilter);
-        if (traceId is not null)
-        {
-            propertyFilters["traceId"] = traceId;
+            string? v = NormalizeFilter(item.Value);
+            if (v is not null)
+            {
+                propertyFilters[item.Key] = v;
+            }
         }
 
         return new LogQuery
@@ -162,6 +224,14 @@ public partial class LogFiltersViewModel : ViewModelBase
         }
 
         return enabledLevels;
+    }
+
+    private void OnPropertyFilterItemChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(PropertyFilterItemViewModel.Value), StringComparison.Ordinal))
+        {
+            OnPropertyChanged(nameof(PropertyFilters));
+        }
     }
 
     private static LogLevel? ParseMinimumLevel(string? option)

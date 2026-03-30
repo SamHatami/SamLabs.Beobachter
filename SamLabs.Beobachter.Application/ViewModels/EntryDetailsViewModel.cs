@@ -15,6 +15,8 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class EntryDetailsViewModel : ViewModelBase
 {
+    public event Action<string, string>? FilterByPropertyRequested;
+
     private readonly IClipboardService _clipboardService;
     private string _rawPayloadText = string.Empty;
     private string _formattedPayloadText = string.Empty;
@@ -233,7 +235,7 @@ public partial class EntryDetailsViewModel : ViewModelBase
 
         foreach (KeyValuePair<string, string> pair in entry.Properties.OrderBy(static x => x.Key, StringComparer.OrdinalIgnoreCase))
         {
-            Attributes.Add(new EntryDetailPropertyViewModel(pair.Key, pair.Value));
+            Attributes.Add(new EntryDetailPropertyViewModel(pair.Key, pair.Value, (k, v) => FilterByPropertyRequested?.Invoke(k, v)));
         }
         HasAttributes = Attributes.Count > 0;
 

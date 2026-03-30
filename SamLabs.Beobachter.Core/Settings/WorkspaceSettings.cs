@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace SamLabs.Beobachter.Core.Settings;
 
 public sealed record class WorkspaceSettings
@@ -10,9 +12,8 @@ public sealed record class WorkspaceSettings
 
     public string ThreadFilter { get; init; } = string.Empty;
 
-    public string TenantFilter { get; init; } = string.Empty;
-
-    public string TraceIdFilter { get; init; } = string.Empty;
+    public IReadOnlyDictionary<string, string> PropertyFilters { get; init; } =
+        new Dictionary<string, string>();
 
     public string MinimumLevelOption { get; init; } = "Any";
 

@@ -113,6 +113,17 @@ public sealed partial class WorkspaceSidebarViewModel : ViewModelBase
                 .Select(static group => new SidebarFacetOptionViewModel(group.Key, group.Key, group.Count()))
                 .ToArray());
 
+        List<string> topPropertyKeys = snapshot
+            .SelectMany(static entry => entry.Properties.Keys)
+            .GroupBy(static key => key, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(static g => g.Count())
+            .ThenBy(static g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(10)
+            .Select(static g => g.Key)
+            .ToList();
+
+        Filters.SetPropertyKeys(topPropertyKeys);
+
         SyncFacetSelectionState();
     }
 

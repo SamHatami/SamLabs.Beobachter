@@ -25,8 +25,7 @@ public partial class MainWindowViewModel : ViewModelBase
         nameof(LogFiltersViewModel.ReceiverFilter),
         nameof(LogFiltersViewModel.LoggerFilter),
         nameof(LogFiltersViewModel.ThreadFilter),
-        nameof(LogFiltersViewModel.TenantFilter),
-        nameof(LogFiltersViewModel.TraceIdFilter),
+        nameof(LogFiltersViewModel.PropertyFilters),
         nameof(LogFiltersViewModel.MinimumLevelOption),
         nameof(LogFiltersViewModel.ShowTrace),
         nameof(LogFiltersViewModel.ShowDebug),
@@ -107,6 +106,7 @@ public partial class MainWindowViewModel : ViewModelBase
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Stream.PropertyChanged += OnStreamPropertyChanged;
+        Details.FilterByPropertyRequested += OnFilterByPropertyRequested;
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
         IReadOnlyList<LogEntry> initialSnapshot = _ingestionSession.Snapshot();
@@ -146,6 +146,11 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         UpdateShellStatusPresentation();
+    }
+
+    private void OnFilterByPropertyRequested(string key, string value)
+    {
+        Filters.SetPropertyFilterValue(key, value);
     }
 
     private void OnTopBarSearchTextChanged(object? sender, EventArgs e)
@@ -320,8 +325,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Filters.ReceiverFilter = workspace.ReceiverFilter;
             Filters.LoggerFilter = workspace.LoggerFilter;
             Filters.ThreadFilter = workspace.ThreadFilter;
-            Filters.TenantFilter = workspace.TenantFilter;
-            Filters.TraceIdFilter = workspace.TraceIdFilter;
+            Filters.SetPropertyFiltersFromDictionary(workspace.PropertyFilters);
             Filters.MinimumLevelOption = string.IsNullOrWhiteSpace(workspace.MinimumLevelOption) ? "Any" : workspace.MinimumLevelOption;
             Stream.IsAutoScrollEnabled = workspace.AutoScroll;
             Stream.IsCompactDensity = workspace.CompactDensity;
@@ -359,8 +363,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Filters.ReceiverFilter,
             Filters.LoggerFilter,
             Filters.ThreadFilter,
-            Filters.TenantFilter,
-            Filters.TraceIdFilter,
+            Filters.GetPropertyFilters(),
             Filters.MinimumLevelOption,
             Stream.IsCompactDensity,
             ReceiverSetup.SelectedReceiverDefinition?.Id ?? string.Empty,

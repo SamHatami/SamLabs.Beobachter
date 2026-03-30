@@ -11,8 +11,7 @@ public sealed class WorkspaceStateUpdate
         string receiverFilter,
         string loggerFilter,
         string threadFilter,
-        string tenantFilter,
-        string traceIdFilter,
+        IReadOnlyDictionary<string, string> propertyFilters,
         string minimumLevelOption,
         bool compactDensity,
         string selectedReceiverId,
@@ -27,8 +26,7 @@ public sealed class WorkspaceStateUpdate
         ArgumentNullException.ThrowIfNull(receiverFilter);
         ArgumentNullException.ThrowIfNull(loggerFilter);
         ArgumentNullException.ThrowIfNull(threadFilter);
-        ArgumentNullException.ThrowIfNull(tenantFilter);
-        ArgumentNullException.ThrowIfNull(traceIdFilter);
+        ArgumentNullException.ThrowIfNull(propertyFilters);
         ArgumentNullException.ThrowIfNull(minimumLevelOption);
         ArgumentNullException.ThrowIfNull(selectedReceiverId);
         ArgumentNullException.ThrowIfNull(enabledLevels);
@@ -37,8 +35,7 @@ public sealed class WorkspaceStateUpdate
         ReceiverFilter = receiverFilter;
         LoggerFilter = loggerFilter;
         ThreadFilter = threadFilter;
-        TenantFilter = tenantFilter;
-        TraceIdFilter = traceIdFilter;
+        PropertyFilters = propertyFilters;
         MinimumLevelOption = minimumLevelOption;
         CompactDensity = compactDensity;
         SelectedReceiverId = selectedReceiverId;
@@ -58,9 +55,7 @@ public sealed class WorkspaceStateUpdate
 
     public string ThreadFilter { get; }
 
-    public string TenantFilter { get; }
-
-    public string TraceIdFilter { get; }
+    public IReadOnlyDictionary<string, string> PropertyFilters { get; }
 
     public string MinimumLevelOption { get; }
 
