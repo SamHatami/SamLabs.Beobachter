@@ -12,7 +12,7 @@
         d:DesignHeight="800"
         x:Class="SamLabs.Beobachter.Application.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/SamLabsLogo.png"
         Title="Beobachter"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="0"
