@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
+using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Application.ViewModels;
 using SamLabs.Beobachter.Core.Interfaces;
 
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
 {
     private MainWindowViewModel? _boundViewModel;
     private ISettingsService? _settingsService;
+    private IReleaseNotesProvider? _releaseNotesProvider;
 
     public MainWindow()
     {
@@ -27,6 +29,12 @@ public partial class MainWindow : Window
     {
         get => _settingsService;
         set => _settingsService = value;
+    }
+
+    public IReleaseNotesProvider? ReleaseNotesProvider
+    {
+        get => _releaseNotesProvider;
+        set => _releaseNotesProvider = value;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -120,14 +128,14 @@ public partial class MainWindow : Window
 
     private async void OnAppSettingsClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (_settingsService is null)
+        if (_settingsService is null || _releaseNotesProvider is null)
         {
             return;
         }
 
         AppSettingsWindow window = new()
         {
-            DataContext = new AppSettingsViewModel(_settingsService)
+            DataContext = new AppSettingsViewModel(_settingsService, _releaseNotesProvider)
         };
 
         await window.ShowDialog(this);

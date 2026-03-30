@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Interfaces;
 using SamLabs.Beobachter.Core.Services;
 using SamLabs.Beobachter.Core.Settings;
@@ -12,6 +13,7 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 public sealed partial class AppSettingsViewModel : ViewModelBase
 {
     private readonly ISettingsService _settingsService;
+    private readonly IReleaseNotesProvider _releaseNotesProvider;
 
     [ObservableProperty]
     private int _selectedThemeIndex;
@@ -19,9 +21,28 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private int _channelCapacity;
 
-    public AppSettingsViewModel(ISettingsService settingsService)
+    [NotifyPropertyChangedFor(nameof(IsCurrentReleaseSeen))]
+    [NotifyPropertyChangedFor(nameof(ReleaseSeenStatus))]
+    [ObservableProperty]
+    private string _releaseVersion = string.Empty;
+
+    [ObservableProperty]
+    private string _releasePublishedOn = string.Empty;
+
+    [ObservableProperty]
+    private string _releaseSummary = string.Empty;
+
+    [NotifyPropertyChangedFor(nameof(IsCurrentReleaseSeen))]
+    [NotifyPropertyChangedFor(nameof(ReleaseSeenStatus))]
+    [ObservableProperty]
+    private string _lastSeenReleaseNotesVersion = string.Empty;
+
+    public AppSettingsViewModel(
+        ISettingsService settingsService,
+        IReleaseNotesProvider releaseNotesProvider)
     {
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _releaseNotesProvider = releaseNotesProvider ?? throw new ArgumentNullException(nameof(releaseNotesProvider));
 
         LevelColors =
         [
@@ -33,10 +54,22 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
             new("Fatal")
         ];
 
+        LoadReleaseNotes();
         LoadFromCurrent();
     }
 
     public ObservableCollection<LogLevelColorItemViewModel> LevelColors { get; }
+
+    public ObservableCollection<string> ReleaseHighlights { get; } = [];
+
+    public bool HasReleaseHighlights => ReleaseHighlights.Count > 0;
+
+    public bool IsCurrentReleaseSeen => string.Equals(
+        LastSeenReleaseNotesVersion,
+        ReleaseVersion,
+        StringComparison.OrdinalIgnoreCase);
+
+    public string ReleaseSeenStatus => IsCurrentReleaseSeen ? "Seen" : "New";
 
     public bool Saved { get; private set; }
 
@@ -46,6 +79,34 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
         AppSettings updated = BuildSettings();
         await _settingsService.UpdateAppSettingsAsync(updated).ConfigureAwait(false);
         Saved = true;
+    }
+
+    [RelayCommand]
+    private async Task MarkReleaseNotesSeenAsync()
+    {
+        if (IsCurrentReleaseSeen)
+        {
+            return;
+        }
+
+        LastSeenReleaseNotesVersion = ReleaseVersion;
+        await SaveAsync().ConfigureAwait(false);
+    }
+
+    private void LoadReleaseNotes()
+    {
+        ReleaseNotesSnapshot notes = _releaseNotesProvider.GetCurrentReleaseNotes();
+        ReleaseVersion = notes.Version;
+        ReleasePublishedOn = notes.PublishedOn;
+        ReleaseSummary = notes.Summary;
+
+        ReleaseHighlights.Clear();
+        foreach (string highlight in notes.Highlights)
+        {
+            ReleaseHighlights.Add(highlight);
+        }
+
+        OnPropertyChanged(nameof(HasReleaseHighlights));
     }
 
     private void LoadFromCurrent()
@@ -60,6 +121,7 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
         };
 
         ChannelCapacity = current.ChannelCapacity;
+        LastSeenReleaseNotesVersion = current.LastSeenReleaseNotesVersion;
 
         LogLevelColorOverrides c = current.LogLevelColors;
         LevelColors[0].LoadFrom(c.Trace);
@@ -83,6 +145,7 @@ public sealed partial class AppSettingsViewModel : ViewModelBase
         {
             ThemeMode = themeMode,
             ChannelCapacity = Math.Clamp(ChannelCapacity, 1_000, 1_000_000),
+            LastSeenReleaseNotesVersion = LastSeenReleaseNotesVersion,
             LogLevelColors = new LogLevelColorOverrides
             {
                 Trace = LevelColors[0].ToOverride(),

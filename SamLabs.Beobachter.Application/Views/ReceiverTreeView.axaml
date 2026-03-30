@@ -3,36 +3,74 @@
              xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:viewModels="clr-namespace:SamLabs.Beobachter.Application.ViewModels"
              x:Class="SamLabs.Beobachter.Application.Views.ReceiverTreeView"
-             x:Name="Root"
              x:DataType="viewModels:ReceiverTreeViewModel">
 
+    <UserControl.DataTemplates>
+        <TreeDataTemplate x:DataType="viewModels:ReceiverTreeGroupViewModel"
+                          ItemsSource="{Binding Children}">
+            <Grid Classes="receiver-tree-group-row"
+                  ColumnDefinitions="Auto,*,Auto,Auto">
+                <i:Icon Grid.Column="0"
+                        Classes="receiver-tree-group-icon"
+                        Value="{Binding Icon}" />
+                <TextBlock Grid.Column="1"
+                           Classes="receiver-tree-group-title"
+                           Text="{Binding Name}" />
+                <TextBlock Grid.Column="2"
+                           Classes="receiver-tree-group-count"
+                           Text="{Binding ReceiverCount}" />
+                <Button Grid.Column="3"
+                        Classes="toolbar-button receiver-tree-group-add-button"
+                        Command="{Binding AddReceiverCommand}"
+                        ToolTip.Tip="Add receiver"
+                        i:Attached.Icon="fa-solid fa-plus" />
+            </Grid>
+        </TreeDataTemplate>
+
+        <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
+            <Grid Classes="receiver-tree-item-row"
+                  ColumnDefinitions="Auto,*,Auto,Auto">
+                <Grid Grid.Column="0"
+                      Classes="receiver-tree-state-host">
+                    <Ellipse Classes="receiver-tree-state receiver-tree-state-running"
+                             IsVisible="{Binding IsRunning}" />
+                    <Ellipse Classes="receiver-tree-state receiver-tree-state-faulted"
+                             IsVisible="{Binding IsFaulted}" />
+                </Grid>
+                <TextBlock Grid.Column="1"
+                           Classes="receiver-tree-item-title"
+                           Text="{Binding DisplayName}" />
+                <ToggleSwitch Grid.Column="2"
+                              Classes="receiver-tree-enabled-toggle"
+                              IsChecked="{Binding Enabled, Mode=TwoWay}"
+                              ToolTip.Tip="Enable or disable this receiver" />
+                <Button Grid.Column="3"
+                        Classes="toolbar-button icon-button receiver-tree-edit-button"
+                        Command="{Binding ((viewModels:ReceiverTreeViewModel)DataContext).OpenReceiverEditorCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                        ToolTip.Tip="Edit receiver"
+                        i:Attached.Icon="fa-solid fa-pen" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
     <Expander Classes="sidebar-expander"
-              IsExpanded="True">
+              IsExpanded="{Binding IsExpanded}">
         <Expander.Header>
-            <Grid ColumnDefinitions="Auto,Auto,*,Auto"
-                  ColumnSpacing="8">
+            <Grid Classes="receiver-tree-header-grid"
+                  ColumnDefinitions="Auto,Auto,*,Auto">
                 <TextBlock Grid.Column="0"
-                           Text="RECEIVERS"
                            Classes="section-caption"
-                           VerticalAlignment="Center" />
+                           Text="RECEIVERS" />
                 <Border Grid.Column="1"
-                        Padding="5,5"
-                        Margin="0,5"
-                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
-                        Background="{DynamicResource ShellChromeBrush}"
-                        BorderBrush="{DynamicResource ShellChromeBorderBrush}"
-                        BorderThickness="1">
-                    <TextBlock Text="{Binding ReceiverSetup.ReceiverDefinitions.Count}"
-                               FontSize="11"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        Classes="receiver-tree-header-count-badge">
+                    <TextBlock Classes="receiver-tree-header-count-text" VerticalAlignment="Center"
+                               Text="{Binding ReceiverSetup.ReceiverDefinitions.Count}" />
                 </Border>
                 <StackPanel Grid.Column="3"
-                            Orientation="Horizontal"
-                            Spacing="2"
+                            Classes="receiver-tree-header-actions"
                             IsVisible="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=Expander}}">
                     <Button Classes="toolbar-button"
-                            
                             Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
                             ToolTip.Tip="Save + Reload"
                             i:Attached.Icon="fa-solid fa-floppy-disk" />
@@ -41,201 +79,15 @@
                             ToolTip.Tip="Reload from disk"
                             i:Attached.Icon="fa-solid fa-rotate" />
                     <Button Classes="toolbar-button"
-                            Click="OnOpenEditorClick"
+                            Command="{Binding OpenEditorCommand}"
                             ToolTip.Tip="Open receiver editor"
                             i:Attached.Icon="fa-solid fa-gear" />
                 </StackPanel>
             </Grid>
         </Expander.Header>
 
-        <StackPanel Classes="sidebar-expander-content"
-                    Spacing="0">
-            <!-- UDP group -->
-            <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="4"
-                  Margin="0,4,0,2">
-                <i:Icon Grid.Column="0"
-                        Value="fa-solid fa-tower-broadcast"
-                        FontSize="11"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                <TextBlock Grid.Column="1"
-                           Text="UDP"
-                           Classes="section-caption"
-                           VerticalAlignment="Center"
-                           Margin="4,0,0,0" />
-                <Button Grid.Column="2"
-                        Classes="toolbar-button"
-                        Command="{Binding ReceiverSetup.AddUdpReceiverCommand}"
-                        ToolTip.Tip="Add UDP receiver"
-                        i:Attached.Icon="fa-solid fa-plus" />
-            </Grid>
-
-            <ItemsControl ItemsSource="{Binding UdpReceivers}"
-                          Margin="0,0,0,4">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="6"
-                                    MinHeight="26"
-                                    Margin="20,1">
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4"
-                                        VerticalAlignment="Center"
-                                        MinWidth="14">
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#22c55e"
-                                         IsVisible="{Binding IsRunning}" />
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#ef4444"
-                                         IsVisible="{Binding IsFaulted}" />
-                                <TextBlock Text="{Binding DisplayName}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           FontSize="12" />
-                                <ToggleSwitch
-                                    IsChecked="{Binding Enabled, Mode=TwoWay}"
-                                    VerticalAlignment="Center"
-                                    ToolTip.Tip="Enable or disable this receiver" />
-                                <Button
-                                    Classes="toolbar-button icon-button"
-                                    Click="OnEditReceiverClick"
-                                    ToolTip.Tip="Edit receiver"
-                                    i:Attached.Icon="fa-solid fa-pen" />
-                            </StackPanel>
-
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <!-- TCP group -->
-            <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="4"
-                  Margin="0,4,0,2">
-                <i:Icon Grid.Column="0"
-                        Value="fa-solid fa-ethernet"
-                        FontSize="11"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                <TextBlock Grid.Column="1"
-                           Text="TCP"
-                           Classes="section-caption"
-                           VerticalAlignment="Center"
-                           Margin="4,0,0,0" />
-                <Button Grid.Column="2"
-                        Classes="toolbar-button"
-                        Command="{Binding ReceiverSetup.AddTcpReceiverCommand}"
-                        ToolTip.Tip="Add TCP receiver"
-                        i:Attached.Icon="fa-solid fa-plus" />
-            </Grid>
-
-            <ItemsControl ItemsSource="{Binding TcpReceivers}"
-                          Margin="0,0,0,4">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="6"
-                                    MinHeight="26"
-                                    Margin="20,1">
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4"
-                                        VerticalAlignment="Center"
-                                        MinWidth="14">
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#22c55e"
-                                         IsVisible="{Binding IsRunning}" />
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#ef4444"
-                                         IsVisible="{Binding IsFaulted}" />
-                                <TextBlock
-                                    Text="{Binding DisplayName}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           FontSize="12" />
-                                <ToggleSwitch
-                                    IsChecked="{Binding Enabled, Mode=TwoWay}"
-                                    VerticalAlignment="Center"
-                                    ToolTip.Tip="Enable or disable this receiver" />
-                                <Button
-                                    Classes="toolbar-button icon-button"
-                                    Click="OnEditReceiverClick"
-                                    ToolTip.Tip="Edit receiver"
-                                    i:Attached.Icon="fa-solid fa-pen" />
-                            </StackPanel>
-
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <!-- File group -->
-            <Grid ColumnDefinitions="Auto,*,Auto"
-                  ColumnSpacing="4"
-                  Margin="0,4,0,2">
-                <i:Icon Grid.Column="0"
-                        Value="fa-regular fa-file-lines"
-                        FontSize="11"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                <TextBlock Grid.Column="1"
-                           Text="File"
-                           Classes="section-caption"
-                           VerticalAlignment="Center"
-                           Margin="4,0,0,0" />
-                <Button Grid.Column="2"
-                        Classes="toolbar-button"
-                        Command="{Binding ReceiverSetup.AddFileReceiverCommand}"
-                        ToolTip.Tip="Add file tail receiver"
-                        i:Attached.Icon="fa-solid fa-plus" />
-            </Grid>
-
-            <ItemsControl ItemsSource="{Binding FileReceivers}"
-                          Margin="0,0,0,2">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels:ReceiverDefinitionViewModel">
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="6"
-                                    MinHeight="26"
-                                    Margin="20,1">
-                            <StackPanel Orientation="Horizontal"
-                                        Spacing="4"
-                                        VerticalAlignment="Center"
-                                        MinWidth="14">
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#22c55e"
-                                         IsVisible="{Binding IsRunning}" />
-                                <Ellipse Width="7"
-                                         Height="7"
-                                         Fill="#ef4444"
-                                         IsVisible="{Binding IsFaulted}" />
-                                <TextBlock
-                                           Text="{Binding DisplayName}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis"
-                                           FontSize="12" />
-                                <ToggleSwitch
-                                    IsChecked="{Binding Enabled, Mode=TwoWay}"
-                                    VerticalAlignment="Center"
-                                    ToolTip.Tip="Enable or disable this receiver" />
-                                <Button
-                                    Classes="toolbar-button icon-button"
-                                    Click="OnEditReceiverClick"
-                                    ToolTip.Tip="Edit receiver"
-                                    i:Attached.Icon="fa-solid fa-pen" />
-                            </StackPanel>
-
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-        </StackPanel>
+        <TreeView Classes="receiver-tree"
+                  ItemsSource="{Binding Groups}"
+                  SelectedItem="{Binding SelectedNode, Mode=TwoWay}" />
     </Expander>
-
 </UserControl>

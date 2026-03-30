@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using SamLabs.Beobachter.Application.Composition;
+using SamLabs.Beobachter.Application.Services;
 using SamLabs.Beobachter.Core.Interfaces;
 using MainWindow = SamLabs.Beobachter.Application.Views.MainWindow;
 using MainWindowViewModel = SamLabs.Beobachter.Application.ViewModels.MainWindowViewModel;
@@ -25,6 +26,7 @@ public partial class App : Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var settingsService = _services.GetRequiredService<ISettingsService>();
+            var releaseNotesProvider = _services.GetRequiredService<IReleaseNotesProvider>();
             settingsService.InitializeAsync().GetAwaiter().GetResult();
 
             var ingestionSession = _services.GetRequiredService<IIngestionSession>();
@@ -33,7 +35,8 @@ public partial class App : Avalonia.Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext = _services.GetRequiredService<MainWindowViewModel>(),
-                SettingsService = settingsService
+                SettingsService = settingsService,
+                ReleaseNotesProvider = releaseNotesProvider
             };
 
             desktop.Exit += (_, _) =>

@@ -35,6 +35,7 @@ public static class Root
         services.AddSingleton<ILogStatisticsService, RollingLogStatisticsService>();
         services.AddSingleton<ILogStore, InMemoryLogStore>();
         services.AddSingleton<ISettingsStore, JsonSettingsStore>();
+        services.AddSingleton<IReleaseNotesProvider, ReleaseNotesProvider>();
         services.AddSingleton<ILogQueryEvaluator, LogQueryEvaluator>();
 
         services.AddSingleton<ILogParser, Log4jXmlParser>();

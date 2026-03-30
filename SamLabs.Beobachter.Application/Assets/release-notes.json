@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "publishedOn": "2026-03-30",
+  "summary": "Receiver tree moved to a real hierarchical TreeView with shared theme styling.",
+  "highlights": [
+    "Receivers are grouped by UDP, TCP, and File in expandable nodes.",
+    "Edit/open actions are command-driven from the tree view model.",
+    "Receiver tree visual styling is centralized in Themes/Common.axaml."
+  ]
+}

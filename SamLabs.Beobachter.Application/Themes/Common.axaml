@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="https://github.com/projektanker/icons.avalonia">
     <Styles.Resources>
         <x:Double x:Key="ShellSpace2">4</x:Double>
         <x:Double x:Key="ShellSpace3">6</x:Double>
@@ -370,5 +371,143 @@
 
     <Style Selector="StackPanel.sidebar-expander-content">
         <Setter Property="Margin" Value="0,6,0,0" />
+    </Style>
+
+    <Style Selector="TextBlock.release-notes-meta">
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.release-notes-summary">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="StackPanel.release-note-item">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="6" />
+    </Style>
+
+    <Style Selector="TextBlock.release-note-bullet">
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.release-note-text">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="Grid.receiver-tree-header-grid">
+        <Setter Property="ColumnSpacing" Value="8" />
+    </Style>
+
+    <Style Selector="Border.receiver-tree-header-count-badge">
+        <Setter Property="Padding" Value="5,5" />
+        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ShellBadgeCornerRadius}" />
+        <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="TextBlock.receiver-tree-header-count-text">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="StackPanel.receiver-tree-header-actions">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="2" />
+    </Style>
+
+    <Style Selector="TreeView.receiver-tree">
+        <Setter Property="Margin" Value="0,6,0,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="TreeView.receiver-tree TreeViewItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="24" />
+    </Style>
+
+    <Style Selector="TreeView.receiver-tree TreeViewItem /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="TreeView.receiver-tree TreeViewItem /template/ ToggleButton#Expander">
+        <Setter Property="Margin" Value="0,0,4,0" />
+    </Style>
+
+    <Style Selector="Grid.receiver-tree-group-row">
+        <Setter Property="ColumnSpacing" Value="4" />
+        <Setter Property="Margin" Value="0,2,0,2" />
+        <Setter Property="MinHeight" Value="28" />
+    </Style>
+
+    <Style Selector="i|Icon.receiver-tree-group-icon">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.receiver-tree-group-title">
+        <Setter Property="Margin" Value="4,0,0,0" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.receiver-tree-group-count">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource ShellMutedForegroundBrush}" />
+    </Style>
+
+    <Style Selector="Button.receiver-tree-group-add-button">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="24" />
+    </Style>
+
+    <Style Selector="Grid.receiver-tree-item-row">
+        <Setter Property="ColumnSpacing" Value="6" />
+        <Setter Property="Margin" Value="0,1,0,1" />
+        <Setter Property="MinHeight" Value="26" />
+    </Style>
+
+    <Style Selector="Grid.receiver-tree-state-host">
+        <Setter Property="Width" Value="12" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Ellipse.receiver-tree-state">
+        <Setter Property="Width" Value="7" />
+        <Setter Property="Height" Value="7" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Ellipse.receiver-tree-state.receiver-tree-state-running">
+        <Setter Property="Fill" Value="{DynamicResource MessageInfoBrush}" />
+    </Style>
+
+    <Style Selector="Ellipse.receiver-tree-state.receiver-tree-state-faulted">
+        <Setter Property="Fill" Value="{DynamicResource MessageErrorBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.receiver-tree-item-title">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="ToggleSwitch.receiver-tree-enabled-toggle">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.receiver-tree-edit-button">
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 </Styles>

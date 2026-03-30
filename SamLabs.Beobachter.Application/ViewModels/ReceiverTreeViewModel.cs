@@ -2,35 +2,81 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Core.Models;
 
 namespace SamLabs.Beobachter.Application.ViewModels;
 
 public sealed partial class ReceiverTreeViewModel : ViewModelBase
 {
+    private readonly ReceiverTreeGroupViewModel _udpGroup;
+    private readonly ReceiverTreeGroupViewModel _tcpGroup;
+    private readonly ReceiverTreeGroupViewModel _fileGroup;
+
     public ReceiverTreeViewModel(ReceiverSetupViewModel receiverSetup)
     {
         ReceiverSetup = receiverSetup ?? throw new ArgumentNullException(nameof(receiverSetup));
         ReceiverSetup.ReceiverDefinitions.CollectionChanged += OnReceiverDefinitionsChanged;
+        ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
+
+        _udpGroup = new ReceiverTreeGroupViewModel(
+            "UDP",
+            "fa-solid fa-tower-broadcast",
+            ReceiverSetup.AddUdpReceiverCommand);
+        _tcpGroup = new ReceiverTreeGroupViewModel(
+            "TCP",
+            "fa-solid fa-ethernet",
+            ReceiverSetup.AddTcpReceiverCommand);
+        _fileGroup = new ReceiverTreeGroupViewModel(
+            "File",
+            "fa-regular fa-file-lines",
+            ReceiverSetup.AddFileReceiverCommand);
+
+        Groups.Add(_udpGroup);
+        Groups.Add(_tcpGroup);
+        Groups.Add(_fileGroup);
+
         SyncFilteredCollections();
+        SelectedNode = ReceiverSetup.SelectedReceiverDefinition;
     }
 
     public ReceiverSetupViewModel ReceiverSetup { get; }
 
+    public ObservableCollection<ReceiverTreeGroupViewModel> Groups { get; } = [];
+
     [ObservableProperty]
     private bool _isExpanded = true;
 
-    public ObservableCollection<ReceiverDefinitionViewModel> UdpReceivers { get; } = [];
-    public ObservableCollection<ReceiverDefinitionViewModel> TcpReceivers { get; } = [];
-    public ObservableCollection<ReceiverDefinitionViewModel> FileReceivers { get; } = [];
+    [ObservableProperty]
+    private object? _selectedNode;
 
     public event EventHandler? OpenEditorRequested;
 
     public void RequestOpenEditor()
     {
         OpenEditorRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void OpenEditor()
+    {
+        RequestOpenEditor();
+    }
+
+    [RelayCommand]
+    private void OpenReceiverEditor(ReceiverDefinitionViewModel? receiver)
+    {
+        if (receiver is null)
+        {
+            return;
+        }
+
+        ReceiverSetup.SelectedReceiverDefinition = receiver;
+        SelectedNode = receiver;
+        RequestOpenEditor();
     }
 
     public void UpdateRuntimeStates(IReadOnlyList<ReceiverRuntimeState> runtimeStates)
@@ -48,11 +94,32 @@ public sealed partial class ReceiverTreeViewModel : ViewModelBase
         SyncFilteredCollections();
     }
 
+    partial void OnSelectedNodeChanged(object? value)
+    {
+        if (value is ReceiverDefinitionViewModel receiver)
+        {
+            ReceiverSetup.SelectedReceiverDefinition = receiver;
+        }
+    }
+
+    private void OnReceiverSetupPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!string.Equals(
+                e.PropertyName,
+                nameof(ReceiverSetupViewModel.SelectedReceiverDefinition),
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        SelectedNode = ReceiverSetup.SelectedReceiverDefinition;
+    }
+
     private void SyncFilteredCollections()
     {
-        SyncCollection(UdpReceivers, static x => x.IsUdp);
-        SyncCollection(TcpReceivers, static x => x.IsTcp);
-        SyncCollection(FileReceivers, static x => x.IsFile);
+        SyncCollection(_udpGroup.Children, static x => x.IsUdp);
+        SyncCollection(_tcpGroup.Children, static x => x.IsTcp);
+        SyncCollection(_fileGroup.Children, static x => x.IsFile);
     }
 
     private void SyncCollection(

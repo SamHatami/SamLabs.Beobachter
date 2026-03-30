@@ -57,6 +57,40 @@
                           Padding="16">
                 <StackPanel Spacing="20">
 
+                    <!-- Release Notes -->
+                    <Border Classes="shell-card"
+                            Padding="14">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="RELEASE NOTES"
+                                       Classes="section-caption" />
+                            <TextBlock Text="{Binding ReleaseVersion}"
+                                       Classes="panel-title" />
+                            <TextBlock Text="{Binding ReleasePublishedOn}"
+                                       Classes="release-notes-meta" />
+                            <TextBlock Text="{Binding ReleaseSummary}"
+                                       Classes="release-notes-summary" />
+                            <TextBlock Text="{Binding ReleaseSeenStatus}"
+                                       Classes="release-notes-meta" />
+                            <ItemsControl ItemsSource="{Binding ReleaseHighlights}"
+                                          IsVisible="{Binding HasReleaseHighlights}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Classes="release-note-item">
+                                            <TextBlock Text="•"
+                                                       Classes="release-note-bullet" />
+                                            <TextBlock Text="{Binding}"
+                                                       Classes="release-note-text" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Classes="toolbar-button"
+                                    Content="Mark Release Notes As Seen"
+                                    Command="{Binding MarkReleaseNotesSeenCommand}"
+                                    IsVisible="{Binding !IsCurrentReleaseSeen}" />
+                        </StackPanel>
+                    </Border>
+
                     <!-- Theme Section -->
                     <Border Classes="shell-card"
                             Padding="14">

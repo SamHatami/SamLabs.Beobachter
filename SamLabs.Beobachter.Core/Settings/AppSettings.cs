@@ -6,5 +6,7 @@ public sealed record class AppSettings
 
     public int ChannelCapacity { get; init; } = 50_000;
 
+    public string LastSeenReleaseNotesVersion { get; init; } = string.Empty;
+
     public LogLevelColorOverrides LogLevelColors { get; init; } = new();
 }
