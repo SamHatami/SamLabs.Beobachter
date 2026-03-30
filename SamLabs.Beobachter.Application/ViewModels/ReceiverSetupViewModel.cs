@@ -17,7 +17,7 @@ namespace SamLabs.Beobachter.Application.ViewModels;
 
 public partial class ReceiverSetupViewModel : ViewModelBase
 {
-    private const string BindAddressValidationMessage = "Bind address must be a literal IPv4 or IPv6 address (for example 0.0.0.0 or ::1).";
+    private const string BindAddressValidationMessage = "Bind address must be a literal IPv4 or IPv6 address, or 'localhost' (for example 0.0.0.0, ::1, or localhost).";
     private static readonly StringComparer ParserNameComparer = StringComparer.OrdinalIgnoreCase;
     private static readonly string[] DefaultParserOrder =
     [
@@ -507,7 +507,13 @@ public partial class ReceiverSetupViewModel : ViewModelBase
             return false;
         }
 
-        return IPAddress.TryParse(value.Trim(), out _);
+        string bindAddress = value.Trim();
+        if (string.Equals(bindAddress, "localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return IPAddress.TryParse(bindAddress, out _);
     }
 
     private static string BuildReloadStatusMessage(

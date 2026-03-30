@@ -15,6 +15,8 @@ public partial class LogStreamViewModel : ViewModelBase
     private const int MaxVisibleEntries = 2_000;
     private readonly IIngestionSession _ingestionSession;
 
+    public event EventHandler? EntriesCleared;
+
     [ObservableProperty]
     private bool _isCompactDensity;
 
@@ -63,6 +65,15 @@ public partial class LogStreamViewModel : ViewModelBase
 
     public string PauseButtonIcon => IsPaused ? "fa-solid fa-play" : "fa-solid fa-pause";
 
+    [RelayCommand]
+    private void ClearEntries()
+    {
+        _ingestionSession.ClearEntries();
+        VisibleEntries.Clear();
+        SelectedEntry = null;
+        EntriesCleared?.Invoke(this, EventArgs.Empty);
+    }
+    
     [RelayCommand]
     private void ToggleDensity()
     {

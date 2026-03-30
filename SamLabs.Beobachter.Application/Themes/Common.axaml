@@ -113,6 +113,16 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
     </Style>
+    
+    <Style Selector="Button.toolbar-button-clear">
+        <Setter Property="Padding" Value="{DynamicResource ShellToolbarButtonPadding}" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ShellPanelCornerRadius}" />
+        <Setter Property="Foreground" Value="{DynamicResource ButtonClearLog}"/>
+    </Style>
 
     <Style Selector="Button.stream-pause-toggle.stream-pause-active">
         <Setter Property="Background" Value="{DynamicResource StreamPauseActiveBrush}" />

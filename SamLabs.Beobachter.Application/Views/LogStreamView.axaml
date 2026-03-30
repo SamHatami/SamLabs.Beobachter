@@ -65,16 +65,27 @@
                             Orientation="Horizontal"
                             Spacing="6"
                             HorizontalAlignment="Right">
-                    <Button Classes="toolbar-button"
-                            ToolTip.Tip="Toggle row density between Comfortable and Compact."
-                            Command="{Binding ToggleDensityCommand}"
-                            i:Attached.Icon="fa-solid fa-grip-lines" />
                     <Button Classes="toolbar-button stream-pause-toggle"
                             Classes.stream-pause-active="{Binding IsStreamActive}"
                             Classes.stream-pause-paused="{Binding IsPaused}"
                             ToolTip.Tip="Pause or resume stream ingestion."
                             Command="{Binding TogglePauseCommand}"
                             i:Attached.Icon="{Binding PauseButtonIcon}" />
+                    <Border Width="1"
+                            Height="20"
+                            Margin="2,0"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource ShellChromeBorderBrush}" />
+                    <Button Classes="toolbar-button-clear"                         
+                            ToolTip.Tip="Clear all log entries from the stream."
+                            Command="{Binding ClearEntriesCommand}"
+                            i:Attached.Icon="fa-solid fa-circle-xmark" />
+
+                    <Button Classes="toolbar-button"
+                            ToolTip.Tip="Toggle row density between Comfortable and Compact."
+                            Command="{Binding ToggleDensityCommand}"
+                            i:Attached.Icon="fa-solid fa-grip-lines" />
+
                     <ToggleButton Classes="toolbar-button"
                                   ToolTip.Tip="Auto-scroll to newest row when new logs arrive."
                                   IsChecked="{Binding IsAutoScrollEnabled, Mode=OneWay}"

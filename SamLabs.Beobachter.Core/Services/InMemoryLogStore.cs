@@ -52,6 +52,14 @@ public sealed class InMemoryLogStore : ILogStore
         EntriesAppended?.Invoke(this, new LogEntriesAppendedEventArgs(appended));
     }
 
+    public void Clear()
+    {
+        lock (_gate)
+        {
+            _entries.Clear();
+        }
+    }
+
     public IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null)
     {
         lock (_gate)

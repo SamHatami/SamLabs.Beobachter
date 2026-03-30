@@ -47,6 +47,27 @@ public sealed class LogStreamViewModelTests
     }
 
     [Fact]
+    public void ClearEntries_ClearsSessionAndVisibleCollection()
+    {
+        FakeIngestionSession session =
+        new(
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "one"),
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Warn, "two")
+        ]);
+        LogStreamViewModel vm = new(session);
+        vm.RebuildEntries(session.Snapshot(), _ => true);
+        vm.SelectedEntry = vm.VisibleEntries[1];
+
+        vm.ClearEntriesCommand.Execute(null);
+
+        Assert.Equal(1, session.ClearEntriesCalls);
+        Assert.Equal(0, session.TotalCount);
+        Assert.Empty(vm.VisibleEntries);
+        Assert.Null(vm.SelectedEntry);
+    }
+
+    [Fact]
     public void ToggleDensity_UpdatesRowMetrics()
     {
         LogStreamViewModel vm = new(new FakeIngestionSession([]));

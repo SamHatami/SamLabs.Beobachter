@@ -166,12 +166,35 @@ public sealed class UdpReceiver : ILogReceiver
 
     private static UdpClient CreateUdpClient(UdpReceiverOptions options)
     {
-        if (!IPAddress.TryParse(options.BindAddress, out var bindAddress))
+        if (!TryResolveBindAddress(options.BindAddress, out IPAddress bindAddress))
         {
             throw new ArgumentException($"Invalid UDP bind address: '{options.BindAddress}'.", nameof(options));
         }
 
-        var endPoint = new IPEndPoint(bindAddress, options.Port);
+        IPEndPoint endPoint = new(bindAddress, options.Port);
         return new UdpClient(endPoint);
+    }
+
+    private static bool TryResolveBindAddress(string? bindAddressText, out IPAddress bindAddress)
+    {
+        bindAddress = IPAddress.None;
+        if (string.IsNullOrWhiteSpace(bindAddressText))
+        {
+            return false;
+        }
+
+        string normalized = bindAddressText.Trim();
+        if (IPAddress.TryParse(normalized, out bindAddress))
+        {
+            return true;
+        }
+
+        if (string.Equals(normalized, "localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            bindAddress = IPAddress.Loopback;
+            return true;
+        }
+
+        return false;
     }
 }

@@ -116,7 +116,7 @@
                                     <TextBox Width="180"
                                              Watermark="Bind address"
                                              IsVisible="{Binding IsUdp}"
-                                             ToolTip.Tip="Literal IP address only, e.g. 0.0.0.0 or ::1."
+                                             ToolTip.Tip="Literal IP or localhost, e.g. 0.0.0.0, ::1, or localhost."
                                              Text="{Binding BindAddress}" />
                                     <TextBox Width="90"
                                              Watermark="Port"
@@ -126,7 +126,7 @@
                                     <TextBox Width="180"
                                              Watermark="Bind address"
                                              IsVisible="{Binding IsTcp}"
-                                             ToolTip.Tip="Literal IP address only, e.g. 0.0.0.0 or ::1."
+                                             ToolTip.Tip="Literal IP or localhost, e.g. 0.0.0.0, ::1, or localhost."
                                              Text="{Binding BindAddress}" />
                                     <TextBox Width="90"
                                              Watermark="Port"

@@ -147,4 +147,29 @@ public sealed class MainWindowFilteringTests
         Assert.Single(vm.Stream.VisibleEntries);
         Assert.Equal("Structured line", vm.Stream.VisibleEntries[0].Message);
     }
+
+    [Fact]
+    public void ClearEntries_ClearsMessagesAndKeepsSourceTree()
+    {
+        FakeIngestionSession session =
+        new(
+        [
+            MainWindowTestSupport.CreateEntry("Orders.Api", LogLevel.Info, "Accepted"),
+            MainWindowTestSupport.CreateEntry("Inventory.Api", LogLevel.Warn, "Slow sync")
+        ]);
+
+        MainWindowViewModel vm = MainWindowTestSupport.CreateMainWindowViewModel(session);
+        Assert.NotEmpty(vm.Sources.LoggerTreeItems);
+        Assert.Equal(2, vm.Stream.VisibleEntries.Count);
+
+        vm.Stream.ClearEntriesCommand.Execute(null);
+
+        Assert.Equal(1, session.ClearEntriesCalls);
+        Assert.Equal(0, session.TotalCount);
+        Assert.Empty(vm.Stream.VisibleEntries);
+        Assert.NotEmpty(vm.Sources.LoggerTreeItems);
+        Assert.All(vm.Sources.VisibleSourceItems, source => Assert.Equal(0, source.Count));
+        Assert.Equal(0, vm.QuickFilters.ErrorsAndAboveCount);
+        Assert.Equal(0, vm.QuickFilters.StructuredOnlyCount);
+    }
 }

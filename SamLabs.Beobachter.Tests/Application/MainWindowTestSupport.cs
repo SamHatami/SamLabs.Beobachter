@@ -128,6 +128,8 @@ internal sealed class FakeIngestionSession : IIngestionSession
 
     public int ReloadReceiversCalls { get; private set; }
 
+    public int ClearEntriesCalls { get; private set; }
+
     public ReceiverReloadResult ReloadResult { get; set; } = new();
 
     public IReadOnlyList<ReceiverRuntimeState> ReceiverRuntimeStates { get; set; } = [];
@@ -137,6 +139,12 @@ internal sealed class FakeIngestionSession : IIngestionSession
         _entries.Add(entry);
         EntriesAppended?.Invoke(this, new LogEntriesAppendedEventArgs([entry]));
         return true;
+    }
+
+    public void ClearEntries()
+    {
+        ClearEntriesCalls++;
+        _entries.Clear();
     }
 
     public IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null)

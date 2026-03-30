@@ -107,6 +107,7 @@ public partial class MainWindowViewModel : ViewModelBase
         QuickFilters.PropertyChanged += OnQuickFiltersPropertyChanged;
         ReceiverSetup.PropertyChanged += OnReceiverSetupPropertyChanged;
         Stream.PropertyChanged += OnStreamPropertyChanged;
+        Stream.EntriesCleared += OnStreamEntriesCleared;
         Details.FilterByPropertyRequested += OnFilterByPropertyRequested;
 
         _ingestionSession.EntriesAppended += OnEntriesAppended;
@@ -248,6 +249,14 @@ public partial class MainWindowViewModel : ViewModelBase
             WorkspaceSidebar.UpdateSnapshot(_ingestionSession.Snapshot());
             UpdateShellStatusPresentation();
         });
+    }
+
+    private void OnStreamEntriesCleared(object? sender, EventArgs e)
+    {
+        _statisticsService.Reset();
+        Sources.ResetSourceCounts();
+        WorkspaceSidebar.UpdateSnapshot([]);
+        UpdateShellStatusPresentation();
     }
 
     private void RebuildVisibleEntries()

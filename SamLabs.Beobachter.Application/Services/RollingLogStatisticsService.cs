@@ -47,6 +47,14 @@ public sealed class RollingLogStatisticsService : ILogStatisticsService
         }
     }
 
+    public void Reset()
+    {
+        lock (_gate)
+        {
+            _buckets.Clear();
+        }
+    }
+
     public LogStatisticsSnapshot GetSnapshot(DateTimeOffset? nowUtc = null)
     {
         var now = (nowUtc ?? DateTimeOffset.UtcNow).ToUniversalTime().ToUnixTimeSeconds();

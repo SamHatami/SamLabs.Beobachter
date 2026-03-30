@@ -81,6 +81,21 @@ public sealed class IngestionSession : IIngestionSession
         return writer is not null && writer.TryWrite(entry);
     }
 
+    public void ClearEntries()
+    {
+        _store.Clear();
+
+        ChannelReader<LogEntry>? reader = _reader;
+        if (reader is null)
+        {
+            return;
+        }
+
+        while (reader.TryRead(out _))
+        {
+        }
+    }
+
     public IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null)
     {
         return _store.Snapshot(query);

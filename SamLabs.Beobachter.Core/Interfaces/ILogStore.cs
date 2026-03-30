@@ -13,5 +13,7 @@ public interface ILogStore
 
     void AppendRange(IEnumerable<LogEntry> entries);
 
+    void Clear();
+
     IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null);
 }

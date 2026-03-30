@@ -243,11 +243,34 @@ public sealed class TcpReceiver : ILogReceiver
 
     private static TcpListener CreateListener(TcpReceiverOptions options)
     {
-        if (!IPAddress.TryParse(options.BindAddress, out var bindAddress))
+        if (!TryResolveBindAddress(options.BindAddress, out IPAddress bindAddress))
         {
             throw new ArgumentException($"Invalid TCP bind address: '{options.BindAddress}'.", nameof(options));
         }
 
         return new TcpListener(bindAddress, options.Port);
+    }
+
+    private static bool TryResolveBindAddress(string? bindAddressText, out IPAddress bindAddress)
+    {
+        bindAddress = IPAddress.None;
+        if (string.IsNullOrWhiteSpace(bindAddressText))
+        {
+            return false;
+        }
+
+        string normalized = bindAddressText.Trim();
+        if (IPAddress.TryParse(normalized, out bindAddress))
+        {
+            return true;
+        }
+
+        if (string.Equals(normalized, "localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            bindAddress = IPAddress.Loopback;
+            return true;
+        }
+
+        return false;
     }
 }

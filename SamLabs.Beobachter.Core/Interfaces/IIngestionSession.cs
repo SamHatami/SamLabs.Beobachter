@@ -18,6 +18,8 @@ public interface IIngestionSession : IAsyncDisposable
 
     bool TryPublish(LogEntry entry);
 
+    void ClearEntries();
+
     IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null);
 
     IReadOnlyList<ReceiverRuntimeState> GetReceiverRuntimeStates();

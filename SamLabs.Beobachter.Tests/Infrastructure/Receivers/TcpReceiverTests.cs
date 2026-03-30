@@ -20,7 +20,7 @@ public sealed class TcpReceiverTests
         {
             Id = "tcp-receiver-1",
             DisplayName = "TCP Receiver 1",
-            BindAddress = IPAddress.Loopback.ToString(),
+            BindAddress = "localhost",
             Port = port,
             DefaultLoggerName = "TcpDefault"
         };

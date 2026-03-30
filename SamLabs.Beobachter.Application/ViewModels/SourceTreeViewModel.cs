@@ -84,6 +84,16 @@ public partial class SourceTreeViewModel : ViewModelBase
         SyncSourceItemsFromTree();
     }
 
+    public void ResetSourceCounts()
+    {
+        foreach (SourceFilterItemViewModel sourceItem in _sourceIndex.Values)
+        {
+            sourceItem.Count = 0;
+        }
+
+        RefreshVisibleSourceItems();
+    }
+
     public bool IsLoggerEnabled(string loggerName)
     {
         return !_loggerRoot.TryGetPath(loggerName, out LoggerNode? node) || node?.IsEnabled != false;

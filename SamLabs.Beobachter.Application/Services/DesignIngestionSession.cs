@@ -50,6 +50,11 @@ internal sealed class DesignIngestionSession : IIngestionSession
         return true;
     }
 
+    public void ClearEntries()
+    {
+        _entries.Clear();
+    }
+
     public IReadOnlyList<LogEntry> Snapshot(LogQuery? query = null)
     {
         return _entries.ToArray();

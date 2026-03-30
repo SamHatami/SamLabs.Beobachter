@@ -56,4 +56,6 @@
     <SolidColorBrush x:Key="MessageErrorBrush" Color="#FFD8AAA5" />
     <SolidColorBrush x:Key="MessageFatalBrush" Color="#FFC99691" />
     <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FFE4E3DE" />
+    
+    <SolidColorBrush x:Key="ButtonClearLog" Color="Red"/>
 </ResourceDictionary>

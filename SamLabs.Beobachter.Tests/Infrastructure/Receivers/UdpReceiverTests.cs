@@ -20,7 +20,7 @@ public sealed class UdpReceiverTests
         {
             Id = "udp-receiver-1",
             DisplayName = "UDP Receiver 1",
-            BindAddress = IPAddress.Loopback.ToString(),
+            BindAddress = "localhost",
             Port = port,
             DefaultLoggerName = "UdpDefault"
         };

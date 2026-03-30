@@ -77,7 +77,7 @@ public sealed class ReceiverSetupViewModelTests
     }
 
     [Fact]
-    public async Task SaveReceiverSetup_HostnameBindAddress_IsRejectedBeforeReload()
+    public async Task SaveReceiverSetup_LocalhostBindAddress_IsAccepted()
     {
         FakeSettingsStore settings = new();
         FakeIngestionSession session = new([]);
@@ -87,6 +87,25 @@ public sealed class ReceiverSetupViewModelTests
         vm.AddUdpReceiverCommand.Execute(null);
         ReceiverDefinitionViewModel udp = vm.ReceiverDefinitions.Single(x => x.IsUdp);
         udp.BindAddress = "localhost";
+
+        await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
+
+        Assert.NotNull(settings.LastSavedReceiverDefinitions);
+        Assert.Equal("localhost", settings.LastSavedReceiverDefinitions!.UdpReceivers[0].BindAddress);
+        Assert.Equal(1, session.ReloadReceiversCalls);
+    }
+
+    [Fact]
+    public async Task SaveReceiverSetup_NonLocalhostHostnameBindAddress_IsRejectedBeforeReload()
+    {
+        FakeSettingsStore settings = new();
+        FakeIngestionSession session = new([]);
+        ReceiverSetupViewModel vm = new(settings, session);
+        await vm.LoadAsync();
+
+        vm.AddUdpReceiverCommand.Execute(null);
+        ReceiverDefinitionViewModel udp = vm.ReceiverDefinitions.Single(x => x.IsUdp);
+        udp.BindAddress = "loghost";
 
         await ((IAsyncRelayCommand)vm.SaveReceiverSetupCommand).ExecuteAsync(null);
 
