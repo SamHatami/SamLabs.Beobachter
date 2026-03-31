@@ -25,8 +25,13 @@ public partial class EntryDetailsViewModel : ViewModelBase
     private LogEntry? _selectedEntry;
 
     [NotifyPropertyChangedFor(nameof(IsEmptyStateVisible))]
+    [NotifyPropertyChangedFor(nameof(IsDetailsVisible))]
     [ObservableProperty]
     private bool _hasSelectedEntry;
+
+    [NotifyPropertyChangedFor(nameof(IsDetailsVisible))]
+    [ObservableProperty]
+    private bool _isPinned;
 
     [ObservableProperty]
     private string _selectedDetailsText = "No entry selected.";
@@ -80,6 +85,8 @@ public partial class EntryDetailsViewModel : ViewModelBase
 
     public bool IsEmptyStateVisible => !HasSelectedEntry;
 
+    public bool IsDetailsVisible => HasSelectedEntry || IsPinned;
+
     public bool HasHeaderContext => !string.IsNullOrWhiteSpace(HeaderContextText);
 
     public bool HasNoAttributes => !HasAttributes;
@@ -90,6 +97,9 @@ public partial class EntryDetailsViewModel : ViewModelBase
     {
         _clipboardService = clipboardService ?? throw new ArgumentNullException(nameof(clipboardService));
     }
+
+    [RelayCommand]
+    private void TogglePin() => IsPinned = !IsPinned;
 
     [RelayCommand]
     private async Task CopySelectedMessageAsync()

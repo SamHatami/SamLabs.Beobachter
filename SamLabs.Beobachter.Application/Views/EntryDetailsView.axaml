@@ -11,166 +11,193 @@
     </UserControl.Resources>
 
     <Border Classes="shell-panel shell-flat shell-border-vertical"
-            Padding="12">
-        <Grid RowDefinitions="Auto,*,Auto"
-              RowSpacing="12">
+            Padding="0">
+        <Grid RowDefinitions="Auto,Auto,*,Auto"
+              RowSpacing="0">
+
+            <!-- Panel header: title + pin toggle -->
             <Grid Grid.Row="0"
-                  IsVisible="{Binding HasSelectedEntry}"
-                  ColumnDefinitions="*,Auto,Auto"
-                  ColumnSpacing="8">
-                <StackPanel Grid.Column="0"
-                            Spacing="6">
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="8">
-                        <Border Padding="8,3"
-                                CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
-                                Background="{Binding HeaderLevel, Converter={StaticResource LogLevelToBadgeBrushConverter}}">
-                            <TextBlock Text="{Binding HeaderLevelText}"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SeverityBadgeForegroundBrush}" />
-                        </Border>
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding HeaderTimestampText}"
-                                   Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                    </StackPanel>
-
-                    <TextBlock Text="{Binding HeaderMessage}"
-                               TextWrapping="Wrap"
-                               FontSize="18"
-                               FontWeight="SemiBold"
-                               Foreground="{Binding HeaderLevel, Converter={StaticResource LogLevelToMessageBrushConverter}}" />
-
-                    <TextBlock Text="{Binding HeaderSourceText}"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource ShellForegroundBrush}" />
-
-                    <TextBlock Text="{Binding HeaderContextText}"
-                               IsVisible="{Binding HasHeaderContext}"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                </StackPanel>
-
-                <Button Grid.Column="1"
-                        Classes="toolbar-button icon-button"
-                        VerticalAlignment="Top"
-                        ToolTip.Tip="Copy message"
-                        Command="{Binding CopySelectedMessageCommand}"
-                        i:Attached.Icon="fa-regular fa-copy" />
-                <Button Grid.Column="2"
-                        Classes="toolbar-button icon-button"
-                        VerticalAlignment="Top"
-                        ToolTip.Tip="Copy full details"
-                        Command="{Binding CopySelectedDetailsCommand}"
-                        i:Attached.Icon="fa-solid fa-file-lines" />
+                  ColumnDefinitions="*,Auto"
+                  Margin="10,8,10,8">
+                <TextBlock Grid.Column="0"
+                           Text="LOG DETAILS"
+                           Classes="panel-title"
+                           VerticalAlignment="Center" />
+                <ToggleButton Grid.Column="1"
+                              Classes="toolbar-button sidebar-header-action"
+                              IsChecked="{Binding IsPinned}"
+                              Command="{Binding TogglePinCommand}"
+                              ToolTip.Tip="Pin panel (keep visible when no entry is selected)"
+                              i:Attached.Icon="fa-solid fa-thumbtack" />
             </Grid>
 
-            <Border Grid.Row="0"
+            <!-- Empty state -->
+            <Border Grid.Row="1"
                     Classes="shell-card"
                     IsVisible="{Binding IsEmptyStateVisible}"
+                    Margin="10,0,10,10"
                     Padding="16">
                 <TextBlock Text="Select a log entry to inspect its attributes, payload, and exception details."
                            TextWrapping="Wrap"
                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
             </Border>
 
-            <ScrollViewer Grid.Row="1"
-                          IsVisible="{Binding HasSelectedEntry}"
-                          VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="16">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="ATTRIBUTES"
-                                   Classes="section-caption" />
-                        <Border Classes="shell-card"
-                                Padding="10">
-                            <StackPanel Spacing="6">
-                                <TextBlock Text="No structured attributes on this entry."
-                                           IsVisible="{Binding HasNoAttributes}"
+            <!-- Two-column body: left = header + attributes, right = payload + exception -->
+            <Grid Grid.Row="2"
+                  Margin="10,0,10,0"
+                  IsVisible="{Binding HasSelectedEntry}"
+                  ColumnDefinitions="*,Auto,*"
+                  ColumnSpacing="0"
+                  MinHeight="160">
+
+                <!-- Left: entry header + attributes -->
+                <ScrollViewer Grid.Column="0"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="0,0,8,0">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="6">
+                            <StackPanel Orientation="Horizontal"
+                                        Spacing="8">
+                                <Border Padding="8,3"
+                                        CornerRadius="{DynamicResource ShellBadgeCornerRadius}"
+                                        Background="{Binding HeaderLevel, Converter={StaticResource LogLevelToBadgeBrushConverter}}">
+                                    <TextBlock Text="{Binding HeaderLevelText}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource SeverityBadgeForegroundBrush}" />
+                                </Border>
+                                <TextBlock VerticalAlignment="Center"
+                                           Text="{Binding HeaderTimestampText}"
                                            Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                                <ItemsControl ItemsSource="{Binding Attributes}"
-                                              IsVisible="{Binding HasAttributes}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="viewModels:EntryDetailPropertyViewModel">
-                                            <Grid ColumnDefinitions="150,*,Auto"
-                                                  ColumnSpacing="8"
-                                                  Margin="0,1">
-                                                <TextBlock Grid.Column="0"
-                                                           Text="{Binding Key}"
-                                                           FontWeight="SemiBold"
-                                                           VerticalAlignment="Top"
-                                                           Foreground="{DynamicResource ShellMutedForegroundBrush}" />
-                                                <TextBlock Grid.Column="1"
-                                                           Text="{Binding Value}"
-                                                           TextWrapping="Wrap"
-                                                           Foreground="{DynamicResource ShellForegroundBrush}" />
-                                                <Button Grid.Column="2"
-                                                        Classes="toolbar-button icon-button"
-                                                        VerticalAlignment="Top"
-                                                        Command="{Binding FilterCommand}"
-                                                        ToolTip.Tip="Filter by this value"
-                                                        i:Attached.Icon="fa-solid fa-filter" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <Button Classes="toolbar-button icon-button"
+                                        ToolTip.Tip="Copy message"
+                                        Command="{Binding CopySelectedMessageCommand}"
+                                        i:Attached.Icon="fa-regular fa-copy" />
+                                <Button Classes="toolbar-button icon-button"
+                                        ToolTip.Tip="Copy full details"
+                                        Command="{Binding CopySelectedDetailsCommand}"
+                                        i:Attached.Icon="fa-solid fa-file-lines" />
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
 
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto,Auto"
-                              ColumnSpacing="6">
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="RAW JSON PAYLOAD"
+                            <TextBlock Text="{Binding HeaderMessage}"
+                                       TextWrapping="Wrap"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{Binding HeaderLevel, Converter={StaticResource LogLevelToMessageBrushConverter}}" />
+
+                            <TextBlock Text="{Binding HeaderSourceText}"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource ShellForegroundBrush}" />
+
+                            <TextBlock Text="{Binding HeaderContextText}"
+                                       IsVisible="{Binding HasHeaderContext}"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="ATTRIBUTES"
                                        Classes="section-caption" />
-                            <ToggleButton Grid.Column="1"
-                                          Classes="segment-toggle"
-                                          IsChecked="{Binding IsJsonPayloadView}"
-                                          Command="{Binding ShowJsonPayloadCommand}"
-                                          Content="JSON"
-                                          i:Attached.Icon="fa-solid fa-code" />
-                            <ToggleButton Grid.Column="2"
-                                          Classes="segment-toggle"
-                                          IsChecked="{Binding IsRawPayloadView}"
-                                          Command="{Binding ShowRawPayloadCommand}"
-                                          Content="Raw"
-                                          i:Attached.Icon="fa-solid fa-align-left" />
-                        </Grid>
-                        <Border Classes="shell-card"
-                                Padding="10">
-                            <TextBox Classes="monospace-display"
-                                     Text="{Binding PayloadText}"
-                                     IsReadOnly="True"
-                                     AcceptsReturn="True"
-                                     TextWrapping="NoWrap"
-                                     MinHeight="220"
-                                     Foreground="{DynamicResource ShellForegroundBrush}" />
-                        </Border>
+                            <Border Classes="shell-card"
+                                    Padding="10">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="No structured attributes on this entry."
+                                               IsVisible="{Binding HasNoAttributes}"
+                                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                    <ItemsControl ItemsSource="{Binding Attributes}"
+                                                  IsVisible="{Binding HasAttributes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="viewModels:EntryDetailPropertyViewModel">
+                                                <Grid ColumnDefinitions="150,*,Auto"
+                                                      ColumnSpacing="8"
+                                                      Margin="0,1">
+                                                    <TextBlock Grid.Column="0"
+                                                               Text="{Binding Key}"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Top"
+                                                               Foreground="{DynamicResource ShellMutedForegroundBrush}" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Value}"
+                                                               TextWrapping="Wrap"
+                                                               Foreground="{DynamicResource ShellForegroundBrush}" />
+                                                    <Button Grid.Column="2"
+                                                            Classes="toolbar-button icon-button"
+                                                            VerticalAlignment="Top"
+                                                            Command="{Binding FilterCommand}"
+                                                            ToolTip.Tip="Filter by this value"
+                                                            i:Attached.Icon="fa-solid fa-filter" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
+                </ScrollViewer>
 
-                    <Expander IsVisible="{Binding HasException}"
-                              IsExpanded="{Binding IsExceptionExpanded}">
-                        <Expander.Header>
-                            <TextBlock Text="EXCEPTION"
-                                       Classes="section-caption" />
-                        </Expander.Header>
-                        <Border Margin="0,8,0,0"
-                                Classes="shell-card"
-                                Padding="10">
-                            <TextBox Classes="monospace-display"
-                                     Text="{Binding ExceptionText}"
-                                     IsReadOnly="True"
-                                     AcceptsReturn="True"
-                                     TextWrapping="Wrap"
-                                     MinHeight="120"
-                                     Foreground="{DynamicResource ShellForegroundBrush}" />
-                        </Border>
-                    </Expander>
-                </StackPanel>
-            </ScrollViewer>
+                <GridSplitter Grid.Column="1"
+                              Classes="shell-grid-splitter"
+                              ResizeBehavior="PreviousAndNext" />
 
-            <TextBlock Grid.Row="2"
+                <!-- Right: payload + exception -->
+                <ScrollViewer Grid.Column="2"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto,Auto"
+                                  ColumnSpacing="6">
+                                <TextBlock Grid.Column="0"
+                                           VerticalAlignment="Center"
+                                           Text="RAW JSON PAYLOAD"
+                                           Classes="section-caption" />
+                                <ToggleButton Grid.Column="1"
+                                              Classes="segment-toggle"
+                                              IsChecked="{Binding IsJsonPayloadView}"
+                                              Command="{Binding ShowJsonPayloadCommand}"
+                                              Content="JSON"
+                                              i:Attached.Icon="fa-solid fa-code" />
+                                <ToggleButton Grid.Column="2"
+                                              Classes="segment-toggle"
+                                              IsChecked="{Binding IsRawPayloadView}"
+                                              Command="{Binding ShowRawPayloadCommand}"
+                                              Content="Raw"
+                                              i:Attached.Icon="fa-solid fa-align-left" />
+                            </Grid>
+                            <Border Classes="shell-card"
+                                    Padding="10">
+                                <TextBox Classes="monospace-display"
+                                         Text="{Binding PayloadText}"
+                                         IsReadOnly="True"
+                                         AcceptsReturn="True"
+                                         TextWrapping="NoWrap"
+                                         Foreground="{DynamicResource ShellForegroundBrush}" />
+                            </Border>
+                        </StackPanel>
+
+                        <Expander IsVisible="{Binding HasException}"
+                                  IsExpanded="{Binding IsExceptionExpanded}">
+                            <Expander.Header>
+                                <TextBlock Text="EXCEPTION"
+                                           Classes="section-caption" />
+                            </Expander.Header>
+                            <Border Margin="0,8,0,0"
+                                    Classes="shell-card"
+                                    Padding="10">
+                                <TextBox Classes="monospace-display"
+                                         Text="{Binding ExceptionText}"
+                                         IsReadOnly="True"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Foreground="{DynamicResource ShellForegroundBrush}" />
+                            </Border>
+                        </Expander>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <TextBlock Grid.Row="3"
+                       Margin="10,4,10,6"
                        Text="{Binding CopyStatus}"
                        Foreground="{DynamicResource ShellMutedForegroundBrush}" />
         </Grid>

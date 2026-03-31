@@ -57,7 +57,13 @@
                         <i:Icon Value="fa-solid fa-bars"
                                 FontSize="13" />
                     </Button>
-                    
+                    <Button Classes="titlebar-button"
+                            Command="{Binding ToggleSidebarCommand}"
+                            ToolTip.Tip="Toggle sidebar">
+                        <i:Icon Value="fa-solid fa-table-columns"
+                                FontSize="13" />
+                    </Button>
+
                 </StackPanel>
 
                 <StackPanel Grid.Column="2"
@@ -92,41 +98,42 @@
             </Grid>
         </Border>
 
-        <!-- Row 1: Workspace (sidebar | splitter | stream panel | splitter | details) -->
+        <!-- Row 1: Workspace (sidebar+receivers | splitter | stream panel + details) -->
         <Grid Grid.Row="1"
-              ColumnDefinitions="240,Auto,*,Auto,340">
+              ColumnDefinitions="Auto,Auto,*">
 
-            <!-- Left sidebar: filters + sources -->
-            <ContentControl Grid.Column="0"
-                            Content="{Binding WorkspaceSidebar}" />
+            <!-- Left: receivers on top, filters below -->
+            <Grid Grid.Column="0"
+                  Width="240"
+                  RowDefinitions="Auto,*"
+                  IsVisible="{Binding IsSidebarVisible}">
+                <ContentControl Grid.Row="0"
+                                Content="{Binding ReceiverTree}" />
+                <ContentControl Grid.Row="1"
+                                Content="{Binding WorkspaceSidebar}" />
+            </Grid>
 
             <GridSplitter Grid.Column="1"
                           Classes="shell-grid-splitter"
                           ResizeBehavior="PreviousAndNext"
-                          />
+                          IsVisible="{Binding IsSidebarVisible}" />
 
-            <!-- Center: stream search + log stream -->
+            <!-- Center: search + stream + details (auto-hide/pinnable) -->
             <Grid Grid.Column="2"
-                  RowDefinitions="Auto,*">
+                  RowDefinitions="Auto,*,Auto,Auto">
                 <ContentControl x:Name="StreamSearchHost"
                                 Grid.Row="0"
                                 Content="{Binding TopBar}" />
                 <ContentControl Grid.Row="1"
                                 Content="{Binding Stream}" />
-            </Grid>
-
-            <GridSplitter Grid.Column="3"
-                          Classes="shell-grid-splitter"
-                          ResizeBehavior="PreviousAndNext"
-                          />
-
-            <!-- Right: receiver tree + entry details -->
-            <Grid Grid.Column="4"
-                  RowDefinitions="Auto,*">
-                <ContentControl Grid.Row="0"
-                                Content="{Binding ReceiverTree}" />
-                <ContentControl Grid.Row="1"
-                                Content="{Binding Details}" />
+                <Border Grid.Row="2"
+                        Height="1"
+                        Background="{DynamicResource ShellPanelBorderBrush}"
+                        IsVisible="{Binding Details.IsDetailsVisible}" />
+                <ContentControl Grid.Row="3"
+                                MaxHeight="320"
+                                Content="{Binding Details}"
+                                IsVisible="{Binding Details.IsDetailsVisible}" />
             </Grid>
         </Grid>
 

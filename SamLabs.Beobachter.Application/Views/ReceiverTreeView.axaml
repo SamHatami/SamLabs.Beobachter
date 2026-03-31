@@ -68,37 +68,41 @@
     <Expander Classes="sidebar-expander"
               IsExpanded="{Binding IsExpanded}">
         <Expander.Header>
-            <Grid Classes="receiver-tree-header-grid"
-                  ColumnDefinitions="Auto,Auto,*,Auto">
-                <TextBlock Grid.Column="0"
-                           Classes="section-caption receiver-tree-header-title"
-                           Text="RECEIVERS" />
-                <Border Grid.Column="1"
-                        Classes="receiver-tree-header-count-badge">
-                    <TextBlock Classes="receiver-tree-header-count-text" VerticalAlignment="Center"
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6">
+                <TextBlock Classes="panel-title"
+                           Text="RECEIVERS"
+                           VerticalAlignment="Center" />
+                <Border Classes="receiver-tree-header-count-badge">
+                    <TextBlock Classes="receiver-tree-header-count-text"
+                               VerticalAlignment="Center"
                                Text="{Binding ReceiverSetup.ReceiverDefinitions.Count}" />
                 </Border>
-                <StackPanel Grid.Column="3"
-                            Classes="receiver-tree-header-actions"
-                            IsVisible="{Binding IsExpanded, RelativeSource={RelativeSource AncestorType=Expander}}">
-                    <Button Classes="toolbar-button"
-                            Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
-                            ToolTip.Tip="Save + Reload"
-                            i:Attached.Icon="fa-solid fa-floppy-disk" />
-                    <Button Classes="toolbar-button"
-                            Command="{Binding ReceiverSetup.ReloadReceiverSetupCommand}"
-                            ToolTip.Tip="Reload from disk"
-                            i:Attached.Icon="fa-solid fa-rotate" />
-                    <Button Classes="toolbar-button"
-                            Command="{Binding OpenEditorCommand}"
-                            ToolTip.Tip="Open receiver editor"
-                            i:Attached.Icon="fa-solid fa-gear" />
-                </StackPanel>
-            </Grid>
+            </StackPanel>
         </Expander.Header>
 
-        <TreeView Classes="receiver-tree"
-                  ItemsSource="{Binding Groups}"
-                  SelectedItem="{Binding SelectedNode, Mode=TwoWay}" />
+        <StackPanel>
+            <!-- Action toolbar below the header -->
+            <StackPanel Orientation="Horizontal"
+                        Spacing="2"
+                        Margin="8,4,8,4">
+                <Button Classes="toolbar-button"
+                        Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
+                        ToolTip.Tip="Save + Reload"
+                        i:Attached.Icon="fa-solid fa-floppy-disk" />
+                <Button Classes="toolbar-button"
+                        Command="{Binding ReceiverSetup.ReloadReceiverSetupCommand}"
+                        ToolTip.Tip="Reload from disk"
+                        i:Attached.Icon="fa-solid fa-rotate" />
+                <Button Classes="toolbar-button"
+                        Command="{Binding OpenEditorCommand}"
+                        ToolTip.Tip="Open receiver editor"
+                        i:Attached.Icon="fa-solid fa-gear" />
+            </StackPanel>
+
+            <TreeView Classes="receiver-tree"
+                      ItemsSource="{Binding Groups}"
+                      SelectedItem="{Binding SelectedNode, Mode=TwoWay}" />
+        </StackPanel>
     </Expander>
 </UserControl>

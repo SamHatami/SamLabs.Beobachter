@@ -64,6 +64,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _topReceiversSummary = "Top receivers (5m): -";
 
+    [ObservableProperty]
+    private bool _isSidebarVisible = true;
+
     public MainWindowViewModel(
         IShellStatusFormatter shellStatusFormatter,
         ISampleLogEntryGenerator sampleLogEntryGenerator,
@@ -140,6 +143,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public EntryDetailsViewModel Details { get; }
 
     public SessionHealthViewModel SessionHealth { get; }
+
+    [RelayCommand]
+    private void ToggleSidebar() => IsSidebarVisible = !IsSidebarVisible;
 
     [RelayCommand]
     private void GenerateSampleEntries()

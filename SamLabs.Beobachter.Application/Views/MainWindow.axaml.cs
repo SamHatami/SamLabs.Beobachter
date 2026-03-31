@@ -82,6 +82,13 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (e.Key == Key.Escape)
+        {
+            _boundViewModel.Stream.SelectedEntry = null;
+            e.Handled = true;
+            return;
+        }
+
         if (e.Source is TextBox)
         {
             return;
