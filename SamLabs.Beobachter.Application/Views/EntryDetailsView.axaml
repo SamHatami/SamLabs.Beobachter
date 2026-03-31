@@ -18,7 +18,7 @@
             <!-- Panel header: title + pin toggle -->
             <Grid Grid.Row="0"
                   ColumnDefinitions="*,Auto"
-                  Margin="10,8,10,8">
+                  Margin="4,2">
                 <TextBlock Grid.Column="0"
                            Text="LOG DETAILS"
                            Classes="panel-title"
@@ -137,6 +137,7 @@
                 </ScrollViewer>
 
                 <GridSplitter Grid.Column="1"
+                              Margin="4,0"
                               Classes="shell-grid-splitter"
                               ResizeBehavior="PreviousAndNext" />
 

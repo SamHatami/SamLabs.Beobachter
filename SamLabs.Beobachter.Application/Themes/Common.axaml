@@ -7,7 +7,7 @@
         <x:Double x:Key="ShellSpace4">8</x:Double>
         <x:Double x:Key="ShellSpace5">12</x:Double>
         <x:Double x:Key="ShellSpace6">16</x:Double>
-        <x:Double x:Key="ShellGridSplitterThickness">0.75</x:Double>
+        <x:Double x:Key="ShellGridSplitterThickness">1</x:Double>
         <Thickness x:Key="ShellPanelPadding">0</Thickness>
         <Thickness x:Key="ShellPanelPaddingCompact">10,8</Thickness>
         <Thickness x:Key="ShellToolbarButtonPadding">10,6</Thickness>
@@ -15,6 +15,21 @@
         <CornerRadius x:Key="ShellPanelCornerRadius">4</CornerRadius>
         <CornerRadius x:Key="ShellBadgeCornerRadius">999</CornerRadius>
         <FontFamily x:Key="ShellMonospaceFontFamily">Consolas, Menlo, Monaco, Courier New</FontFamily>
+        <!-- LogLevel Icon Brushes (Light Theme) -->
+        <SolidColorBrush x:Key="IconTraceBrush" Color="#FF00BCD4" /> <!-- Cyan, saturated -->
+        <SolidColorBrush x:Key="IconDebugBrush" Color="#FF2196F3" /> <!-- Blue, saturated -->
+        <SolidColorBrush x:Key="IconInfoBrush" Color="#FF43A047" /> <!-- Green, saturated -->
+        <SolidColorBrush x:Key="IconWarnBrush" Color="#FFFFA000" /> <!-- Amber, saturated -->
+        <SolidColorBrush x:Key="IconErrorBrush" Color="#FFD32F2F" /> <!-- Red, saturated -->
+        <SolidColorBrush x:Key="IconFatalBrush" Color="#FF8E24AA" /> <!-- Purple, saturated -->
+
+        <!-- LogLevel Icon Brushes (Dark Theme) -->
+        <SolidColorBrush x:Key="IconTraceBrush_Dark" Color="#FF4DD0E1" /> <!-- Lighter Cyan for dark bg -->
+        <SolidColorBrush x:Key="IconDebugBrush_Dark" Color="#FF64B5F6" /> <!-- Lighter Blue for dark bg -->
+        <SolidColorBrush x:Key="IconInfoBrush_Dark" Color="#FF81C784" /> <!-- Lighter Green for dark bg -->
+        <SolidColorBrush x:Key="IconWarnBrush_Dark" Color="#FFFFD54F" /> <!-- Lighter Amber for dark bg -->
+        <SolidColorBrush x:Key="IconErrorBrush_Dark" Color="#FFE57373" /> <!-- Lighter Red for dark bg -->
+        <SolidColorBrush x:Key="IconFatalBrush_Dark" Color="#FFBA68C8" /> <!-- Lighter Purple for dark bg -->
     </Styles.Resources>
 
     <Style Selector="GridSplitter.shell-grid-splitter">
@@ -126,9 +141,9 @@
     </Style>
 
     <Style Selector="Button.sidebar-header-action">
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="MinHeight" Value="26" />
-        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="FontSize" Value="10" />
     </Style>
 
     <Style Selector="Button.stream-pause-toggle.stream-pause-active">
@@ -166,8 +181,8 @@
     </Style>
 
     <Style Selector="Button.receiver-setup-button">
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="30" />
         <Setter Property="Background" Value="{DynamicResource ShellPanelBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ShellPanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />

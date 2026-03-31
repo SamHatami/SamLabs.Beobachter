@@ -69,7 +69,7 @@
               IsExpanded="{Binding IsExpanded}">
         <Expander.Header>
             <StackPanel Orientation="Horizontal"
-                        Spacing="6">
+                        Spacing="4">
                 <TextBlock Classes="panel-title"
                            Text="RECEIVERS"
                            VerticalAlignment="Center" />
@@ -85,7 +85,7 @@
             <!-- Action toolbar below the header -->
             <StackPanel Orientation="Horizontal"
                         Spacing="2"
-                        Margin="8,4,8,4">
+                        Margin="4,2">
                 <Button Classes="toolbar-button"
                         Command="{Binding ReceiverSetup.SaveReceiverSetupCommand}"
                         ToolTip.Tip="Save + Reload"

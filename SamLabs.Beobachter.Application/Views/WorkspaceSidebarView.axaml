@@ -11,10 +11,10 @@
             <StackPanel Spacing="0"
                         HorizontalAlignment="Stretch">
                 <Grid ColumnDefinitions="*,Auto"
-                      Margin="10,10,10,8">
+                      Margin="5,5">
                     <TextBlock Grid.Column="0"
                                Text="FILTERS"
-                               Classes="panel-title" />
+                               Classes="panel-title" VerticalAlignment="Center"/>
                     <Button Grid.Column="1"
                             Classes="toolbar-button sidebar-header-action"
                             Command="{Binding ResetAllFiltersCommand}"

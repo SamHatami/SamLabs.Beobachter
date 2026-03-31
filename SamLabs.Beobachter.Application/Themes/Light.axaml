@@ -1,3 +1,4 @@
+
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#FFF1EEE8" />
@@ -60,4 +61,12 @@
     <SolidColorBrush x:Key="MessageErrorBrush" Color="#FF8C5650" />
     <SolidColorBrush x:Key="MessageFatalBrush" Color="#FF734742" />
     <SolidColorBrush x:Key="MessageFallbackBrush" Color="#FF2D322F" />
+    
+    <!-- LogLevel Icon Brushes (Light Theme) -->
+    <SolidColorBrush x:Key="IconTraceBrush" Color="#FF00BCD4" />
+    <SolidColorBrush x:Key="IconDebugBrush" Color="#FF2196F3" />
+    <SolidColorBrush x:Key="IconInfoBrush" Color="#FF43A047" />
+    <SolidColorBrush x:Key="IconWarnBrush" Color="#FFFFA000" />
+    <SolidColorBrush x:Key="IconErrorBrush" Color="#FFD32F2F" />
+    <SolidColorBrush x:Key="IconFatalBrush" Color="#FF8E24AA" />
 </ResourceDictionary>
