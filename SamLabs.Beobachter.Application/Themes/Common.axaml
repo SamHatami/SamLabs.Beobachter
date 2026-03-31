@@ -126,9 +126,9 @@
     </Style>
 
     <Style Selector="Button.sidebar-header-action">
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="MinHeight" Value="26" />
-        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinHeight" Value="22" />
+        <Setter Property="FontSize" Value="10" />
     </Style>
 
     <Style Selector="Button.stream-pause-toggle.stream-pause-active">
@@ -166,8 +166,8 @@
     </Style>
 
     <Style Selector="Button.receiver-setup-button">
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="30" />
         <Setter Property="Background" Value="{DynamicResource ShellPanelBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ShellPanelBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
