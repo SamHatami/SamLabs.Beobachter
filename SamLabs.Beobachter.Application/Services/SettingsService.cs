@@ -28,7 +28,7 @@ public sealed class SettingsService : ISettingsService
 
     public async Task InitializeAsync()
     {
-        CurrentAppSettings = await _settingsStore.LoadAppSettingsAsync();
+        CurrentAppSettings = await _settingsStore.LoadAppSettingsAsync().ConfigureAwait(false);
         ApplySettings(CurrentAppSettings);
     }
 
@@ -36,7 +36,7 @@ public sealed class SettingsService : ISettingsService
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        await _settingsStore.SaveAppSettingsAsync(settings);
+        await _settingsStore.SaveAppSettingsAsync(settings).ConfigureAwait(false);
         CurrentAppSettings = settings;
         ApplySettings(settings);
         AppSettingsSaved?.Invoke(this, new AppSettingsSavedEventArgs(settings));
