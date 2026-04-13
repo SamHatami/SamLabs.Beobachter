@@ -146,6 +146,13 @@
         <Setter Property="FontSize" Value="10" />
     </Style>
 
+    <Style Selector="Button.sidebar-collapse-button">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
     <Style Selector="Button.stream-pause-toggle.stream-pause-active">
         <Setter Property="Background" Value="{DynamicResource StreamPauseActiveBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource StreamPauseActiveBorderBrush}" />
@@ -262,6 +269,24 @@
         <Setter Property="Background" Value="{DynamicResource ShellAccentBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource ShellAccentForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ShellAccentBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.sidebar-level-toggle">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellChromeBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <Style Selector="ToggleButton.sidebar-level-toggle:checked">
+        <Setter Property="Background" Value="{DynamicResource ShellButtonStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShellAccentBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
     </Style>
 
     <Style Selector="TextBox.monospace-display">

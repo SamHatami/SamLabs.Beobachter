@@ -1,11 +1,13 @@
 {
-  "version": "0.1.0",
-  "publishedOn": "2026-03-30",
-  "summary": "Fixed up several UI details and improved shutdown reliability.",
+  "version": "0.1.1",
+  "publishedOn": "2026-04-13",
+  "summary": "Improved sidebar collapse behavior, settings dialog scrolling, and release output naming.",
   "highlights": [
-    "Hardened app shutdown/disposal so background receiver tasks and service lifetimes close cleanly.",
-    "Polished filter and receiver controls for clearer intent and layout.",
-    "Cleaned up sidebar and receiver panel action presentation.",
-    "Refined icon and spacing consistency for common interactions."
+    "Added a left toolbar rail when the sidebar is collapsed, including shorthand log-level toggles.",
+    "Moved sidebar collapse/expand chevrons to a dedicated bottom row so they remain visible outside scrolling content.",
+    "Made active collapsed rail toggles easier to read with a clearer accent-green border.",
+    "Adjusted Application Settings window sizing and scroll padding so full content is reachable at the bottom.",
+    "Set publish output naming to SamLabs.Beobachter.exe by setting the application assembly name.",
+    "Fixed LogStream view row-font bindings to avoid design-time cast errors with LogStreamDesignViewModel."
   ]
 }

@@ -16,7 +16,6 @@
         <conv:LogLevelToIconConverter x:Key="LogLevelToIconConverter" />
     </UserControl.Resources>
 
-    <!--- the synatx errors here is due to having a designviewmodel -->
     <Design.DataContext>
         <designViewModels:LogStreamDesignViewModel />
     </Design.DataContext>
@@ -101,6 +100,7 @@
             <ListBox x:Name="LogEntriesList"
                      Classes="log-stream-list"
                      Classes.log-stream-density-compact="{Binding IsCompactDensity}"
+                     Tag="{Binding LogRowFontSize}"
                      Background="Transparent"
                      BorderThickness="0"
                      ItemsSource="{Binding VisibleEntries}"
@@ -127,20 +127,20 @@
                                                       SharedSizeGroup="LogActionsColumn" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                           FontSize="{Binding Tag, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellMutedForegroundBrush}"
                                            Text="{Binding Timestamp}" />
                                 <i:Icon Grid.Column="1"
                                         Value="{Binding Level, Converter={StaticResource LogLevelToIconConverter}}"
-                                        FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                        FontSize="{Binding Tag, ElementName=LogEntriesList}"
                                         VerticalAlignment="Center"
                                         Foreground="{Binding Level, Converter={StaticResource LogLevelToMessageBrushConverter}}" />
                                 <TextBlock Grid.Column="2"
-                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                           FontSize="{Binding Tag, ElementName=LogEntriesList}"
                                            Foreground="{DynamicResource ShellForegroundBrush}"
                                            Text="{Binding LoggerName}" />
                                 <TextBlock Grid.Column="3"
-                                           FontSize="{Binding ((viewModels:LogStreamViewModel)DataContext).LogRowFontSize, ElementName=LogEntriesList}"
+                                           FontSize="{Binding Tag, ElementName=LogEntriesList}"
                                            Foreground="{Binding Level, Converter={StaticResource LogLevelToMessageBrushConverter}}"
                                            Text="{Binding Message}"
                                            TextTrimming="CharacterEllipsis" />

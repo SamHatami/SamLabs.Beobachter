@@ -5,9 +5,10 @@
         x:Class="SamLabs.Beobachter.Application.Views.AppSettingsWindow"
         x:DataType="vm:AppSettingsViewModel"
         Width="680"
-        Height="700"
         MinWidth="580"
-        MinHeight="520"
+        MinHeight="560"
+        MaxHeight="900"
+        SizeToContent="Height"
         Title="Application Settings"
         WindowStartupLocation="CenterOwner">
 
@@ -54,7 +55,7 @@
             <ScrollViewer Grid.Row="1"
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled"
-                          Padding="16">
+                          Padding="16,16,16,28">
                 <StackPanel Spacing="20">
 
                     <!-- Release Notes -->

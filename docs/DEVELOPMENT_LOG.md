@@ -1652,3 +1652,21 @@ Impact:
 - The top bar and details header actions now use icon-backed controls.
 - Log rows now show explicit severity badges instead of relying only on tinted backgrounds.
 - Sidebar chips and status surfaces now share the same shell styling language.
+
+## 2026-04-13 - Sidebar Collapsed Rail + Settings Dialog Scroll Fit
+What changed:
+- Added left toolbar rail when collapsing the left toolbar.
+- Kept the collapse/expand chevron in a dedicated bottom row so it remains visible outside the sidebar scroller.
+- Updated collapsed log-level toggle styling to use a clearer active outline with the shared accent green border.
+- Removed the redundant filter title row from the sidebar surface.
+- Increased application settings dialog viewport height and bottom scroll padding so the full content is reachable without bottom cutoff.
+- Set the application assembly name to `SamLabs.Beobachter` so GitHub single-file publish output is named `SamLabs.Beobachter.exe`.
+
+Why:
+- The collapsed sidebar needed persistent, fast access to level filtering without reopening the full panel.
+- The settings dialog should never hide trailing content when sections grow; scrolling should reveal all controls.
+
+Impact:
+- Collapsed navigation now preserves filter control parity with the expanded sidebar.
+- Active level toggles are easier to read at a glance.
+- Application settings content is fully reachable at the bottom of the dialog.

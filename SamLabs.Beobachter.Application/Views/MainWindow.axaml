@@ -57,12 +57,6 @@
                         <i:Icon Value="fa-solid fa-bars"
                                 FontSize="13" />
                     </Button>
-                    <Button Classes="titlebar-button"
-                            Command="{Binding ToggleSidebarCommand}"
-                            ToolTip.Tip="Toggle sidebar">
-                        <i:Icon Value="fa-solid fa-table-columns"
-                                FontSize="13" />
-                    </Button>
 
                 </StackPanel>
 
@@ -102,15 +96,99 @@
         <Grid Grid.Row="1"
               ColumnDefinitions="Auto,Auto,*">
 
-            <!-- Left: receivers on top, filters below -->
-            <Grid Grid.Column="0"
-                  Width="240"
-                  RowDefinitions="Auto,*"
-                  IsVisible="{Binding IsSidebarVisible}">
-                <ContentControl Grid.Row="0"
-                                Content="{Binding ReceiverTree}" />
-                <ContentControl Grid.Row="1"
-                                Content="{Binding WorkspaceSidebar}" />
+            <!-- Left: expanded sidebar -->
+            <Grid Grid.Column="0">
+                <Grid Width="240"
+                      RowDefinitions="*,Auto"
+                      IsVisible="{Binding IsSidebarVisible}">
+                    <Grid Grid.Row="0"
+                          RowDefinitions="Auto,*">
+                        <ContentControl Grid.Row="0"
+                                        Content="{Binding ReceiverTree}" />
+                        <ContentControl Grid.Row="1"
+                                        Content="{Binding WorkspaceSidebar}" />
+                    </Grid>
+                    <Border Grid.Row="1"
+                            Classes="shell-panel shell-flat shell-border-vertical"
+                            Padding="6,4">
+                        <Button Classes="toolbar-button sidebar-collapse-button"
+                                HorizontalAlignment="Right"
+                                Command="{Binding ToggleSidebarCommand}"
+                                ToolTip.Tip="Collapse sidebar">
+                            <i:Icon Value="fa-solid fa-chevron-left"
+                                    FontSize="12" />
+                        </Button>
+                    </Border>
+                </Grid>
+
+                <!-- Left: collapsed shorthand rail -->
+                <Grid Width="44"
+                      RowDefinitions="*,Auto"
+                      IsVisible="{Binding !IsSidebarVisible}">
+                    <Border Grid.Row="0"
+                            Classes="shell-panel shell-flat shell-border-vertical"
+                            Padding="4">
+                        <ScrollViewer Classes="sidebar-scroll">
+                            <StackPanel Margin="0,4,0,4"
+                                        Spacing="6">
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowError}"
+                                              ToolTip.Tip="Error">
+                                    <i:Icon Value="fa-solid fa-circle-xmark"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageErrorBrush}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowWarn}"
+                                              ToolTip.Tip="Warn">
+                                    <i:Icon Value="fa-solid fa-triangle-exclamation"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageWarnBrush}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowInfo}"
+                                              ToolTip.Tip="Info">
+                                    <i:Icon Value="fa-solid fa-circle-info"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageInfoBrush}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowDebug}"
+                                              ToolTip.Tip="Debug">
+                                    <i:Icon Value="fa-solid fa-bug"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageDebugBrush}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowTrace}"
+                                              ToolTip.Tip="Trace">
+                                    <i:Icon Value="fa-solid fa-wave-square"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageTraceBrush}" />
+                                </ToggleButton>
+                                <ToggleButton Classes="sidebar-level-toggle"
+                                              IsChecked="{Binding WorkspaceSidebar.Filters.ShowFatal}"
+                                              ToolTip.Tip="Fatal">
+                                    <i:Icon Value="fa-solid fa-skull-crossbones"
+                                            FontSize="13"
+                                            Foreground="{DynamicResource MessageFatalBrush}" />
+                                </ToggleButton>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Classes="shell-panel shell-flat shell-border-vertical">
+                        <Button Classes="toolbar-button sidebar-collapse-button"
+                                HorizontalAlignment="Center"
+                                Margin="0,4,0,4"
+                                Command="{Binding ToggleSidebarCommand}"
+                                ToolTip.Tip="Expand sidebar">
+                            <i:Icon Value="fa-solid fa-chevron-right"
+                                    FontSize="12" />
+                        </Button>
+                    </Border>
+                </Grid>
             </Grid>
 
             <GridSplitter Grid.Column="1"
