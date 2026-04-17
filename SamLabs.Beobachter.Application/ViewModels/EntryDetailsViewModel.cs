@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SamLabs.Beobachter.Core.Enums;
@@ -51,22 +52,25 @@ public partial class EntryDetailsViewModel : ViewModelBase
     [ObservableProperty]
     private string _headerMessage = "No entry selected.";
 
+    [NotifyPropertyChangedFor(nameof(HasNoMetadata))]
     [ObservableProperty]
-    private string _headerSourceText = string.Empty;
-
-    [NotifyPropertyChangedFor(nameof(HasHeaderContext))]
-    [ObservableProperty]
-    private string _headerContextText = string.Empty;
+    private bool _hasMetadata;
 
     [ObservableProperty]
     private string _payloadText = "No payload available.";
 
+    [NotifyPropertyChangedFor(nameof(HasRightContent))]
+    [NotifyPropertyChangedFor(nameof(RightColumnWidth))]
+    [NotifyPropertyChangedFor(nameof(IsSplitterVisible))]
     [ObservableProperty]
     private bool _hasPayload;
 
     [ObservableProperty]
     private string _exceptionText = string.Empty;
 
+    [NotifyPropertyChangedFor(nameof(HasRightContent))]
+    [NotifyPropertyChangedFor(nameof(RightColumnWidth))]
+    [NotifyPropertyChangedFor(nameof(IsSplitterVisible))]
     [ObservableProperty]
     private bool _hasException;
 
@@ -78,20 +82,42 @@ public partial class EntryDetailsViewModel : ViewModelBase
     private bool _hasAttributes;
 
     [NotifyPropertyChangedFor(nameof(IsRawPayloadView))]
+    [NotifyPropertyChangedFor(nameof(IsTreePayloadVisible))]
+    [NotifyPropertyChangedFor(nameof(IsRawPayloadVisible))]
     [ObservableProperty]
     private bool _isJsonPayloadView = true;
 
+    [NotifyPropertyChangedFor(nameof(IsTreePayloadVisible))]
+    [ObservableProperty]
+    private bool _hasPayloadTree;
+
     public ObservableCollection<EntryDetailPropertyViewModel> Attributes { get; } = [];
+
+    public ObservableCollection<EntryDetailPropertyViewModel> MetadataFields { get; } = [];
+
+    public ObservableCollection<JsonNodeViewModel> PayloadTree { get; } = [];
+
+    public ObservableCollection<ExceptionLineViewModel> ExceptionLines { get; } = [];
 
     public bool IsEmptyStateVisible => !HasSelectedEntry;
 
     public bool IsDetailsVisible => HasSelectedEntry || IsPinned;
 
-    public bool HasHeaderContext => !string.IsNullOrWhiteSpace(HeaderContextText);
+    public bool HasNoMetadata => !HasMetadata;
 
     public bool HasNoAttributes => !HasAttributes;
 
     public bool IsRawPayloadView => !IsJsonPayloadView;
+
+    public bool IsTreePayloadVisible => IsJsonPayloadView && HasPayloadTree;
+
+    public bool IsRawPayloadVisible => !IsJsonPayloadView || !HasPayloadTree;
+
+    public bool HasRightContent => HasPayload || HasException;
+
+    public bool IsSplitterVisible => HasRightContent;
+
+    public GridLength RightColumnWidth => HasRightContent ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
 
     public EntryDetailsViewModel(IClipboardService clipboardService)
     {
@@ -214,6 +240,9 @@ public partial class EntryDetailsViewModel : ViewModelBase
     private void ApplyProjection(LogEntry? entry)
     {
         Attributes.Clear();
+        MetadataFields.Clear();
+        PayloadTree.Clear();
+        ExceptionLines.Clear();
 
         if (entry is null)
         {
@@ -222,13 +251,13 @@ public partial class EntryDetailsViewModel : ViewModelBase
             HeaderLevelText = string.Empty;
             HeaderTimestampText = string.Empty;
             HeaderMessage = "No entry selected.";
-            HeaderSourceText = string.Empty;
-            HeaderContextText = string.Empty;
             ExceptionText = string.Empty;
             HasException = false;
             IsExceptionExpanded = false;
+            HasMetadata = false;
             HasAttributes = false;
             HasPayload = false;
+            HasPayloadTree = false;
             _rawPayloadText = string.Empty;
             _formattedPayloadText = string.Empty;
             PayloadText = "No payload available.";
@@ -240,8 +269,9 @@ public partial class EntryDetailsViewModel : ViewModelBase
         HeaderLevelText = entry.Level.ToString().ToUpperInvariant();
         HeaderTimestampText = entry.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff");
         HeaderMessage = entry.Message;
-        HeaderSourceText = entry.LoggerName;
-        HeaderContextText = BuildContextText(entry);
+
+        PopulateMetadataFields(entry);
+        HasMetadata = MetadataFields.Count > 0;
 
         foreach (KeyValuePair<string, string> pair in entry.Properties.OrderBy(static x => x.Key, StringComparer.OrdinalIgnoreCase))
         {
@@ -253,9 +283,21 @@ public partial class EntryDetailsViewModel : ViewModelBase
         HasException = !string.IsNullOrWhiteSpace(ExceptionText);
         IsExceptionExpanded = HasException;
 
+        foreach (ExceptionLineViewModel line in ExceptionLineViewModel.Parse(ExceptionText))
+        {
+            ExceptionLines.Add(line);
+        }
+
         _rawPayloadText = entry.StructuredPayloadJson ?? string.Empty;
         _formattedPayloadText = FormatPayloadJson(_rawPayloadText);
         HasPayload = !string.IsNullOrWhiteSpace(_rawPayloadText);
+
+        foreach (JsonNodeViewModel node in JsonNodeViewModel.Build(_rawPayloadText))
+        {
+            PayloadTree.Add(node);
+        }
+        HasPayloadTree = PayloadTree.Count > 0;
+
         IsJsonPayloadView = true;
         UpdatePayloadText();
     }
@@ -271,31 +313,43 @@ public partial class EntryDetailsViewModel : ViewModelBase
         PayloadText = IsJsonPayloadView ? _formattedPayloadText : _rawPayloadText;
     }
 
-    private static string BuildContextText(LogEntry entry)
+    private void PopulateMetadataFields(LogEntry entry)
     {
-        List<string> parts = new(5);
+        AddMetadataField("Logger", entry.LoggerName);
+        AddMetadataField("Receiver", entry.ReceiverId);
+        AddMetadataField("Thread", entry.ThreadName);
+        AddMetadataField("Host", entry.HostName);
 
-        if (!string.IsNullOrWhiteSpace(entry.ReceiverId))
+        if (!string.IsNullOrWhiteSpace(entry.CallSiteClass) || !string.IsNullOrWhiteSpace(entry.CallSiteMethod))
         {
-            parts.Add($"Receiver: {entry.ReceiverId}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(entry.ThreadName))
-        {
-            parts.Add($"Thread: {entry.ThreadName}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(entry.HostName))
-        {
-            parts.Add($"Host: {entry.HostName}");
+            string callSite = string.Join('.', new[] { entry.CallSiteClass, entry.CallSiteMethod }
+                .Where(static p => !string.IsNullOrWhiteSpace(p)));
+            AddMetadataField("Call site", callSite);
         }
 
         if (!string.IsNullOrWhiteSpace(entry.SourceFileName) || entry.SourceFileLineNumber.HasValue)
         {
-            parts.Add($"Source: {entry.SourceFileName}:{entry.SourceFileLineNumber}");
+            string source = entry.SourceFileLineNumber.HasValue
+                ? $"{entry.SourceFileName}:{entry.SourceFileLineNumber}"
+                : entry.SourceFileName ?? string.Empty;
+            AddMetadataField("Source", source);
         }
 
-        return string.Join(" | ", parts);
+        if (!string.IsNullOrWhiteSpace(entry.MessageTemplate) &&
+            !string.Equals(entry.MessageTemplate, entry.Message, StringComparison.Ordinal))
+        {
+            AddMetadataField("Template", entry.MessageTemplate);
+        }
+    }
+
+    private void AddMetadataField(string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        MetadataFields.Add(new EntryDetailPropertyViewModel(key, value, (k, v) => FilterByPropertyRequested?.Invoke(k, v)));
     }
 
     private static string FormatPayloadJson(string payload)

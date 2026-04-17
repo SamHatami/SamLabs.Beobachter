@@ -64,6 +64,14 @@
     
     <SolidColorBrush x:Key="ButtonClearLog" Color="#F87171"/>
     
+    <!-- JSON syntax brushes (Dark Theme) -->
+    <SolidColorBrush x:Key="JsonKeyBrush" Color="#FFB39DDB" />
+    <SolidColorBrush x:Key="JsonStringBrush" Color="#FFA5D6A7" />
+    <SolidColorBrush x:Key="JsonNumberBrush" Color="#FFFFB74D" />
+    <SolidColorBrush x:Key="JsonBooleanBrush" Color="#FF82B1FF" />
+    <SolidColorBrush x:Key="JsonNullBrush" Color="#FF8F949E" />
+    <SolidColorBrush x:Key="JsonPunctuationBrush" Color="#FFA8ADB7" />
+
     <!-- LogLevel Icon Brushes (Dark Theme) -->
     <SolidColorBrush x:Key="IconTraceBrush" Color="#FF4DD0E1" />
     <SolidColorBrush x:Key="IconDebugBrush" Color="#FF64B5F6" />

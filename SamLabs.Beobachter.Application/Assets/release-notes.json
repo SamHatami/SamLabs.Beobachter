@@ -1,13 +1,14 @@
 {
-  "version": "0.1.1",
-  "publishedOn": "2026-04-13",
-  "summary": "Improved sidebar collapse behavior, settings dialog scrolling, and release output naming.",
+  "version": "0.1.2",
+  "publishedOn": "2026-04-17",
+  "summary": "Restructured log-entry detail pane with semantic sections, JSON tree view, and a formatted exception view.",
   "highlights": [
-    "Added a left toolbar rail when the sidebar is collapsed, including shorthand log-level toggles.",
-    "Moved sidebar collapse/expand chevrons to a dedicated bottom row so they remain visible outside scrolling content.",
-    "Made active collapsed rail toggles easier to read with a clearer accent-green border.",
-    "Adjusted Application Settings window sizing and scroll padding so full content is reachable at the bottom.",
-    "Set publish output naming to SamLabs.Beobachter.exe by setting the application assembly name.",
-    "Fixed LogStream view row-font bindings to avoid design-time cast errors with LogStreamDesignViewModel."
+    "Promoted the log message into a level-tinted hero card so severity is identifiable at a glance.",
+    "Split the entry header into discrete METADATA rows (Logger, Receiver, Thread, Host, Call site, Source) — each filterable.",
+    "Replaced the raw JSON payload dump with a collapsible tree, with syntax coloring per JSON value type.",
+    "Replaced the raw exception text with a structured view that distinguishes the exception type/message, stack frames, and inner-exception separators.",
+    "Right pane (payload + exception) now collapses when both are empty, giving the metadata pane the full width.",
+    "Empty ATTRIBUTES section is hidden instead of showing a placeholder message.",
+    "Fixed the level badge from rendering as a tall pill with off-center text and corrected the monospace font binding."
   ]
 }

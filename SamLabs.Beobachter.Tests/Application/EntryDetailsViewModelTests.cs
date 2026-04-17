@@ -52,7 +52,7 @@ public sealed class EntryDetailsViewModelTests
         Assert.True(vm.HasSelectedEntry);
         Assert.Equal("WARN", vm.HeaderLevelText);
         Assert.Equal("Gateway timeout", vm.HeaderMessage);
-        Assert.Equal("Orders.Api", vm.HeaderSourceText);
+        Assert.Contains(vm.MetadataFields, f => f.Key == "Logger" && f.Value == "Orders.Api");
         Assert.Equal(string.Empty, vm.CopyStatus);
     }
 
@@ -85,8 +85,9 @@ public sealed class EntryDetailsViewModelTests
         Assert.Contains(Environment.NewLine, vm.PayloadText);
         Assert.True(vm.HasException);
         Assert.Equal("Boom", vm.ExceptionText);
-        Assert.Contains("Receiver: udp-prod", vm.HeaderContextText);
-        Assert.Contains("Host: node-1", vm.HeaderContextText);
+        Assert.True(vm.HasMetadata);
+        Assert.Contains(vm.MetadataFields, f => f.Key == "Receiver" && f.Value == "udp-prod");
+        Assert.Contains(vm.MetadataFields, f => f.Key == "Host" && f.Value == "node-1");
     }
 
     [Fact]
